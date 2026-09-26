@@ -1,16 +1,48 @@
 ---
+export const prerender = false;
+
 import AnaLayout from '../layouts/AnaLayout.astro';
 import SayfaBasligi from '../components/SayfaBasligi.astro';
 import Kart from '../components/Kart.astro';
 import Rozet from '../components/Rozet.astro';
 import Buton from '../components/Buton.astro';
 import Tablo from '../components/Tablo.astro';
+import { bugunIstanbul } from '../lib/tarih';
+import { getDb } from '../lib/db';
+
+const db = getDb();
+const bugun = bugunIstanbul();
+const { results: bugunkuOneriler } = await db
+	.prepare('SELECT * FROM oneriler WHERE tarih = ?1 ORDER BY olusturulma DESC')
+	.bind(bugun)
+	.all<Record<string, string>>();
+
+const oneriSatirlari = bugunkuOneriler.map((o) => ({
+	kurum: o.kurum,
+	hisse: o.hisse,
+	tur: o.tur,
+	giris: o.giris ?? '—',
+	hedef: o.hedef,
+	stop: o.stop ?? '—',
+	pot: o.potansiyel ?? '—',
+}));
+
+const kurumlarHisseBazinda = new Map<string, Set<string>>();
+for (const o of bugunkuOneriler) {
+	if (!kurumlarHisseBazinda.has(o.hisse)) kurumlarHisseBazinda.set(o.hisse, new Set());
+	kurumlarHisseBazinda.get(o.hisse)!.add(o.kurum);
+}
+const konsensusListesi = [...kurumlarHisseBazinda.entries()]
+	.map(([hisse, kurumlar]) => ({ hisse, kurumlar: [...kurumlar], n: kurumlar.size }))
+	.filter((k) => k.n >= 2)
+	.sort((a, b) => b.n - a.n);
+const enCokKurum = konsensusListesi[0]?.n || 1;
 
 const kpiler = [
-	{ ad: 'Bugünkü öneri', alt: 'kurumlardan derlenir' },
-	{ ad: 'Konsensüs hissesi', alt: 'en az 3 kurumun önerdiği' },
-	{ ad: 'Hedefi yükselen', alt: 'son 24 saatte' },
-	{ ad: 'Hedefi düşen', alt: 'son 24 saatte' },
+	{ ad: 'Bugünkü öneri', deger: String(bugunkuOneriler.length), alt: 'kurumlardan derlenir' },
+	{ ad: 'Konsensüs hissesi', deger: String(konsensusListesi.length), alt: 'en az 2 kurumun önerdiği' },
+	{ ad: 'Hedefi yükselen', deger: '—', alt: 'yakında: hedef geçmişi' },
+	{ ad: 'Hedefi düşen', deger: '—', alt: 'yakında: hedef geçmişi' },
 ];
 
 const sirketHaberleri = [
@@ -79,7 +111,7 @@ const oneriKolonlari = [
 			kpiler.map((k) => (
 				<div class="kpi">
 					<span class="kpi-ad">{k.ad}</span>
-					<span class="kpi-deger">—</span>
+					<span class="kpi-deger">{k.deger}</span>
 					<span class="kpi-alt">{k.alt}</span>
 				</div>
 			))
@@ -88,7 +120,24 @@ const oneriKolonlari = [
 
 	<section class="izgara">
 		<Kart baslik="Günün konsensüsü" altBaslik="En çok kurumun aynı anda önerdiği hisseler" class="genis">
-			<p class="bos">Öneriler girilmeye başladığında burada görünecek.</p>
+			{
+				konsensusListesi.length === 0 ? (
+					<p class="bos">Bugün için henüz konsensüs hissesi yok (en az 2 kurumun aynı hisseyi önermesi gerekir).</p>
+				) : (
+					<div class="konsensus-listesi">
+						{konsensusListesi.map((k) => (
+							<a href="/hedef-fiyatlar" class="konsensus-satir">
+								<span class="konsensus-hisse">{k.hisse}</span>
+								<span class="konsensus-cubuk">
+									<span class="konsensus-dolu" style={`width:${Math.round((k.n / enCokKurum) * 100)}%`} />
+								</span>
+								<span class="konsensus-kurumlar">{k.kurumlar.join(' · ')}</span>
+								<span class="konsensus-n">{k.n} kurum</span>
+							</a>
+						))}
+					</div>
+				)
+			}
 		</Kart>
 		<Kart baslik="Öneri karnesi" etiket="YAKINDA" koyu class="dar">
 			<p class="koyu-metin">
@@ -100,7 +149,7 @@ const oneriKolonlari = [
 
 	<Kart baslik="Bugünkü öneriler" altBaslik="Kaynak her satırda">
 		<Fragment slot="sag"><a href="/oneriler">Tümü</a></Fragment>
-		<Tablo kolonlar={oneriKolonlari} satirlar={[]} bosMesaj="Bugün için henüz öneri girilmedi." />
+		<Tablo kolonlar={oneriKolonlari} satirlar={oneriSatirlari} bosMesaj="Bugün için henüz öneri girilmedi." />
 	</Kart>
 
 	<section class="izgara">
@@ -118,6 +167,54 @@ const oneriKolonlari = [
 </AnaLayout>
 
 <style>
+	.konsensus-listesi {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+	.konsensus-satir {
+		display: grid;
+		grid-template-columns: 72px minmax(0, 1fr) 150px;
+		align-items: center;
+		gap: 16px;
+		color: var(--metin);
+		padding: 4px 0;
+	}
+	.konsensus-hisse {
+		font-family: var(--font-mono);
+		font-weight: 500;
+		font-size: 14px;
+	}
+	.konsensus-cubuk {
+		height: 10px;
+		background: #efece4;
+		border-radius: 5px;
+		overflow: hidden;
+		display: block;
+	}
+	.konsensus-dolu {
+		display: block;
+		height: 10px;
+		background: var(--marka);
+		border-radius: 5px;
+	}
+	.konsensus-kurumlar {
+		grid-column: 2;
+		grid-row: 2;
+		font-size: 12px;
+		color: var(--metin-ikincil);
+	}
+	.konsensus-satir {
+		grid-template-rows: auto auto;
+	}
+	.konsensus-n {
+		grid-column: 3;
+		grid-row: 1 / span 2;
+		text-align: right;
+		font-size: 16px;
+		font-weight: 600;
+		align-self: center;
+	}
 	.haber-izgara {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));

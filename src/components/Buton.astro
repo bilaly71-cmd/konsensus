@@ -1,20 +1,20 @@
 ---
-interface Props {
+interface Props extends astroHTML.JSX.HTMLAttributes {
 	href?: string;
 	tur?: 'birincil' | 'koyu' | 'ikincil' | 'kehribar' | 'metin';
 	genis?: boolean;
 	type?: 'button' | 'submit';
 }
-const { href, tur = 'birincil', genis = false, type = 'button' } = Astro.props;
+const { href, tur = 'birincil', genis = false, type = 'button', ...rest } = Astro.props;
 ---
 
 {
 	href ? (
-		<a href={href} class:list={['buton', tur, { genis }]}>
+		<a href={href} class:list={['buton', tur, { genis }]} {...rest}>
 			<slot />
 		</a>
 	) : (
-		<button type={type} class:list={['buton', tur, { genis }]}>
+		<button type={type} class:list={['buton', tur, { genis }]} {...rest}>
 			<slot />
 		</button>
 	)

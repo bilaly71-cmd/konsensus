@@ -1,0 +1,318 @@
+---
+export const prerender = false;
+
+import AnaLayout from '../../layouts/AnaLayout.astro';
+import SayfaBasligi from '../../components/SayfaBasligi.astro';
+import Kart from '../../components/Kart.astro';
+import Rozet from '../../components/Rozet.astro';
+import Buton from '../../components/Buton.astro';
+import { bugunIstanbul } from '../../lib/tarih';
+
+const bugun = bugunIstanbul();
+---
+
+<AnaLayout baslik="Yönetim paneli">
+	<SayfaBasligi baslik="Yönetim paneli" ust="PANEL" aciklama="Öneri listesini yapıştır, kontrol et, kaydet.">
+		<Rozet tur="marka">Sadece Bilal</Rozet>
+	</SayfaBasligi>
+
+	<Kart baslik="1. Öneri listesini yapıştır" altBaslik="Her satır: Kurum, Hisse, Tür, Giriş, Hedef, Stop, Potansiyel">
+		<div class="satir">
+			<label>
+				<span>Öneri tarihi</span>
+				<input type="date" id="tarih" value={bugun} />
+			</label>
+		</div>
+		<p class="ipucu">
+			Excel/Sheets'ten kopyalayıp yapıştırabilirsin (sekmeyle ayrılır), ya da her satırı
+			<code>|</code> ile ayır. Giriş, Stop ve Potansiyel boş bırakılabilir. Örnek:
+		</p>
+		<pre class="ornek">Garanti BBVA	THYAO	Günlük	330	365	310	+%10,6</pre>
+		<textarea id="girdi" rows="8" placeholder="Kurum	Hisse	Tür	Giriş	Hedef	Stop	Potansiyel"></textarea>
+		<div class="dugmeler">
+			<Buton tur="ikincil" type="button">
+				<span id="cevirDugme">Tabloya çevir</span>
+			</Buton>
+		</div>
+	</Kart>
+
+	<Kart baslik="2. Kontrol et ve onayla" altBaslik="Yanlış satır varsa yukarıdan düzeltip tekrar çevir">
+		<div id="onizlemeBos" class="bos">Henüz bir şey yapıştırmadın.</div>
+		<div id="onizlemeSarici" class="tablo-sarici" style="display:none">
+			<table>
+				<thead>
+					<tr><th>Kurum</th><th>Hisse</th><th>Tür</th><th>Giriş</th><th>Hedef</th><th>Stop</th><th>Potansiyel</th></tr>
+				</thead>
+				<tbody id="onizlemeGovde"></tbody>
+			</table>
+		</div>
+		<div class="dugmeler">
+			<Buton id="kaydetDugme" type="button">
+				<span id="kaydetMetin">Onayla ve kaydet</span>
+			</Buton>
+		</div>
+		<p id="durumMesaji" class="durum-mesaji"></p>
+	</Kart>
+
+	<Kart baslik="Bugün kaydedilenler" altBaslik="Bu tarih için veritabanındaki öneriler">
+		<Fragment slot="sag"><button type="button" id="yenileDugme" class="yenile">Yenile</button></Fragment>
+		<div id="kayitliBos" class="bos">Yükleniyor...</div>
+		<div id="kayitliSarici" class="tablo-sarici" style="display:none">
+			<table>
+				<thead>
+					<tr><th>Kurum</th><th>Hisse</th><th>Tür</th><th>Giriş</th><th>Hedef</th><th>Stop</th><th>Potansiyel</th><th></th></tr>
+				</thead>
+				<tbody id="kayitliGovde"></tbody>
+			</table>
+		</div>
+	</Kart>
+
+	<script>
+		type Satir = { kurum: string; hisse: string; tur: string; giris: string; hedef: string; stop: string; potansiyel: string };
+
+		const tarihEl = document.getElementById('tarih') as HTMLInputElement;
+		const girdiEl = document.getElementById('girdi') as HTMLTextAreaElement;
+		const cevirDugmeEl = document.getElementById('cevirDugme')!.closest('button') as HTMLButtonElement;
+		const onizlemeBosEl = document.getElementById('onizlemeBos')!;
+		const onizlemeSariciEl = document.getElementById('onizlemeSarici')!;
+		const onizlemeGovdeEl = document.getElementById('onizlemeGovde')!;
+		const kaydetDugmeEl = document.getElementById('kaydetDugme') as HTMLButtonElement;
+		const durumMesajiEl = document.getElementById('durumMesaji')!;
+		const kayitliBosEl = document.getElementById('kayitliBos')!;
+		const kayitliSariciEl = document.getElementById('kayitliSarici')!;
+		const kayitliGovdeEl = document.getElementById('kayitliGovde')!;
+		const yenileDugmeEl = document.getElementById('yenileDugme')!;
+
+		let mevcutSatirlar: Satir[] = [];
+
+		function satirlariAyristir(metin: string): Satir[] {
+			return metin
+				.split('\n')
+				.map((s) => s.trim())
+				.filter(Boolean)
+				.map((satir) => {
+					let parcalar: string[];
+					if (satir.includes('\t')) parcalar = satir.split('\t');
+					else if (satir.includes('|')) parcalar = satir.split('|');
+					else parcalar = satir.split(/\s{2,}/);
+					parcalar = parcalar.map((p) => p.trim());
+					const [kurum = '', hisse = '', tur = '', giris = '', hedef = '', stop = '', potansiyel = ''] = parcalar;
+					return { kurum, hisse, tur, giris, hedef, stop, potansiyel };
+				});
+		}
+
+		function onizlemeCiz(satirlar: Satir[]) {
+			mevcutSatirlar = satirlar;
+			if (satirlar.length === 0) {
+				onizlemeBosEl.style.display = '';
+				onizlemeSariciEl.style.display = 'none';
+				return;
+			}
+			onizlemeBosEl.style.display = 'none';
+			onizlemeSariciEl.style.display = '';
+			onizlemeGovdeEl.innerHTML = satirlar
+				.map(
+					(s) =>
+						`<tr><td>${s.kurum || '<span class="eksik">—</span>'}</td><td>${s.hisse || '<span class="eksik">—</span>'}</td><td>${s.tur || 'Günlük'}</td><td>${s.giris || '—'}</td><td>${s.hedef || '<span class="eksik">—</span>'}</td><td>${s.stop || '—'}</td><td>${s.potansiyel || '—'}</td></tr>`,
+				)
+				.join('');
+		}
+
+		cevirDugmeEl.addEventListener('click', () => {
+			onizlemeCiz(satirlariAyristir(girdiEl.value));
+			durumMesajiEl.textContent = '';
+			durumMesajiEl.className = 'durum-mesaji';
+		});
+
+		kaydetDugmeEl.addEventListener('click', async () => {
+			const gecerli = mevcutSatirlar.filter((s) => s.kurum && s.hisse && s.hedef);
+			if (gecerli.length === 0) {
+				durumMesajiEl.textContent = 'Önce yukarıdan geçerli satırlar oluştur (kurum, hisse ve hedef zorunlu).';
+				durumMesajiEl.className = 'durum-mesaji hata';
+				return;
+			}
+			kaydetDugmeEl.disabled = true;
+			durumMesajiEl.textContent = 'Kaydediliyor...';
+			durumMesajiEl.className = 'durum-mesaji';
+			try {
+				const yanit = await fetch('/api/oneriler', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ tarih: tarihEl.value, satirlar: gecerli }),
+				});
+				const veri = await yanit.json();
+				if (!yanit.ok) throw new Error(veri.hata || 'Kayıt başarısız.');
+				durumMesajiEl.textContent = `${veri.eklenen} öneri kaydedildi.`;
+				durumMesajiEl.className = 'durum-mesaji basarili';
+				girdiEl.value = '';
+				onizlemeCiz([]);
+				kayitliListeYukle();
+			} catch (e) {
+				durumMesajiEl.textContent = e instanceof Error ? e.message : 'Kayıt başarısız.';
+				durumMesajiEl.className = 'durum-mesaji hata';
+			} finally {
+				kaydetDugmeEl.disabled = false;
+			}
+		});
+
+		async function kayitliSil(id: number) {
+			await fetch(`/api/oneriler?id=${id}`, { method: 'DELETE' });
+			kayitliListeYukle();
+		}
+		(window as any).kayitliSil = kayitliSil;
+
+		async function kayitliListeYukle() {
+			const tarih = tarihEl.value;
+			const yanit = await fetch(`/api/oneriler?tarih=${tarih}`);
+			const veri = await yanit.json();
+			const satirlar = veri.satirlar || [];
+			if (satirlar.length === 0) {
+				kayitliBosEl.textContent = 'Bu tarih için henüz kayıt yok.';
+				kayitliBosEl.style.display = '';
+				kayitliSariciEl.style.display = 'none';
+				return;
+			}
+			kayitliBosEl.style.display = 'none';
+			kayitliSariciEl.style.display = '';
+			kayitliGovdeEl.innerHTML = satirlar
+				.map(
+					(s: any) =>
+						`<tr><td>${s.kurum}</td><td>${s.hisse}</td><td>${s.tur}</td><td>${s.giris ?? '—'}</td><td>${s.hedef}</td><td>${s.stop ?? '—'}</td><td>${s.potansiyel ?? '—'}</td><td><button type="button" class="sil" onclick="kayitliSil(${s.id})">Sil</button></td></tr>`,
+				)
+				.join('');
+		}
+
+		tarihEl.addEventListener('change', kayitliListeYukle);
+		yenileDugmeEl.addEventListener('click', kayitliListeYukle);
+		kayitliListeYukle();
+	</script>
+
+	<style>
+		.satir {
+			display: flex;
+			gap: 16px;
+		}
+		label {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			font-size: 13px;
+			font-weight: 500;
+			color: var(--metin-ikincil);
+		}
+		input[type='date'] {
+			height: 44px;
+			border: 1px solid var(--kenarlik);
+			border-radius: 10px;
+			padding: 0 14px;
+			font: inherit;
+			font-size: 14px;
+			font-weight: 600;
+			background: #faf9f5;
+		}
+		.ipucu {
+			margin: 0;
+			font-size: 13px;
+			color: var(--metin-ikincil);
+		}
+		.ipucu code {
+			background: #f1eee6;
+			padding: 1px 5px;
+			border-radius: 4px;
+			font-family: var(--font-mono);
+		}
+		.ornek {
+			margin: 0;
+			font-family: var(--font-mono);
+			font-size: 12px;
+			background: #f1eee6;
+			padding: 8px 12px;
+			border-radius: 8px;
+			overflow-x: auto;
+			color: var(--metin-ikincil);
+		}
+		textarea {
+			width: 100%;
+			border: 1px solid var(--kenarlik);
+			border-radius: 10px;
+			padding: 12px 14px;
+			font-family: var(--font-mono);
+			font-size: 13px;
+			background: #faf9f5;
+			resize: vertical;
+		}
+		textarea:focus {
+			outline: 2px solid var(--marka);
+			outline-offset: 1px;
+		}
+		.dugmeler {
+			display: flex;
+			gap: 10px;
+		}
+		.bos {
+			font-size: 14px;
+			color: var(--metin-ikincil);
+			padding: 24px;
+			text-align: center;
+			background: #faf9f5;
+			border-radius: 10px;
+		}
+		.tablo-sarici {
+			overflow-x: auto;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 13px;
+		}
+		th {
+			text-align: left;
+			font-size: 11px;
+			font-weight: 600;
+			letter-spacing: 0.5px;
+			color: var(--metin-ikincil);
+			padding: 0 10px 8px;
+			border-bottom: 1px solid var(--cizgi);
+			text-transform: uppercase;
+			white-space: nowrap;
+		}
+		td {
+			padding: 8px 10px;
+			border-bottom: 1px solid var(--cizgi);
+			white-space: nowrap;
+		}
+		.eksik {
+			color: var(--dusus);
+			font-weight: 600;
+		}
+		.sil {
+			border: 0;
+			background: transparent;
+			color: var(--dusus);
+			font-weight: 600;
+			font-size: 12px;
+			cursor: pointer;
+			padding: 4px 8px;
+		}
+		.yenile {
+			border: 0;
+			background: transparent;
+			color: var(--marka);
+			font-weight: 600;
+			font-size: 13px;
+			cursor: pointer;
+		}
+		.durum-mesaji {
+			margin: 0;
+			font-size: 13px;
+			font-weight: 600;
+			min-height: 18px;
+		}
+		.durum-mesaji.basarili {
+			color: var(--yukselis);
+		}
+		.durum-mesaji.hata {
+			color: var(--dusus);
+		}
+	</style>
+</AnaLayout>
