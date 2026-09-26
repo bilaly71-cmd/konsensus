@@ -24,6 +24,15 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 		<title>{sayfaBasligi}</title>
 		<meta name="description" content={aciklama} />
 		<meta name="theme-color" content="#11151F" />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Konsensüs" />
+		<meta property="og:title" content={sayfaBasligi} />
+		<meta property="og:description" content={aciklama} />
+		<meta property="og:url" content={Astro.url.href} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={sayfaBasligi} />
+		<meta name="twitter:description" content={aciklama} />
+		<link rel="canonical" href={Astro.url.href} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -68,11 +77,17 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 			<div class="icerik-alani">
 				<!-- Masaüstü üst bar -->
 				<header class="ust-bar">
-					<label class="arama" for="ara">
+					<form class="arama" id="aramaForm">
 						<Ikon ad="ara" boyut={18} />
-						<input id="ara" type="search" placeholder="Hisse, aracı kurum ya da fon ara" disabled />
+						<input
+							id="ara"
+							name="q"
+							type="search"
+							placeholder="Hisse kodu ara, ör. THYAO"
+							autocomplete="off"
+						/>
 						<span class="kisayol">/</span>
-					</label>
+					</form>
 					<div class="tarih-durum">
 						<div class="tarih" data-tarih>&nbsp;</div>
 						<div data-piyasa>Fiyatlar 15 dk gecikmeli</div>
@@ -88,7 +103,7 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 						<span class="logo-ad">Konsensüs</span>
 						<span class="logo-bist">BIST</span>
 					</a>
-					<button type="button" class="mobil-ikon" aria-label="Ara">
+					<button type="button" class="mobil-ikon" aria-label="Hisse ara" data-arama-ac>
 						<Ikon ad="ara" boyut={18} />
 					</button>
 					<button type="button" class="mobil-ikon" aria-label="Menüyü aç" data-menu-ac>
@@ -154,6 +169,21 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 			}
 		</dialog>
 
+		<!-- Mobil arama diyaloğu -->
+		<dialog class="arama-menu" data-arama-modal>
+			<div class="mobil-menu-ust">
+				<span class="logo-ad">Hisse ara</span>
+				<button type="button" class="mobil-ikon" aria-label="Aramayı kapat" data-arama-kapat>
+					<Ikon ad="kapat" boyut={18} />
+				</button>
+			</div>
+			<form data-arama-form-mobil class="arama-form-mobil">
+				<input type="search" name="q" placeholder="ör. THYAO" autocomplete="off" autofocus />
+				<button type="submit">Git</button>
+			</form>
+			<p class="arama-ipucu">Hisse koduyla ara, ilgili sayfaya götürür.</p>
+		</dialog>
+
 		<script>
 			// Üst bardaki tarih ve piyasa durumu (İstanbul saatiyle)
 			const simdi = new Date();
@@ -189,6 +219,49 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 			document.querySelector('[data-menu-kapat]')?.addEventListener('click', () => menu?.close());
 			menu?.addEventListener('click', (e) => {
 				if (e.target === menu) menu.close();
+			});
+
+			// Hisse arama: masaüstü kutusu + mobil diyalog + "/" kısayolu
+			function hisseyeGit(deger: string) {
+				const kod = deger.trim().toUpperCase();
+				if (kod) window.location.href = `/hisse/${encodeURIComponent(kod)}`;
+			}
+
+			document.getElementById('aramaForm')?.addEventListener('submit', (e) => {
+				e.preventDefault();
+				const input = document.getElementById('ara') as HTMLInputElement | null;
+				if (input) hisseyeGit(input.value);
+			});
+
+			const aramaModal = document.querySelector<HTMLDialogElement>('[data-arama-modal]');
+			document.querySelector('[data-arama-ac]')?.addEventListener('click', () => {
+				aramaModal?.showModal();
+				aramaModal?.querySelector('input')?.focus();
+			});
+			document.querySelector('[data-arama-kapat]')?.addEventListener('click', () => aramaModal?.close());
+			aramaModal?.addEventListener('click', (e) => {
+				if (e.target === aramaModal) aramaModal.close();
+			});
+			document.querySelector('[data-arama-form-mobil]')?.addEventListener('submit', (e) => {
+				e.preventDefault();
+				const input = (e.target as HTMLFormElement).querySelector('input');
+				if (input) hisseyeGit(input.value);
+			});
+
+			// "/" kısayolu: bir yazı kutusunda değilsek masaüstü arama kutusuna odaklan
+			document.addEventListener('keydown', (e) => {
+				if (e.key !== '/') return;
+				const aktifEtiket = (document.activeElement as HTMLElement)?.tagName;
+				if (aktifEtiket === 'INPUT' || aktifEtiket === 'TEXTAREA' || aktifEtiket === 'SELECT') return;
+				const desktopArama = document.getElementById('ara') as HTMLInputElement | null;
+				if (desktopArama && desktopArama.offsetParent !== null) {
+					e.preventDefault();
+					desktopArama.focus();
+				} else {
+					e.preventDefault();
+					aramaModal?.showModal();
+					aramaModal?.querySelector('input')?.focus();
+				}
 			});
 		</script>
 
@@ -452,6 +525,59 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 			}
 			.mobil-menu .menu-oge {
 				min-height: 44px;
+			}
+
+			.arama-menu {
+				border: 0;
+				padding: 20px;
+				margin: auto;
+				width: min(420px, 90vw);
+				max-width: none;
+				border-radius: 16px;
+				background: var(--koyu);
+				color: #c9cdd6;
+				flex-direction: column;
+				gap: 16px;
+			}
+			.arama-menu[open] {
+				display: flex;
+			}
+			.arama-menu::backdrop {
+				background: rgb(17 21 31 / 0.5);
+			}
+			.arama-form-mobil {
+				display: flex;
+				gap: 8px;
+			}
+			.arama-form-mobil input {
+				flex-grow: 1;
+				height: 48px;
+				border-radius: 10px;
+				border: 1px solid #2a3142;
+				background: #1b2130;
+				color: #fff;
+				padding: 0 14px;
+				font: inherit;
+				font-size: 16px;
+			}
+			.arama-form-mobil input:focus {
+				outline: 2px solid var(--kehribar);
+			}
+			.arama-form-mobil button {
+				height: 48px;
+				padding: 0 18px;
+				border-radius: 10px;
+				border: 0;
+				background: var(--kehribar);
+				color: var(--koyu);
+				font-weight: 600;
+				font-size: 14px;
+				cursor: pointer;
+			}
+			.arama-ipucu {
+				margin: 0;
+				font-size: 12px;
+				color: #7d8391;
 			}
 
 			@media (max-width: 899px) {

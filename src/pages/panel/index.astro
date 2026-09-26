@@ -162,7 +162,7 @@ const bugun = bugunIstanbul();
 		});
 
 		// --- 1. Tek tek ekleme formu ---
-		ekleDugmeEl.addEventListener('click', () => {
+		function satirEkle() {
 			const kurum = fKurum.value.trim();
 			const hisse = fHisse.value.trim().toUpperCase();
 			const hedef = fHedef.value.trim();
@@ -189,6 +189,16 @@ const bugun = bugunIstanbul();
 			fStop.value = '';
 			fPotansiyel.value = '';
 			fKurum.focus();
+		}
+		ekleDugmeEl.addEventListener('click', satirEkle);
+		// Hızlı veri girişi: hangi kutudaysan olsun Enter'a basınca satır eklensin
+		[fKurum, fHisse, fTur, fGiris, fHedef, fStop, fPotansiyel].forEach((el) => {
+			el.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					satirEkle();
+				}
+			});
 		});
 
 		// --- 2. Toplu yapıştırma (Excel/Sheets) ---

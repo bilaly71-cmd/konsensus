@@ -1,0 +1,49 @@
+---
+import AnaLayout from '../layouts/AnaLayout.astro';
+import Buton from '../components/Buton.astro';
+---
+
+<AnaLayout baslik="Sayfa bulunamadı">
+	<div class="bulunamadi">
+		<span class="kod">404</span>
+		<h1>Bu sayfayı bulamadık</h1>
+		<p>Aradığın sayfa taşınmış ya da hiç var olmamış olabilir.</p>
+		<div class="dugmeler">
+			<Buton href="/">Gösterge paneline dön</Buton>
+			<Buton href="/oneriler" tur="ikincil">Önerilere git</Buton>
+		</div>
+	</div>
+</AnaLayout>
+
+<style>
+	.bulunamadi {
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		gap: 12px;
+		padding: 60px 20px;
+	}
+	.kod {
+		font-family: var(--font-baslik);
+		font-size: 72px;
+		font-weight: 600;
+		color: var(--kehribar);
+		line-height: 1;
+	}
+	h1 {
+		font-size: 26px;
+	}
+	p {
+		margin: 0;
+		color: var(--metin-ikincil);
+		font-size: 15px;
+	}
+	.dugmeler {
+		display: flex;
+		gap: 10px;
+		margin-top: 12px;
+	}
+</style>

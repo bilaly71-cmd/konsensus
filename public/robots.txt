@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /panel
+Disallow: /api/
+
+Sitemap: https://konsensus.bilaly71.workers.dev/sitemap.xml
