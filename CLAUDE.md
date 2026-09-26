@@ -16,7 +16,7 @@ Bu dosya projenin kalıcı talimatıdır. Her oturumun başında oku.
 - Grafikler: TradingView **Lightweight Charts** (açık kaynak; sitede TradingView atfı ve linki zorunlu).
 - Fiyatlar 15 dk gecikmeli.
 - Yönetim paneli (/panel) Cloudflare Access arkasında, sadece Bilal'in e-postası.
-- Kod GitHub'da; Cloudflare Pages her push'ta otomatik yayınlar.
+- Kod GitHub'da; Cloudflare her push'ta otomatik yayınlar (proje Cloudflare'in yeni birleşik "Workers & Pages" sisteminde bir Workers projesi olarak kuruldu, işlev Pages ile aynı: git bağlantısı, otomatik build/deploy).
 
 ## Tasarım sistemi ("gazete + terminal")
 Referans ekranlar `tasarim/` klasöründe (Main = masaüstü ana sayfa, Hisse = hisse sayfası, Mobil = mobil). Bunlar bir tasarım aracının dosyaları; görünümü ve yerleşimi bunlardan al, kodu birebir kopyalama. İçlerindeki rakamlar örnek veridir.
@@ -47,4 +47,6 @@ Sonra: Öneri karnesi, Fon akıllı para, bülten + e-posta, halka arz, Arena, k
 - Rakip sitelerden veri çekilmez.
 
 ## Durum
-- [ ] Adım 0 başlamadı
+- [x] Adım 0 tamamlandı (27.09.2026): GitHub repo (bilaly71-cmd/konsensus), Astro iskeleti, "yakında" sayfası. Cloudflare'e bağlı, canlı: https://konsensus.bilaly71.workers.dev — masaüstü ve telefonda doğrulandı. Domain şimdilik ertelendi (Bilal isteği), workers.dev adresiyle devam.
+- [~] Adım 1 yayında, Bilal'in telefon kontrolü bekleniyor (27.09.2026): `src/layouts/AnaLayout.astro` (sol menü, üst bar, alt bilgi, mobil üst bar + 5 sekmeli alt menü + tam menü çekmecesi), `src/lib/menu.ts` (menü ve sekmeler tek yerde), `src/styles/tasarim.css` (renk/yazı değişkenleri), bileşenler `src/components/`: Kart, Rozet, Buton, Tablo (telefonda karta döner), GrafikKutusu (yer tutucu + TradingView atfı), SayfaBasligi, BosSayfa, Ikon. Menüdeki 13 sayfa boş iskelet olarak var. Bileşen vitrini: /bilesenler (menüde yok).
+- Not: Bu oturumda PATH'te node yok; komutlarda `$env:Path = "C:\Program Files\nodejs;" + $env:Path` kullanılıyor.

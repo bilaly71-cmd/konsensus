@@ -1,0 +1,58 @@
+---
+interface Props {
+	ad: 'panel' | 'oneriler' | 'akilli' | 'arena' | 'araclar' | 'ara' | 'zil' | 'menu' | 'kapat';
+	boyut?: number;
+}
+const { ad, boyut = 20 } = Astro.props;
+---
+
+<svg
+	width={boyut}
+	height={boyut}
+	viewBox="0 0 24 24"
+	fill="none"
+	stroke="currentColor"
+	stroke-width="2"
+	stroke-linecap="round"
+	stroke-linejoin="round"
+	aria-hidden="true"
+>
+	{ad === 'panel' && (
+		<Fragment>
+			<rect x="3" y="3" width="7" height="7" rx="1.5" />
+			<rect x="14" y="3" width="7" height="7" rx="1.5" />
+			<rect x="3" y="14" width="7" height="7" rx="1.5" />
+			<rect x="14" y="14" width="7" height="7" rx="1.5" />
+		</Fragment>
+	)}
+	{ad === 'oneriler' && <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />}
+	{ad === 'akilli' && (
+		<Fragment>
+			<path d="M3 17l6-6 4 4 8-8" />
+			<path d="M14 7h7v7" />
+		</Fragment>
+	)}
+	{ad === 'arena' && (
+		<Fragment>
+			<circle cx="12" cy="12" r="9" />
+			<path d="M12 7v5l3 3" />
+		</Fragment>
+	)}
+	{ad === 'araclar' && (
+		<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z" />
+	)}
+	{ad === 'ara' && (
+		<Fragment>
+			<circle cx="11" cy="11" r="7" />
+			<path d="M20 20l-3.5-3.5" />
+		</Fragment>
+	)}
+	{ad === 'zil' && (
+		<Fragment>
+			<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+			<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+		</Fragment>
+	)}
+	{ad === 'menu' && <path d="M4 6h16M4 12h16M4 18h16" />}
+	{ad === 'kapat' && <path d="M6 6l12 12M18 6L6 18" />}
+</svg>

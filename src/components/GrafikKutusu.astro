@@ -1,0 +1,52 @@
+---
+// Grafik alanı. Şimdilik yer tutucu; Adım 5'te TradingView Lightweight Charts buraya gelecek.
+interface Props {
+	baslik?: string;
+	yukseklik?: number;
+}
+const { baslik = 'Grafik', yukseklik = 280 } = Astro.props;
+---
+
+<figure class="grafik">
+	<div class="alan" style={`min-height:${yukseklik}px`}>
+		<slot>
+			<span class="bos">{baslik} · yakında</span>
+		</slot>
+	</div>
+	<figcaption>
+		Grafikler <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a>
+		Lightweight Charts ile · Fiyatlar 15 dk gecikmeli
+	</figcaption>
+</figure>
+
+<style>
+	.grafik {
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.alan {
+		background:
+			repeating-linear-gradient(to bottom, transparent 0 55px, var(--cizgi) 55px 56px),
+			#faf9f5;
+		border: 1px dashed var(--kenarlik);
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.bos {
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--metin-ikincil);
+		background: var(--kart);
+		border: 1px solid var(--kenarlik);
+		border-radius: 20px;
+		padding: 6px 14px;
+	}
+	figcaption {
+		font-size: 11px;
+		color: var(--metin-ikincil);
+	}
+</style>

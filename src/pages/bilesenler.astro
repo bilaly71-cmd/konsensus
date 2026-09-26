@@ -1,0 +1,75 @@
+---
+// Tasarım sistemi vitrini: ortak bileşenleri kontrol etmek için. Menüde yok.
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import Buton from '../components/Buton.astro';
+import Tablo from '../components/Tablo.astro';
+import GrafikKutusu from '../components/GrafikKutusu.astro';
+
+const kolonlar = [
+	{ anahtar: 'kurum', baslik: 'Kurum' },
+	{ anahtar: 'hisse', baslik: 'Hisse', tur: 'hisse' as const },
+	{ anahtar: 'hedef', baslik: 'Hedef', hiza: 'sag' as const, tur: 'kalin' as const },
+	{ anahtar: 'pot', baslik: 'Potansiyel', hiza: 'sag' as const, tur: 'yon' as const },
+];
+const satirlar = [
+	{ kurum: 'Kurum A', hisse: 'AAAAA', hedef: '[hedef]', pot: '+%6,2' },
+	{ kurum: 'Kurum B', hisse: 'BBBBB', hedef: '[hedef]', pot: '-%3,1' },
+	{ kurum: 'Kurum C', hisse: 'CCCCC', hedef: '[hedef]', pot: '+%12,0' },
+];
+---
+
+<AnaLayout baslik="Bileşenler">
+	<SayfaBasligi baslik="Bileşenler" ust="TASARIM SİSTEMİ" aciklama="Sitedeki ortak parçaların vitrini. Rakamlar örnek veridir.">
+		<Rozet tur="ornek">Örnek veri</Rozet>
+	</SayfaBasligi>
+
+	<Kart baslik="Rozetler">
+		<div class="sira">
+			<Rozet>Nötr</Rozet>
+			<Rozet tur="marka">Günlük</Rozet>
+			<Rozet tur="pro">PRO</Rozet>
+			<Rozet tur="yukselis">▲ Yükseliş</Rozet>
+			<Rozet tur="dusus">▼ Düşüş</Rozet>
+			<Rozet tur="ornek">Örnek veri</Rozet>
+		</div>
+	</Kart>
+
+	<Kart baslik="Butonlar">
+		<div class="sira">
+			<Buton>Birincil</Buton>
+			<Buton tur="koyu">Koyu</Buton>
+			<Buton tur="ikincil">İkincil</Buton>
+			<Buton tur="kehribar">Kehribar</Buton>
+			<Buton tur="metin">Metin</Buton>
+		</div>
+	</Kart>
+
+	<Kart baslik="Tablo" altBaslik="Telefonda her satır karta dönüşür">
+		<Tablo kolonlar={kolonlar} satirlar={satirlar} />
+	</Kart>
+
+	<Kart baslik="Grafik kutusu">
+		<GrafikKutusu baslik="Fiyat grafiği" />
+	</Kart>
+
+	<Kart baslik="Koyu vurgu kartı" etiket="ETİKET" koyu>
+		<p class="koyu-metin">Öneri karnesi gibi öne çıkan bölümler için.</p>
+	</Kart>
+</AnaLayout>
+
+<style>
+	.sira {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 10px;
+	}
+	.koyu-metin {
+		margin: 0;
+		font-size: 14px;
+		color: #aeb3bf;
+	}
+</style>

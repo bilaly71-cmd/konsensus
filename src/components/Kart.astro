@@ -1,0 +1,82 @@
+---
+interface Props {
+	baslik?: string;
+	altBaslik?: string;
+	etiket?: string;
+	koyu?: boolean;
+	class?: string;
+}
+const { baslik, altBaslik, etiket, koyu = false, class: ekSinif } = Astro.props;
+---
+
+<article class:list={['kart', { koyu }, ekSinif]}>
+	{etiket && <span class="etiket">{etiket}</span>}
+	{(baslik || Astro.slots.has('sag')) && (
+		<header>
+			{baslik && <h2>{baslik}</h2>}
+			{altBaslik && <span class="alt">{altBaslik}</span>}
+			{Astro.slots.has('sag') && <div class="sag"><slot name="sag" /></div>}
+		</header>
+	)}
+	<slot />
+</article>
+
+<style>
+	.kart {
+		background: var(--kart);
+		border: 1px solid var(--kenarlik);
+		border-radius: 16px;
+		padding: 24px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		min-width: 0;
+	}
+	.kart.koyu {
+		background: var(--koyu);
+		border-color: var(--koyu);
+		color: #e7e9ee;
+	}
+	.etiket {
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 1.4px;
+		color: var(--etiket-metin);
+	}
+	.koyu .etiket {
+		color: var(--kehribar);
+	}
+	header {
+		display: flex;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 4px 12px;
+	}
+	h2 {
+		font-size: 24px;
+	}
+	.koyu h2 {
+		color: #fff;
+	}
+	.alt {
+		font-size: 13px;
+		color: var(--metin-ikincil);
+	}
+	.koyu .alt {
+		color: #aeb3bf;
+	}
+	.sag {
+		margin-left: auto;
+		font-size: 13px;
+		font-weight: 600;
+	}
+	@media (max-width: 899px) {
+		.kart {
+			padding: 18px;
+			border-radius: 14px;
+		}
+		h2 {
+			font-size: 20px;
+		}
+	}
+</style>

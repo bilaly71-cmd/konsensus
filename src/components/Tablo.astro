@@ -1,0 +1,155 @@
+---
+// Masaüstünde tablo, telefonda her satır bir karta dönüşür.
+export type Kolon = {
+	anahtar: string;
+	baslik: string;
+	hiza?: 'sol' | 'sag';
+	tur?: 'metin' | 'hisse' | 'kalin' | 'yon' | 'soluk';
+};
+
+interface Props {
+	kolonlar: Kolon[];
+	satirlar: Record<string, string>[];
+	bosMesaj?: string;
+}
+const { kolonlar, satirlar, bosMesaj = 'Henüz veri yok.' } = Astro.props;
+
+function yonSinifi(deger: string) {
+	if (deger.startsWith('+') || deger.startsWith('▲')) return 'yukselis';
+	if (deger.startsWith('-') || deger.startsWith('−') || deger.startsWith('▼')) return 'dusus';
+	return '';
+}
+---
+
+{
+	satirlar.length === 0 ? (
+		<p class="bos">{bosMesaj}</p>
+	) : (
+		<div class="tablo-sarici">
+			<table>
+				<thead>
+					<tr>
+						{kolonlar.map((k) => (
+							<th class:list={[k.hiza === 'sag' && 'sag']}>{k.baslik}</th>
+						))}
+					</tr>
+				</thead>
+				<tbody>
+					{satirlar.map((s) => (
+						<tr>
+							{kolonlar.map((k) => (
+								<td
+									data-etiket={k.baslik}
+									class:list={[
+										k.hiza === 'sag' && 'sag',
+										k.tur,
+										k.tur === 'yon' && yonSinifi(s[k.anahtar] ?? ''),
+									]}
+								>
+									{s[k.anahtar] ?? '—'}
+								</td>
+							))}
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	)
+}
+
+<style>
+	.bos {
+		margin: 0;
+		font-size: 14px;
+		color: var(--metin-ikincil);
+		padding: 24px;
+		text-align: center;
+		background: #faf9f5;
+		border-radius: 10px;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+	th {
+		text-align: left;
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.6px;
+		color: var(--metin-ikincil);
+		padding: 0 12px 10px;
+		border-bottom: 1px solid var(--cizgi);
+		text-transform: uppercase;
+	}
+	td {
+		padding: 0 12px;
+		height: 48px;
+	}
+	tbody tr:nth-child(even) {
+		background: #faf9f5;
+	}
+	.sag {
+		text-align: right;
+	}
+	.hisse {
+		font-family: var(--font-mono);
+		font-weight: 500;
+	}
+	.kalin {
+		font-weight: 600;
+	}
+	.soluk {
+		color: var(--metin-ikincil);
+	}
+	.yon {
+		font-weight: 600;
+	}
+	.yukselis {
+		color: var(--yukselis);
+	}
+	.dusus {
+		color: var(--dusus);
+	}
+
+	@media (max-width: 899px) {
+		table,
+		thead,
+		tbody,
+		tr,
+		td {
+			display: block;
+		}
+		thead {
+			display: none;
+		}
+		tbody {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+		tbody tr,
+		tbody tr:nth-child(even) {
+			background: var(--kart);
+			border: 1px solid var(--kenarlik);
+			border-radius: 14px;
+			padding: 12px 14px;
+		}
+		td {
+			height: auto;
+			padding: 4px 0;
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			text-align: right;
+		}
+		td::before {
+			content: attr(data-etiket);
+			font-family: var(--font-govde);
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--metin-ikincil);
+			text-align: left;
+		}
+	}
+</style>

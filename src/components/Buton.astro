@@ -1,0 +1,80 @@
+---
+interface Props {
+	href?: string;
+	tur?: 'birincil' | 'koyu' | 'ikincil' | 'kehribar' | 'metin';
+	genis?: boolean;
+	type?: 'button' | 'submit';
+}
+const { href, tur = 'birincil', genis = false, type = 'button' } = Astro.props;
+---
+
+{
+	href ? (
+		<a href={href} class:list={['buton', tur, { genis }]}>
+			<slot />
+		</a>
+	) : (
+		<button type={type} class:list={['buton', tur, { genis }]}>
+			<slot />
+		</button>
+	)
+}
+
+<style>
+	.buton {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		min-height: 44px;
+		padding: 0 18px;
+		border-radius: 10px;
+		border: 1px solid transparent;
+		font-size: 14px;
+		font-weight: 600;
+		cursor: pointer;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+	.genis {
+		width: 100%;
+	}
+	.birincil {
+		background: var(--marka);
+		color: #fff;
+	}
+	.birincil:hover {
+		background: var(--marka-koyu);
+		color: #fff;
+	}
+	.koyu {
+		background: var(--metin);
+		color: #fff;
+	}
+	.koyu:hover {
+		background: #000;
+		color: #fff;
+	}
+	.ikincil {
+		background: var(--kart);
+		color: var(--metin);
+		border-color: var(--kenarlik);
+	}
+	.ikincil:hover {
+		border-color: var(--metin);
+		color: var(--metin);
+	}
+	.kehribar {
+		background: var(--kehribar);
+		color: var(--koyu);
+	}
+	.kehribar:hover {
+		background: #d8912b;
+		color: var(--koyu);
+	}
+	.metin {
+		background: transparent;
+		color: var(--marka);
+		padding: 0 14px;
+	}
+</style>

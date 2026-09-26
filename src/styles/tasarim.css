@@ -1,0 +1,60 @@
+/* Konsensüs tasarım sistemi — "gazete + terminal" */
+:root {
+	--zemin: #f4f2ec;
+	--kart: #ffffff;
+	--kenarlik: #e2ded3;
+	--metin: #15171c;
+	--metin-ikincil: #5b5f68;
+	--koyu: #11151f;
+	--koyu-vurgu: #1f2636;
+	--marka: #3438c9;
+	--marka-koyu: #23268f;
+	--kehribar: #e9a23b;
+	--etiket-metin: #a15c07;
+	--yukselis: #0f7a4b;
+	--dusus: #b83227;
+	--cizgi: #eeebe3;
+
+	--font-baslik: 'Fraunces', Georgia, serif;
+	--font-govde: 'IBM Plex Sans', system-ui, sans-serif;
+	--font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	background: var(--zemin);
+}
+
+body {
+	color: var(--metin);
+	font-family: var(--font-govde);
+	font-variant-numeric: tabular-nums;
+	-webkit-font-smoothing: antialiased;
+}
+
+a {
+	color: var(--marka);
+	text-decoration: none;
+}
+
+a:hover {
+	color: var(--marka-koyu);
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--font-baslik);
+	font-weight: 500;
+	margin: 0;
+}
+
+button {
+	font-family: inherit;
+}

@@ -1,0 +1,51 @@
+---
+interface Props {
+	tur?: 'notr' | 'marka' | 'pro' | 'yukselis' | 'dusus' | 'ornek';
+}
+const { tur = 'notr' } = Astro.props;
+---
+
+<span class:list={['rozet', tur]}><slot /></span>
+
+<style>
+	.rozet {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 12px;
+		font-weight: 600;
+		padding: 3px 8px;
+		border-radius: 20px;
+		white-space: nowrap;
+		line-height: 1.4;
+	}
+	.notr {
+		background: #f1eee6;
+		color: var(--metin-ikincil);
+	}
+	.ornek {
+		background: #f1eee6;
+		color: var(--metin-ikincil);
+		font-size: 11px;
+	}
+	.marka {
+		background: #eef0ff;
+		color: #2b2fa8;
+	}
+	.pro {
+		background: var(--kehribar);
+		color: var(--koyu);
+		font-size: 10px;
+		letter-spacing: 0.6px;
+		padding: 2px 6px;
+		border-radius: 4px;
+	}
+	.yukselis {
+		background: #e3f2ea;
+		color: var(--yukselis);
+	}
+	.dusus {
+		background: #f8e4e2;
+		color: var(--dusus);
+	}
+</style>

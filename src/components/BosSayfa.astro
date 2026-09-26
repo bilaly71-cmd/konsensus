@@ -1,0 +1,42 @@
+---
+// Henüz yapılmamış sayfalar için ortak iskelet.
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from './SayfaBasligi.astro';
+import Kart from './Kart.astro';
+import Rozet from './Rozet.astro';
+
+interface Props {
+	baslik: string;
+	grup: string;
+	aciklama: string;
+	gelecekler: string[];
+	pro?: boolean;
+}
+const { baslik, grup, aciklama, gelecekler, pro = false } = Astro.props;
+---
+
+<AnaLayout baslik={baslik} aciklama={aciklama}>
+	<SayfaBasligi baslik={baslik} ust={grup} aciklama={aciklama}>
+		{pro && <Rozet tur="pro">PRO</Rozet>}
+		<Rozet>Yapım aşamasında</Rozet>
+	</SayfaBasligi>
+
+	<Kart baslik="Bu sayfada neler olacak">
+		<ul>
+			{gelecekler.map((g) => <li>{g}</li>)}
+		</ul>
+	</Kart>
+</AnaLayout>
+
+<style>
+	ul {
+		margin: 0;
+		padding-left: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		font-size: 15px;
+		line-height: 1.5;
+		color: #3f434c;
+	}
+</style>

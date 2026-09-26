@@ -1,145 +1,163 @@
 ---
-const yil = new Date().getFullYear();
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import Buton from '../components/Buton.astro';
+import Tablo from '../components/Tablo.astro';
+
+const kpiler = [
+	{ ad: 'Bugünkü öneri', alt: 'kurumlardan derlenir' },
+	{ ad: 'Konsensüs hissesi', alt: 'en az 3 kurumun önerdiği' },
+	{ ad: 'Hedefi yükselen', alt: 'son 24 saatte' },
+	{ ad: 'Hedefi düşen', alt: 'son 24 saatte' },
+];
+
+const oneriKolonlari = [
+	{ anahtar: 'kurum', baslik: 'Kurum' },
+	{ anahtar: 'hisse', baslik: 'Hisse', tur: 'hisse' as const },
+	{ anahtar: 'tur', baslik: 'Tür' },
+	{ anahtar: 'giris', baslik: 'Giriş', hiza: 'sag' as const },
+	{ anahtar: 'hedef', baslik: 'Hedef', hiza: 'sag' as const, tur: 'kalin' as const },
+	{ anahtar: 'stop', baslik: 'Stop', hiza: 'sag' as const, tur: 'soluk' as const },
+	{ anahtar: 'pot', baslik: 'Potansiyel', hiza: 'sag' as const, tur: 'yon' as const },
+];
 ---
 
-<html lang="tr">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Konsensüs — BIST öneri ve hedef fiyat platformu</title>
-		<meta name="description" content="Kurumların BIST önerileri ve hedef fiyatları tek yerde. Yakında." />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap"
-			rel="stylesheet"
-		/>
-	</head>
-	<body>
-		<main>
-			<div class="marka">
-				<span class="ad">Konsensüs</span>
-				<span class="rozet">BIST</span>
-			</div>
+<AnaLayout baslik="Gösterge paneli">
+	<SayfaBasligi
+		baslik="Gösterge paneli"
+		ust="PİYASA"
+		aciklama="Günün önerileri, konsensüs hisseleri, hedef revizyonları ve öneri karnesi tek ekranda."
+	>
+		<Rozet>Yapım aşamasında</Rozet>
+	</SayfaBasligi>
 
-			<h1>Kurumların BIST önerileri ve hedef fiyatları, tek yerde.</h1>
-			<p class="aciklama">
-				Aracı kurumların kamuya açık raporlarından öneriler, konsensüs hedef fiyatlar ve
-				öneri karneleri. Yapım aşamasındayız — çok yakında yayında.
+	<section class="kpi-izgara" aria-label="Özet">
+		{
+			kpiler.map((k) => (
+				<div class="kpi">
+					<span class="kpi-ad">{k.ad}</span>
+					<span class="kpi-deger">—</span>
+					<span class="kpi-alt">{k.alt}</span>
+				</div>
+			))
+		}
+	</section>
+
+	<section class="izgara">
+		<Kart baslik="Günün konsensüsü" altBaslik="En çok kurumun aynı anda önerdiği hisseler" class="genis">
+			<p class="bos">Öneriler girilmeye başladığında burada görünecek.</p>
+		</Kart>
+		<Kart baslik="Öneri karnesi" etiket="YAKINDA" koyu class="dar">
+			<p class="koyu-metin">
+				Günlük önerilerin 5 işlem günü içinde hedefe ulaşma oranı. Yöntem sayfasında açıkça
+				anlatılacak.
 			</p>
+		</Kart>
+	</section>
 
-			<div class="durum">
-				<span class="nokta"></span>
-				Şu anda hazırlanıyor
-			</div>
-		</main>
+	<Kart baslik="Bugünkü öneriler" altBaslik="Kaynak her satırda">
+		<Fragment slot="sag"><a href="/oneriler">Tümü</a></Fragment>
+		<Tablo kolonlar={oneriKolonlari} satirlar={[]} bosMesaj="Bugün için henüz öneri girilmedi." />
+	</Kart>
 
-		<footer>
-			<p>
-				Burada yer alan bilgiler yatırım danışmanlığı kapsamında değildir. Fiyatlar 15 dakika
-				gecikmelidir.
+	<section class="izgara">
+		<Kart etiket="ARAÇLAR" baslik="Teminat simülatörü" class="genis">
+			<p class="metin">
+				Hisse fiyatı düşerse özkaynak oranın ne olur, çağrı gelir mi? Birkaç saniyede gör.
 			</p>
-			<p>&copy; {yil} Konsensüs</p>
-		</footer>
-	</body>
-</html>
+			<div><Buton href="/teminat-simulatoru">Simülatöre git</Buton></div>
+		</Kart>
+		<Kart etiket="ARENA" baslik="Grafik oyunu" class="dar">
+			<p class="metin">Grafik burada kesildi. Sence devamı?</p>
+			<div><Buton href="/grafik-oyunu" tur="ikincil">Oyuna göz at</Buton></div>
+		</Kart>
+	</section>
+</AnaLayout>
 
 <style>
-	:global(html) {
-		background: #f4f2ec;
+	.kpi-izgara {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 16px;
 	}
-	:global(body) {
-		margin: 0;
-		min-height: 100dvh;
+	.kpi {
+		background: var(--kart);
+		border: 1px solid var(--kenarlik);
+		border-radius: 14px;
+		padding: 20px;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		background: #f4f2ec;
-		color: #15171c;
-		font-family: 'IBM Plex Sans', system-ui, sans-serif;
-		font-variant-numeric: tabular-nums;
+		gap: 6px;
 	}
-
-	main {
-		max-width: 640px;
-		width: 100%;
-		box-sizing: border-box;
-		padding: 48px 24px;
-		text-align: center;
-	}
-
-	.marka {
-		display: flex;
-		align-items: baseline;
-		justify-content: center;
-		gap: 8px;
-		margin-bottom: 40px;
-	}
-
-	.ad {
-		font-family: 'Fraunces', Georgia, serif;
-		font-size: 32px;
-		font-weight: 600;
-		letter-spacing: -0.3px;
-		color: #15171c;
-	}
-
-	.rozet {
-		font-size: 12px;
-		font-weight: 600;
-		letter-spacing: 1px;
-		color: #a15c07;
-	}
-
-	h1 {
-		font-family: 'Fraunces', Georgia, serif;
-		font-weight: 600;
-		font-size: clamp(28px, 5vw, 40px);
-		line-height: 1.2;
-		margin: 0 0 20px;
-		color: #15171c;
-	}
-
-	.aciklama {
-		font-size: 17px;
-		line-height: 1.6;
-		color: #5b5f68;
-		margin: 0 0 36px;
-	}
-
-	.durum {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		padding: 10px 18px;
-		background: #ffffff;
-		border: 1px solid #e2ded3;
-		border-radius: 999px;
-		font-size: 14px;
+	.kpi-ad {
+		font-size: 13px;
+		color: var(--metin-ikincil);
 		font-weight: 500;
-		color: #15171c;
 	}
-
-	.nokta {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		background: #e9a23b;
+	.kpi-deger {
+		font-family: var(--font-baslik);
+		font-size: 38px;
+		font-weight: 600;
+		line-height: 1;
 	}
-
-	footer {
-		max-width: 640px;
-		width: 100%;
-		box-sizing: border-box;
-		padding: 0 24px 32px;
-		text-align: center;
-	}
-
-	footer p {
+	.kpi-alt {
 		font-size: 12px;
-		line-height: 1.6;
-		color: #5b5f68;
-		margin: 0 0 4px;
+		color: var(--metin-ikincil);
+	}
+	.izgara {
+		display: grid;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		gap: 24px;
+	}
+	.izgara > :global(.genis) {
+		grid-column: span 7;
+	}
+	.izgara > :global(.dar) {
+		grid-column: span 5;
+	}
+	.bos {
+		margin: 0;
+		font-size: 14px;
+		color: var(--metin-ikincil);
+		padding: 24px;
+		text-align: center;
+		background: #faf9f5;
+		border-radius: 10px;
+	}
+	.koyu-metin {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: #aeb3bf;
+	}
+	.metin {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.55;
+		color: #3f434c;
+	}
+
+	@media (max-width: 1100px) {
+		.kpi-izgara {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 899px) {
+		.kpi-izgara {
+			gap: 10px;
+		}
+		.kpi {
+			padding: 14px;
+		}
+		.kpi-deger {
+			font-size: 30px;
+		}
+		.izgara {
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+		}
 	}
 </style>

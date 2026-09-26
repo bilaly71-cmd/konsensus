@@ -1,0 +1,523 @@
+---
+import '../styles/tasarim.css';
+import Ikon from '../components/Ikon.astro';
+import Rozet from '../components/Rozet.astro';
+import { menuGruplari, altSekmeler } from '../lib/menu';
+
+interface Props {
+	baslik: string;
+	aciklama?: string;
+}
+const { baslik, aciklama = 'Kurumların BIST önerileri ve hedef fiyatları tek yerde.' } = Astro.props;
+
+const yol = Astro.url.pathname.replace(/\/$/, '') || '/';
+const aktifMi = (href: string) => href === yol;
+const sekmeAktifMi = (yollar: string[]) => yollar.includes(yol);
+const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat platformu' : `${baslik} — Konsensüs`;
+---
+
+<!doctype html>
+<html lang="tr">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{sayfaBasligi}</title>
+		<meta name="description" content={aciklama} />
+		<meta name="theme-color" content="#11151F" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<div class="kabuk">
+			<!-- Masaüstü sol menü -->
+			<nav class="yan-menu" aria-label="Ana menü">
+				<a href="/" class="logo">
+					<span class="logo-ad">Konsensüs</span>
+					<span class="logo-bist">BIST</span>
+				</a>
+				{
+					menuGruplari.map((grup) => (
+						<div class="grup">
+							<div class="grup-baslik">{grup.baslik}</div>
+							{grup.ogeler.map((oge) => (
+								<a
+									href={oge.href}
+									class:list={['menu-oge', { aktif: aktifMi(oge.href) }]}
+									aria-current={aktifMi(oge.href) ? 'page' : undefined}
+								>
+									<span class="nokta" />
+									<span class="menu-metin">{oge.t}</span>
+									{oge.rozet && <Rozet tur="pro">{oge.rozet}</Rozet>}
+								</a>
+							))}
+						</div>
+					))
+				}
+				<div class="bulten-kutu">
+					<div class="bulten-baslik">Sabah Bülteni</div>
+					<p>Her iş günü 08:30'da günün önerileri, hedef revizyonları ve dünün karnesi e-postanda.</p>
+					<span class="bulten-yakinda">Yakında</span>
+				</div>
+			</nav>
+
+			<div class="icerik-alani">
+				<!-- Masaüstü üst bar -->
+				<header class="ust-bar">
+					<label class="arama" for="ara">
+						<Ikon ad="ara" boyut={18} />
+						<input id="ara" type="search" placeholder="Hisse, aracı kurum ya da fon ara" disabled />
+						<span class="kisayol">/</span>
+					</label>
+					<div class="tarih-durum">
+						<div class="tarih" data-tarih>&nbsp;</div>
+						<div data-piyasa>Fiyatlar 15 dk gecikmeli</div>
+					</div>
+					<button type="button" class="ikon-buton" aria-label="Bildirimler">
+						<Ikon ad="zil" boyut={18} />
+					</button>
+				</header>
+
+				<!-- Mobil üst bar -->
+				<header class="mobil-ust">
+					<a href="/" class="logo">
+						<span class="logo-ad">Konsensüs</span>
+						<span class="logo-bist">BIST</span>
+					</a>
+					<button type="button" class="mobil-ikon" aria-label="Ara">
+						<Ikon ad="ara" boyut={18} />
+					</button>
+					<button type="button" class="mobil-ikon" aria-label="Menüyü aç" data-menu-ac>
+						<Ikon ad="menu" boyut={18} />
+					</button>
+				</header>
+
+				<main>
+					<slot />
+				</main>
+
+				<footer class="alt-bilgi">
+					<p>
+						Öneriler aracı kurumların kamuya açık raporlarından derlenir, kaynak her satırda
+						gösterilir. Burada yer alan bilgiler yatırım danışmanlığı kapsamında değildir. Fiyatlar
+						15 dakika gecikmelidir.
+					</p>
+					<p>
+						Grafikler <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a>
+						Lightweight Charts ile hazırlanır. &copy; {new Date().getFullYear()} Konsensüs
+					</p>
+				</footer>
+			</div>
+		</div>
+
+		<!-- Mobil alt menü -->
+		<nav class="alt-menu" aria-label="Alt menü">
+			{
+				altSekmeler.map((s) => (
+					<a
+						href={s.href}
+						class:list={{ aktif: sekmeAktifMi(s.yollar) }}
+						aria-current={sekmeAktifMi(s.yollar) ? 'page' : undefined}
+					>
+						<Ikon ad={s.ikon} boyut={22} />
+						{s.t}
+					</a>
+				))
+			}
+		</nav>
+
+		<!-- Mobil tam menü -->
+		<dialog class="mobil-menu" data-menu>
+			<div class="mobil-menu-ust">
+				<span class="logo-ad">Konsensüs</span>
+				<button type="button" class="mobil-ikon" aria-label="Menüyü kapat" data-menu-kapat>
+					<Ikon ad="kapat" boyut={18} />
+				</button>
+			</div>
+			{
+				menuGruplari.map((grup) => (
+					<div class="grup">
+						<div class="grup-baslik">{grup.baslik}</div>
+						{grup.ogeler.map((oge) => (
+							<a href={oge.href} class:list={['menu-oge', { aktif: aktifMi(oge.href) }]}>
+								<span class="nokta" />
+								<span class="menu-metin">{oge.t}</span>
+								{oge.rozet && <Rozet tur="pro">{oge.rozet}</Rozet>}
+							</a>
+						))}
+					</div>
+				))
+			}
+		</dialog>
+
+		<script>
+			// Üst bardaki tarih ve piyasa durumu (İstanbul saatiyle)
+			const simdi = new Date();
+			const tarihEl = document.querySelector('[data-tarih]');
+			const piyasaEl = document.querySelector('[data-piyasa]');
+			if (tarihEl) {
+				tarihEl.textContent = new Intl.DateTimeFormat('tr-TR', {
+					day: 'numeric',
+					month: 'long',
+					year: 'numeric',
+					weekday: 'long',
+					timeZone: 'Europe/Istanbul',
+				}).format(simdi);
+			}
+			if (piyasaEl) {
+				const parcalar = new Intl.DateTimeFormat('en-GB', {
+					weekday: 'short',
+					hour: '2-digit',
+					minute: '2-digit',
+					hour12: false,
+					timeZone: 'Europe/Istanbul',
+				}).formatToParts(simdi);
+				const al = (t: string) => parcalar.find((p) => p.type === t)?.value ?? '';
+				const dakika = Number(al('hour')) * 60 + Number(al('minute'));
+				const haftaIci = !['Sat', 'Sun'].includes(al('weekday'));
+				const acik = haftaIci && dakika >= 10 * 60 && dakika < 18 * 60 + 10;
+				piyasaEl.textContent = `Piyasa ${acik ? 'açık' : 'kapalı'} · fiyatlar 15 dk gecikmeli`;
+			}
+
+			// Mobil menü
+			const menu = document.querySelector<HTMLDialogElement>('[data-menu]');
+			document.querySelector('[data-menu-ac]')?.addEventListener('click', () => menu?.showModal());
+			document.querySelector('[data-menu-kapat]')?.addEventListener('click', () => menu?.close());
+			menu?.addEventListener('click', (e) => {
+				if (e.target === menu) menu.close();
+			});
+		</script>
+
+		<style>
+			.kabuk {
+				display: flex;
+				min-height: 100dvh;
+			}
+
+			/* ---------- Sol menü ---------- */
+			.yan-menu {
+				width: 248px;
+				flex-shrink: 0;
+				background: var(--koyu);
+				color: #c9cdd6;
+				display: flex;
+				flex-direction: column;
+				gap: 28px;
+				padding: 28px 18px;
+				position: sticky;
+				top: 0;
+				height: 100dvh;
+				overflow-y: auto;
+			}
+			.logo {
+				display: flex;
+				align-items: baseline;
+				gap: 8px;
+				padding: 0 10px;
+				color: #fff;
+			}
+			.logo:hover {
+				color: #fff;
+			}
+			.logo-ad {
+				font-family: var(--font-baslik);
+				font-size: 26px;
+				font-weight: 600;
+				letter-spacing: -0.3px;
+				color: #fff;
+			}
+			.logo-bist {
+				font-size: 11px;
+				color: var(--kehribar);
+				font-weight: 600;
+				letter-spacing: 1px;
+			}
+			.grup {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+			.grup-baslik {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 1.4px;
+				color: #7d8391;
+				padding: 0 10px 8px;
+			}
+			.menu-oge {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				min-height: 40px;
+				padding: 0 10px;
+				border-radius: 8px;
+				font-size: 14px;
+				font-weight: 500;
+				color: #c9cdd6;
+			}
+			.menu-oge:hover {
+				background: #171c28;
+				color: #fff;
+			}
+			.menu-oge.aktif {
+				background: var(--koyu-vurgu);
+				color: #fff;
+				font-weight: 600;
+			}
+			.nokta {
+				width: 6px;
+				height: 6px;
+				border-radius: 3px;
+				background: #3a4152;
+				flex-shrink: 0;
+			}
+			.aktif .nokta {
+				background: var(--kehribar);
+			}
+			.menu-metin {
+				flex-grow: 1;
+			}
+			.bulten-kutu {
+				margin-top: auto;
+				background: #1b2130;
+				border: 1px solid #2a3142;
+				border-radius: 12px;
+				padding: 16px;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+			.bulten-baslik {
+				font-family: var(--font-baslik);
+				font-size: 17px;
+				color: #fff;
+				font-weight: 500;
+			}
+			.bulten-kutu p {
+				margin: 0;
+				font-size: 13px;
+				line-height: 1.5;
+				color: #aeb3bf;
+			}
+			.bulten-yakinda {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 44px;
+				border: 1px dashed #3a4152;
+				color: #aeb3bf;
+				border-radius: 8px;
+				font-weight: 600;
+				font-size: 14px;
+			}
+
+			/* ---------- İçerik ---------- */
+			.icerik-alani {
+				flex-grow: 1;
+				min-width: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 24px;
+				padding: 24px 32px 40px;
+			}
+			main {
+				flex-grow: 1;
+				display: flex;
+				flex-direction: column;
+				gap: 24px;
+				min-width: 0;
+			}
+
+			/* ---------- Üst bar ---------- */
+			.ust-bar {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				min-height: 52px;
+			}
+			.arama {
+				flex-grow: 1;
+				max-width: 520px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				height: 44px;
+				background: var(--kart);
+				border: 1px solid var(--kenarlik);
+				border-radius: 10px;
+				padding: 0 14px;
+				color: #6a6f7a;
+			}
+			.arama input {
+				flex-grow: 1;
+				border: 0;
+				outline: none;
+				font: inherit;
+				font-size: 14px;
+				background: transparent;
+				color: var(--metin);
+				min-width: 0;
+			}
+			.kisayol {
+				font-family: var(--font-mono);
+				font-size: 12px;
+				border: 1px solid var(--kenarlik);
+				border-radius: 5px;
+				padding: 1px 6px;
+			}
+			.tarih-durum {
+				margin-left: auto;
+				font-size: 13px;
+				color: var(--metin-ikincil);
+				text-align: right;
+				line-height: 1.35;
+			}
+			.tarih {
+				font-weight: 600;
+				color: var(--metin);
+			}
+			.ikon-buton {
+				width: 44px;
+				height: 44px;
+				border-radius: 10px;
+				border: 1px solid var(--kenarlik);
+				background: var(--kart);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: var(--metin);
+				cursor: pointer;
+				flex-shrink: 0;
+			}
+
+			/* ---------- Alt bilgi ---------- */
+			.alt-bilgi {
+				border-top: 1px solid var(--kenarlik);
+				padding-top: 16px;
+			}
+			.alt-bilgi p {
+				margin: 0 0 4px;
+				font-size: 12px;
+				line-height: 1.6;
+				color: var(--metin-ikincil);
+			}
+
+			/* ---------- Mobil ---------- */
+			.mobil-ust,
+			.alt-menu {
+				display: none;
+			}
+			.mobil-ikon {
+				width: 44px;
+				height: 44px;
+				border-radius: 10px;
+				border: 0;
+				background: var(--koyu-vurgu);
+				color: #fff;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				flex-shrink: 0;
+			}
+			.mobil-menu {
+				border: 0;
+				padding: 16px;
+				margin: 0 0 0 auto;
+				width: min(320px, 88vw);
+				max-width: none;
+				height: 100dvh;
+				max-height: none;
+				overflow-y: auto;
+				background: var(--koyu);
+				color: #c9cdd6;
+				flex-direction: column;
+				gap: 24px;
+			}
+			.mobil-menu[open] {
+				display: flex;
+			}
+			.mobil-menu::backdrop {
+				background: rgb(17 21 31 / 0.5);
+			}
+			.mobil-menu-ust {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding-left: 10px;
+			}
+			.mobil-menu .menu-oge {
+				min-height: 44px;
+			}
+
+			@media (max-width: 899px) {
+				.yan-menu,
+				.ust-bar {
+					display: none;
+				}
+				.icerik-alani {
+					padding: 0 0 100px;
+					gap: 16px;
+				}
+				main {
+					padding: 0 16px;
+					gap: 16px;
+				}
+				.alt-bilgi {
+					margin: 0 16px;
+				}
+				.mobil-ust {
+					display: flex;
+					align-items: center;
+					gap: 8px;
+					background: var(--koyu);
+					padding: 12px 16px;
+					position: sticky;
+					top: 0;
+					z-index: 10;
+				}
+				.mobil-ust .logo {
+					padding: 0;
+					margin-right: auto;
+				}
+				.mobil-ust .logo-ad {
+					font-size: 23px;
+				}
+				.mobil-ust .logo-bist {
+					font-size: 10px;
+				}
+				.alt-menu {
+					display: grid;
+					grid-template-columns: repeat(5, minmax(0, 1fr));
+					position: fixed;
+					left: 0;
+					right: 0;
+					bottom: 0;
+					z-index: 10;
+					background: var(--kart);
+					border-top: 1px solid var(--kenarlik);
+					padding-bottom: env(safe-area-inset-bottom);
+				}
+				.alt-menu a {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					gap: 4px;
+					min-height: 64px;
+					font-size: 11px;
+					font-weight: 500;
+					color: var(--metin-ikincil);
+				}
+				.alt-menu a.aktif {
+					color: var(--marka);
+					font-weight: 600;
+				}
+			}
+		</style>
+	</body>
+</html>
