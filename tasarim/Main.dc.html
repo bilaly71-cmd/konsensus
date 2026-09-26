@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Ana Sayfa — Gösterge Paneli</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4F2EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#15171C}
+a{color:#3438C9;text-decoration:none}a:hover{color:#23268F}
+</style>
+</helmet>
+<div style="width: 1440px; height: 2320px; display: flex; background: #F4F2EC; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #15171C; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Ana menü" style="width: 248px; flex-shrink: 0; background: #11151F; color: #C9CDD6; display: flex; flex-direction: column; gap: 28px; padding: 28px 18px; box-sizing: border-box">
+<a href="Main.dc.html" style="display: flex; align-items: baseline; gap: 8px; padding: 0 10px; color: #FFFFFF">
+<span style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 600; letter-spacing: -0.3px">Konsensüs</span>
+<span style="font-size: 11px; color: #E9A23B; font-weight: 600; letter-spacing: 1px">BIST</span>
+</a>
+<sc-for list="{{nav}}" as="grp" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 1.4px; color: #7D8391; padding: 0 10px 8px">{{grp.baslik}}</div>
+<sc-for list="{{grp.items}}" as="it" hint-placeholder-count="3">
+<a href="{{it.href}}" style="{{it.stil}}">
+<span style="width: 6px; height: 6px; border-radius: 3px; background: {{it.nokta}}; flex-shrink: 0"></span>
+<span style="flex-grow: 1">{{it.t}}</span>
+<sc-if value="{{it.rozet}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 10px; font-weight: 600; letter-spacing: 0.6px; color: #11151F; background: #E9A23B; padding: 2px 6px; border-radius: 4px">{{it.rozet}}</span>
+</sc-if>
+</a>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-top: auto; background: #1B2130; border: 1px solid #2A3142; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-family: 'Fraunces', Georgia, serif; font-size: 17px; color: #FFFFFF; font-weight: 500">Sabah Bülteni</div>
+<div style="font-size: 13px; line-height: 1.5; color: #AEB3BF">Her iş günü 08:30'da günün önerileri, hedef revizyonları ve dünün karnesi e-postanda.</div>
+<a href="#abone" style="display: flex; align-items: center; justify-content: center; height: 44px; background: #E9A23B; color: #11151F; border-radius: 8px; font-weight: 600; font-size: 14px">Ücretsiz abone ol</a>
+</div>
+</nav>
+
+<main style="flex-grow: 1; display: flex; flex-direction: column; gap: 24px; padding: 24px 32px 40px; box-sizing: border-box; min-width: 0">
+
+<header style="display: flex; align-items: center; gap: 16px; height: 52px">
+<label for="ara" style="flex-grow: 1; max-width: 520px; display: flex; align-items: center; gap: 10px; height: 44px; background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 10px; padding: 0 14px; box-sizing: border-box; color: #6A6F7A">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<input id="ara" type="search" placeholder="Hisse, aracı kurum ya da fon ara" style="flex-grow: 1; border: 0; outline: none; font: inherit; font-size: 14px; background: transparent; color: #15171C">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; border: 1px solid #E2DED3; border-radius: 5px; padding: 1px 6px; color: #6A6F7A">/</span>
+</label>
+<div style="margin-left: auto; font-size: 13px; color: #5B5F68; text-align: right; line-height: 1.35">
+<div style="font-weight: 600; color: #15171C">26 Eylül 2026, Cumartesi</div>
+<div>Piyasa kapalı · fiyatlar 15 dk gecikmeli</div>
+</div>
+<button type="button" aria-label="Bildirimler" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #E2DED3; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #15171C; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+</button>
+<a href="#giris" style="height: 44px; padding: 0 18px; display: flex; align-items: center; border-radius: 10px; background: #15171C; color: #FFFFFF; font-weight: 600; font-size: 14px">Giriş yap</a>
+</header>
+
+<section aria-label="Piyasa şeridi" style="display: flex; align-items: stretch; background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 12px; overflow: hidden">
+<sc-for list="{{serit}}" as="s" hint-placeholder-count="6">
+<div style="flex-grow: 1; padding: 12px 18px; border-right: 1px solid #EEEBE3; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; color: #5B5F68; font-weight: 500">{{s.ad}}</span>
+<span style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 17px; font-weight: 600">{{s.deger}}</span><span style="font-size: 12px; font-weight: 600; color: {{s.renk}}">{{s.degisim}}</span></span>
+</div>
+</sc-for>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px">
+<article style="grid-column: span 7; background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 16px; padding: 28px 32px; display: flex; flex-direction: column; gap: 14px; position: relative">
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 1.4px; color: #A15C07">SABAH BÜLTENİ</span>
+<span style="font-size: 12px; color: #5B5F68">26 Eylül · 5 dk okuma</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #5B5F68; background: #F1EEE6; padding: 3px 8px; border-radius: 20px">Örnek veri</span>
+</div>
+<h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 40px; line-height: 1.12; letter-spacing: -0.6px; max-width: 620px">Dokuz kurum, yirmi üç öneri: bugün konsensüs savunma ve havacılıkta</h1>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3F434C; max-width: 620px">[Bültenin ilk paragrafı: günün piyasa görünümü, öne çıkan hedef revizyonları ve dünün karnesinden tek cümlelik ders.]</p>
+<div style="display: flex; align-items: center; gap: 12px; margin-top: 6px">
+<a href="#bulten" style="height: 44px; padding: 0 18px; display: flex; align-items: center; border-radius: 10px; background: #3438C9; color: #FFFFFF; font-weight: 600; font-size: 14px">Bülteni oku</a>
+<a href="#arsiv" style="height: 44px; padding: 0 14px; display: flex; align-items: center; font-weight: 600; font-size: 14px">Arşiv</a>
+</div>
+</article>
+<div style="grid-column: span 5; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<sc-for list="{{kpi}}" as="k" hint-placeholder-count="4">
+<div style="background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5B5F68; font-weight: 500">{{k.ad}}</span>
+<span style="font-family: 'Fraunces', Georgia, serif; font-size: 38px; font-weight: 600; line-height: 1; color: {{k.renk}}">{{k.deger}}</span>
+<span style="font-size: 12px; color: #5B5F68">{{k.alt}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px">
+<article style="grid-column: span 7; background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: baseline; gap: 12px">
+<h2 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 500">Günün konsensüsü</h2>
+<span style="font-size: 13px; color: #5B5F68">En çok kurumun aynı anda önerdiği hisseler</span>
+<a href="#oneriler" style="margin-left: auto; font-size: 13px; font-weight: 600">Tümü</a>
+</div>
+<sc-for list="{{konsensus}}" as="c" hint-placeholder-count="5">
+<a href="Hisse.dc.html" style="display: grid; grid-template-columns: 88px minmax(0, 1fr) 150px; align-items: center; gap: 16px; color: #15171C; padding: 4px 0">
+<span style="display: flex; flex-direction: column"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 15px">{{c.tk}}</span><span style="font-size: 12px; color: #5B5F68">{{c.ad}}</span></span>
+<span style="display: flex; flex-direction: column; gap: 6px">
+<span style="height: 10px; background: #EFECE4; border-radius: 5px; overflow: hidden; display: block"><span style="display: block; height: 10px; width: {{c.w}}; background: #3438C9; border-radius: 5px"></span></span>
+<span style="font-size: 12px; color: #5B5F68">{{c.kurumlar}}</span>
+</span>
+<span style="display: flex; flex-direction: column; align-items: flex-end"><span style="font-size: 20px; font-weight: 600">{{c.n}} kurum</span><span style="font-size: 12px; color: #0F7A4B; font-weight: 600">{{c.pot}}</span></span>
+</a>
+</sc-for>
+</article>
+<article style="grid-column: span 5; background: #11151F; color: #E7E9EE; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: baseline; gap: 10px">
+<h2 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 500; color: #FFFFFF">Öneri karnesi</h2>
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #E9A23B">EYLÜL</span>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #AEB3BF">Günlük önerilerin 5 işlem günü içinde hedefe ulaşma oranı. Yöntem sayfasında açıkça anlatılır.</p>
+<sc-for list="{{karne}}" as="r" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 22px 130px minmax(0, 1fr) 52px; align-items: center; gap: 12px">
+<span style="font-family: 'Fraunces', Georgia, serif; font-size: 16px; color: #7D8391">{{r.sira}}</span>
+<span style="font-size: 14px; font-weight: 500">{{r.kurum}}</span>
+<span style="height: 8px; background: #252C3B; border-radius: 4px; display: block; overflow: hidden"><span style="display: block; height: 8px; width: {{r.w}}; background: #E9A23B; border-radius: 4px"></span></span>
+<span style="font-size: 15px; font-weight: 600; text-align: right; color: #FFFFFF">{{r.isabet}}</span>
+</div>
+</sc-for>
+<a href="#karne" style="margin-top: auto; color: #E9A23B; font-weight: 600; font-size: 13px">Tüm kurumların karnesi</a>
+</article>
+</section>
+
+<section id="oneriler" style="background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px">
+<h2 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 500">Bugünkü öneriler</h2>
+<span style="font-size: 13px; color: #5B5F68">9 kurum · 23 öneri · kaynak her satırda</span>
+<div style="margin-left: auto; display: flex; gap: 6px">
+<sc-for list="{{filtre}}" as="f" hint-placeholder-count="4">
+<button type="button" onClick="{{f.sec}}" style="{{f.stil}}">{{f.t}}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 170px 150px 130px repeat(3, minmax(0, 1fr)) 110px; gap: 12px; padding: 0 12px 10px; border-bottom: 1px solid #EEEBE3; font-size: 12px; font-weight: 600; letter-spacing: 0.6px; color: #5B5F68">
+<span>KURUM</span><span>HİSSE</span><span>TÜR</span><span style="text-align: right">GİRİŞ</span><span style="text-align: right">HEDEF</span><span style="text-align: right">STOP</span><span style="text-align: right">POTANSİYEL</span>
+</div>
+<sc-for list="{{satirlar}}" as="o" hint-placeholder-count="7">
+<div style="display: grid; grid-template-columns: 170px 150px 130px repeat(3, minmax(0, 1fr)) 110px; gap: 12px; align-items: center; min-height: 48px; padding: 0 12px; border-radius: 8px; background: {{o.zemin}}; font-size: 14px">
+<span style="font-weight: 500">{{o.kurum}}</span>
+<a href="Hisse.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-weight: 500; color: #15171C">{{o.hisse}}</a>
+<span><span style="font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 20px; background: #EEF0FF; color: #2B2FA8">{{o.tur}}</span></span>
+<span style="text-align: right">{{o.giris}}</span>
+<span style="text-align: right; font-weight: 600">{{o.hedef}}</span>
+<span style="text-align: right; color: #5B5F68">{{o.stop}}</span>
+<span style="text-align: right; font-weight: 600; color: #0F7A4B">{{o.pot}}</span>
+</div>
+</sc-for>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<article style="background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 21px; font-weight: 500">Hedef revizyonları</h2>
+<sc-for list="{{revizyon}}" as="v" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid #F1EEE6">
+<span style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: {{v.zemin}}; color: {{v.renk}}">{{v.ok}}</span>
+<span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 14px">{{v.tk}}</span><span style="font-size: 12px; color: #5B5F68">{{v.kurum}}</span></span>
+<span style="font-size: 13px; color: #5B5F68">{{v.eski}} →</span>
+<span style="font-size: 14px; font-weight: 600; color: {{v.renk}}">{{v.yeni}}</span>
+</div>
+</sc-for>
+</article>
+<article style="background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: baseline; gap: 8px">
+<h2 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 21px; font-weight: 500">Fonlar ne topladı</h2>
+<span style="font-size: 12px; color: #5B5F68">Ağustos portföy raporları</span>
+</div>
+<sc-for list="{{fonlar}}" as="f" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 64px minmax(0, 1fr) 70px; align-items: center; gap: 10px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 14px">{{f.tk}}</span>
+<span style="height: 18px; background: #F1EEE6; border-radius: 4px; display: block; overflow: hidden"><span style="display: block; height: 18px; width: {{f.w}}; background: #0F7A4B; opacity: 0.85"></span></span>
+<span style="font-size: 13px; font-weight: 600; text-align: right">{{f.fon}}</span>
+</div>
+</sc-for>
+<span style="font-size: 12px; color: #5B5F68">Sayı: hisseyi portföyüne yeni ekleyen fon adedi</span>
+</article>
+<article style="background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; gap: 8px">
+<h2 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 21px; font-weight: 500">Bu hafta takvim</h2>
+<a href="#takvim" style="margin-left: auto; font-size: 13px; font-weight: 600">Takvim</a>
+</div>
+<sc-for list="{{takvim}}" as="t" hint-placeholder-count="5">
+<div style="display: flex; gap: 12px; align-items: center; padding: 6px 0">
+<span style="width: 48px; flex-shrink: 0; text-align: center; border: 1px solid #E2DED3; border-radius: 8px; padding: 4px 0; display: flex; flex-direction: column"><span style="font-family: 'Fraunces', Georgia, serif; font-size: 18px; font-weight: 600; line-height: 1.1">{{t.gun}}</span><span style="font-size: 10px; font-weight: 600; letter-spacing: 0.8px; color: #5B5F68">{{t.ay}}</span></span>
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; font-weight: 600; color: {{t.renk}}">{{t.tur}}</span><span style="font-size: 14px">{{t.metin}}</span></span>
+</div>
+</sc-for>
+</article>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px">
+<article style="grid-column: span 8; background: #FFFFFF; border: 1px solid #E2DED3; border-radius: 16px; padding: 24px 28px; display: flex; gap: 28px; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 10px; width: 280px; flex-shrink: 0">
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 1.4px; color: #A15C07">ARENA · GÜNÜN GRAFİĞİ</span>
+<h2 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 500; line-height: 1.15">Grafik burada kesildi. Sence devamı?</h2>
+<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #5B5F68">Herkese aynı grafik, tek tahmin hakkı. Sonucunu paylaş, serini koru.</p>
+<div style="display: flex; gap: 8px; margin-top: 4px">
+<button type="button" style="height: 44px; flex-grow: 1; border-radius: 10px; border: 0; background: #0F7A4B; color: #FFFFFF; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer">Yükselir</button>
+<button type="button" style="height: 44px; flex-grow: 1; border-radius: 10px; border: 0; background: #B83227; color: #FFFFFF; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer">Düşer</button>
+</div>
+</div>
+<svg viewBox="0 0 520 200" width="520" height="200" role="img" aria-label="Kesilmiş fiyat grafiği" style="flex-grow: 1">
+<g stroke="#EEEBE3" stroke-width="1"><path d="M0 40H520M0 90H520M0 140H520"></path></g>
+<polyline fill="none" stroke="#3438C9" stroke-width="2.5" stroke-linejoin="round" points="0,150 22,142 40,146 60,128 80,132 100,112 118,120 136,96 156,104 176,82 194,90 214,70 232,86 250,78 268,98 288,92 306,74 324,80 340,66"></polyline>
+<path d="M340 12V192" stroke="#15171C" stroke-width="1.5" stroke-dasharray="5 5"></path>
+<rect x="352" y="12" width="168" height="180" rx="10" fill="#F4F2EC"></rect>
+<text x="436" y="108" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="44" fill="#9A9EA8">?</text>
+</svg>
+</article>
+<article style="grid-column: span 4; background: #E9E6FF; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 1.4px; color: #2B2FA8">ARAÇLAR</span>
+<h2 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 500; line-height: 1.2">Teminat simülatörü</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #3F434C">Hisseyi depolar arasında sürükle, özkaynak oranının nasıl değiştiğini canlı gör. "%10 düşerse çağrı gelir mi?" sorusuna 5 saniyede cevap.</p>
+<a href="#teminat" style="margin-top: auto; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #3438C9; color: #FFFFFF; font-weight: 600; font-size: 14px">Simülatörü aç</a>
+</article>
+</section>
+
+<footer style="font-size: 12px; line-height: 1.6; color: #5B5F68; border-top: 1px solid #E2DED3; padding-top: 16px">Öneriler aracı kurumların kamuya açık raporlarından derlenir, kaynak her satırda gösterilir. Burada yer alan bilgiler yatırım danışmanlığı kapsamında değildir. Fiyatlar 15 dakika gecikmelidir.</footer>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2320}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { filtre: 'Tümü' }; }
+  renderVals() {
+    var navItem = function (t, href, aktif, rozet) {
+      return {
+        t: t, href: href, rozet: rozet || '',
+        nokta: aktif ? '#E9A23B' : '#3A4152',
+        stil: 'display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 10px; border-radius: 8px; font-size: 14px; font-weight: ' + (aktif ? '600' : '500') + '; color: ' + (aktif ? '#FFFFFF' : '#C9CDD6') + '; background: ' + (aktif ? '#1F2636' : 'transparent')
+      };
+    };
+    var nav = [
+      { baslik: 'PİYASA', items: [navItem('Gösterge paneli', 'Main.dc.html', true), navItem('Öneriler', '#oneriler'), navItem('Hedef fiyatlar', 'Hisse.dc.html'), navItem('Öneri karnesi', '#karne')] },
+      { baslik: 'AKILLI PARA', items: [navItem('Fon radar', '#fon'), navItem('Takas ve AKD', '#takas', false, 'PRO'), navItem('Kripto balinalar', '#kripto')] },
+      { baslik: 'TAKVİM', items: [navItem('Takvim', '#takvim'), navItem('Halka arz', '#halkaarz'), navItem('SPK bülteni', '#spk')] },
+      { baslik: 'ARAÇLAR VE ARENA', items: [navItem('Teminat simülatörü', '#teminat'), navItem('Opsiyon lab', '#opsiyon'), navItem('Grafik oyunu', '#arena')] }
+    ];
+    var up = '#0F7A4B', down = '#B83227';
+    var serit = [
+      { ad: 'BIST 100', deger: '[değer]', degisim: '', renk: up },
+      { ad: 'USD/TRY', deger: '48,8865', degisim: '', renk: up },
+      { ad: 'EUR/TRY', deger: '55,6929', degisim: '', renk: up },
+      { ad: 'Gram altın', deger: '6.736,68', degisim: '', renk: up },
+      { ad: 'BTC/USD', deger: '84.052', degisim: '', renk: up },
+      { ad: 'Brent', deger: '[değer]', degisim: '', renk: down }
+    ];
+    var kpi = [
+      { ad: 'Bugünkü öneri', deger: '23', alt: '9 kurumdan', renk: '#15171C' },
+      { ad: 'Konsensüs hissesi', deger: '5', alt: 'en az 3 kurumun önerdiği', renk: '#3438C9' },
+      { ad: 'Hedefi yükselen', deger: '6', alt: 'son 24 saatte', renk: up },
+      { ad: 'Hedefi düşen', deger: '2', alt: 'son 24 saatte', renk: down }
+    ];
+    var konsensus = [
+      { tk: 'THYAO', ad: 'Türk Hava Yolları', n: 5, w: '100%', kurumlar: 'Garanti BBVA · Anadolu · Deniz · Tacirler · İntegral', pot: '+%18 ort. potansiyel' },
+      { tk: 'ASELS', ad: 'Aselsan', n: 4, w: '80%', kurumlar: 'Deniz · ICBC · Şeker · Bizim Menkul', pot: '+%14 ort. potansiyel' },
+      { tk: 'TUPRS', ad: 'Tüpraş', n: 4, w: '80%', kurumlar: 'Garanti BBVA · Vakıf · Tacirler · Anadolu', pot: '+%11 ort. potansiyel' },
+      { tk: 'BIMAS', ad: 'BİM Mağazalar', n: 3, w: '60%', kurumlar: 'ICBC · Deniz · İntegral', pot: '+%9 ort. potansiyel' },
+      { tk: 'SISE', ad: 'Şişecam', n: 3, w: '60%', kurumlar: 'Şeker · Vakıf · Bizim Menkul', pot: '+%12 ort. potansiyel' }
+    ];
+    var karne = [
+      { sira: '1', kurum: 'Tacirler', isabet: '%64', w: '64%' },
+      { sira: '2', kurum: 'Garanti BBVA', isabet: '%59', w: '59%' },
+      { sira: '3', kurum: 'Deniz', isabet: '%55', w: '55%' },
+      { sira: '4', kurum: 'İntegral', isabet: '%51', w: '51%' },
+      { sira: '5', kurum: 'Anadolu', isabet: '%47', w: '47%' }
+    ];
+    var self = this;
+    var filtre = ['Tümü', 'Günlük', 'Haftalık', 'Model portföy'].map(function (t) {
+      var on = self.state.filtre === t;
+      return {
+        t: t,
+        sec: function () { self.setState({ filtre: t }); },
+        stil: 'height: 36px; padding: 0 14px; border-radius: 18px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid ' + (on ? '#15171C' : '#E2DED3') + '; background: ' + (on ? '#15171C' : '#FFFFFF') + '; color: ' + (on ? '#FFFFFF' : '#15171C')
+      };
+    });
+    var satirlar = [
+      ['Garanti BBVA', 'THYAO', 'Günlük', '[giriş]', '[hedef]', '[stop]', '+%6,2'],
+      ['Anadolu', 'TUPRS', 'Günlük', '[giriş]', '[hedef]', '[stop]', '+%4,8'],
+      ['Deniz', 'ASELS', 'Model portföy', '[giriş]', '[hedef]', '—', '+%21,0'],
+      ['ICBC', 'BIMAS', 'Model portföy', '[giriş]', '[hedef]', '—', '+%15,4'],
+      ['Tacirler', 'THYAO', 'Günlük', '[giriş]', '[hedef]', '[stop]', '+%5,5'],
+      ['Şeker', 'SISE', 'Haftalık', '[giriş]', '[hedef]', '[stop]', '+%8,1'],
+      ['Vakıf', 'TUPRS', 'Takip listesi', '[giriş]', '[hedef]', '—', '+%10,3']
+    ].map(function (r, i) {
+      return { kurum: r[0], hisse: r[1], tur: r[2], giris: r[3], hedef: r[4], stop: r[5], pot: r[6], zemin: i % 2 ? '#FAF9F5' : '#FFFFFF' };
+    });
+    var revizyon = [
+      { tk: 'ASELS', kurum: 'Deniz Yatırım', eski: '[eski]', yeni: '[yeni]', ok: '▲', renk: up, zemin: '#E3F2EA' },
+      { tk: 'FROTO', kurum: 'ICBC Yatırım', eski: '[eski]', yeni: '[yeni]', ok: '▲', renk: up, zemin: '#E3F2EA' },
+      { tk: 'PGSUS', kurum: 'Garanti BBVA', eski: '[eski]', yeni: '[yeni]', ok: '▲', renk: up, zemin: '#E3F2EA' },
+      { tk: 'EREGL', kurum: 'Tacirler', eski: '[eski]', yeni: '[yeni]', ok: '▼', renk: down, zemin: '#F8E4E2' },
+      { tk: 'AKBNK', kurum: 'Şeker Yatırım', eski: '[eski]', yeni: '[yeni]', ok: '▼', renk: down, zemin: '#F8E4E2' }
+    ];
+    var fonlar = [
+      { tk: 'THYAO', w: '92%', fon: '11 fon' },
+      { tk: 'KCHOL', w: '76%', fon: '9 fon' },
+      { tk: 'ASELS', w: '66%', fon: '8 fon' },
+      { tk: 'YKBNK', w: '50%', fon: '6 fon' },
+      { tk: 'MGROS', w: '42%', fon: '5 fon' }
+    ];
+    var takvim = [
+      { gun: '29', ay: 'EYL', tur: 'TEMETTÜ', renk: up, metin: '[Şirket] net [tutar] temettü' },
+      { gun: '30', ay: 'EYL', tur: 'HALKA ARZ', renk: '#3438C9', metin: '[Şirket] talep toplama başlıyor' },
+      { gun: '01', ay: 'EKİ', tur: 'BEDELSİZ', renk: '#A15C07', metin: '[Şirket] %[oran] bedelsiz' },
+      { gun: '02', ay: 'EKİ', tur: 'SPK BÜLTENİ', renk: '#5B5F68', metin: 'Haftalık bülten yayında' }
+    ];
+    return { nav: nav, serit: serit, kpi: kpi, konsensus: konsensus, karne: karne, filtre: filtre, satirlar: satirlar, revizyon: revizyon, fonlar: fonlar, takvim: takvim };
+  }
+}
+</script>
+</body>
+</html>

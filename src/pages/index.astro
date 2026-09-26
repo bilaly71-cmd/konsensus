@@ -1,0 +1,145 @@
+---
+const yil = new Date().getFullYear();
+---
+
+<html lang="tr">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Konsensüs — BIST öneri ve hedef fiyat platformu</title>
+		<meta name="description" content="Kurumların BIST önerileri ve hedef fiyatları tek yerde. Yakında." />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<main>
+			<div class="marka">
+				<span class="ad">Konsensüs</span>
+				<span class="rozet">BIST</span>
+			</div>
+
+			<h1>Kurumların BIST önerileri ve hedef fiyatları, tek yerde.</h1>
+			<p class="aciklama">
+				Aracı kurumların kamuya açık raporlarından öneriler, konsensüs hedef fiyatlar ve
+				öneri karneleri. Yapım aşamasındayız — çok yakında yayında.
+			</p>
+
+			<div class="durum">
+				<span class="nokta"></span>
+				Şu anda hazırlanıyor
+			</div>
+		</main>
+
+		<footer>
+			<p>
+				Burada yer alan bilgiler yatırım danışmanlığı kapsamında değildir. Fiyatlar 15 dakika
+				gecikmelidir.
+			</p>
+			<p>&copy; {yil} Konsensüs</p>
+		</footer>
+	</body>
+</html>
+
+<style>
+	:global(html) {
+		background: #f4f2ec;
+	}
+	:global(body) {
+		margin: 0;
+		min-height: 100dvh;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		background: #f4f2ec;
+		color: #15171c;
+		font-family: 'IBM Plex Sans', system-ui, sans-serif;
+		font-variant-numeric: tabular-nums;
+	}
+
+	main {
+		max-width: 640px;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 48px 24px;
+		text-align: center;
+	}
+
+	.marka {
+		display: flex;
+		align-items: baseline;
+		justify-content: center;
+		gap: 8px;
+		margin-bottom: 40px;
+	}
+
+	.ad {
+		font-family: 'Fraunces', Georgia, serif;
+		font-size: 32px;
+		font-weight: 600;
+		letter-spacing: -0.3px;
+		color: #15171c;
+	}
+
+	.rozet {
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 1px;
+		color: #a15c07;
+	}
+
+	h1 {
+		font-family: 'Fraunces', Georgia, serif;
+		font-weight: 600;
+		font-size: clamp(28px, 5vw, 40px);
+		line-height: 1.2;
+		margin: 0 0 20px;
+		color: #15171c;
+	}
+
+	.aciklama {
+		font-size: 17px;
+		line-height: 1.6;
+		color: #5b5f68;
+		margin: 0 0 36px;
+	}
+
+	.durum {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 18px;
+		background: #ffffff;
+		border: 1px solid #e2ded3;
+		border-radius: 999px;
+		font-size: 14px;
+		font-weight: 500;
+		color: #15171c;
+	}
+
+	.nokta {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #e9a23b;
+	}
+
+	footer {
+		max-width: 640px;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 0 24px 32px;
+		text-align: center;
+	}
+
+	footer p {
+		font-size: 12px;
+		line-height: 1.6;
+		color: #5b5f68;
+		margin: 0 0 4px;
+	}
+</style>
