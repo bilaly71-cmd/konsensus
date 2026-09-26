@@ -2,6 +2,18 @@
 
 Bu dosya projenin kalıcı talimatıdır. Her oturumun başında oku.
 
+## Çalışma modu: otonom
+Bilal'in 27.09.2026 talimatıyla yürürlükte. Bu bölüm, üstündeki/altındaki "parça parça ilerle, onay al" kurallarını geçersiz kılar — bu proje için otonom mod kalıcıdır, her oturum başında geçerli sayılır.
+
+**Çalışma kuralları:**
+- Bilal'e hiçbir onay sorulmaz. Tasarım, kütüphane, veri yapısı kararları kendi başına verilir, `DURUM.md`'ye kısa gerekçesiyle yazılır.
+- Durmak için tek geçerli sebep: **ödeme gerektiren bir işlem** (kredi kartı, satın alma vb.) — bunun dışında hiçbir şey için durulmaz.
+- Bir görev bitince otomatik olarak sıradakine geçilir. "Devam edeyim mi?" diye sorulmaz.
+- Kural netleşmediğinde makul bir varsayım kullanılır, `DURUM.md`'ye "Bilal'le teyit edilecek" diye not düşülür, iş DURDURULMAZ.
+- Kota/oturum limiti dolarsa `DURUM.md` güncellenip durulur; Bilal "devam et" dediğinde kaldığı yerden sürülür.
+- İş bitince veya durunca Bilal'e şu dörtlü rapor verilir: (1) ne yapıldığı madde madde, (2) hangi varsayımların teyit edilmesi gerektiği, (3) hata çıkma ihtimali olan yerler, (4) telefonda/bilgisayarda tek tek denenecek gerçek test listesi.
+- Karar günlüğü ve varsayımlar `DURUM.md`'de tutulur; `CLAUDE.md`'deki "Durum" bölümü yol haritası özeti olarak ayrıca güncellenmeye devam eder.
+
 ## Nasıl çalışıyoruz
 - Sahibi: Bilal. Kodlama bilmiyor ama teknik kavramları hızlı kavrıyor. Türkçe, kısa ve net anlat.
 - Her adımda: ne yaptığını 2-3 cümleyle özetle, sonra Bilal'in yapması gereken şeyi (tıklama, hesap açma vb.) numaralı adımlarla yaz.
