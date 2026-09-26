@@ -107,14 +107,14 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 			<Kart baslik="Günün konsensüsü" altBaslik="En çok kurumun aynı anda önerdiği hisseler">
 				<div class="konsensus-listesi">
 					{konsensusListesi.map((k) => (
-						<div class="konsensus-satir">
+						<a href={`/hisse/${k.hisse}`} class="konsensus-satir">
 							<span class="konsensus-hisse">{k.hisse}</span>
 							<span class="konsensus-cubuk">
 								<span class="konsensus-dolu" style={`width:${Math.round((k.n / enCokKurum) * 100)}%`} />
 							</span>
 							<span class="konsensus-kurumlar">{k.kurumlar.join(' · ')}</span>
 							<span class="konsensus-n">{k.n} kurum</span>
-						</div>
+						</a>
 					))}
 				</div>
 			</Kart>

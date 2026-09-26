@@ -1,0 +1,310 @@
+---
+export const prerender = false;
+
+import AnaLayout from '../../layouts/AnaLayout.astro';
+import Kart from '../../components/Kart.astro';
+import Rozet from '../../components/Rozet.astro';
+import GrafikKutusu from '../../components/GrafikKutusu.astro';
+import { getDb } from '../../lib/db';
+import { hisseyeGoreOneriler, sayiyaCevir } from '../../lib/oneriler';
+
+const kod = (Astro.params.kod || '').toUpperCase();
+const db = getDb();
+const oneriler = await hisseyeGoreOneriler(db, kod);
+
+const hedefler = oneriler.map((o) => sayiyaCevir(o.hedef)).filter((n): n is number => n !== null);
+const enDusuk = hedefler.length ? Math.min(...hedefler) : null;
+const enYuksek = hedefler.length ? Math.max(...hedefler) : null;
+const ortalama = hedefler.length ? hedefler.reduce((a, b) => a + b, 0) / hedefler.length : null;
+const kurumlar = [...new Set(oneriler.map((o) => o.kurum))];
+
+const tavsiyeDagilimi = new Map<string, number>();
+for (const o of oneriler) {
+	tavsiyeDagilimi.set(o.tur, (tavsiyeDagilimi.get(o.tur) || 0) + 1);
+}
+
+function tl(n: number | null): string {
+	if (n === null) return '—';
+	return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+---
+
+<AnaLayout baslik={kod} aciklama={`${kod} için kurumların hedef fiyatları ve önerileri.`}>
+	<div class="ust">
+		<span class="onculler"><a href="/">Gösterge paneli</a> / <a href="/hedef-fiyatlar">Hedef fiyatlar</a> / {kod}</span>
+	</div>
+
+	<div class="baslik-satir">
+		<span class="hisse-rozet">{kod.slice(0, 3)}</span>
+		<div class="baslik-metin">
+			<h1>{kod}</h1>
+			<span class="alt-baslik">{kurumlar.length} kurum kapsıyor · BIST</span>
+		</div>
+		{oneriler.length > 0 && <Rozet tur="marka">{oneriler.length} öneri</Rozet>}
+	</div>
+
+	{
+		oneriler.length === 0 ? (
+			<Kart>
+				<p class="bos">
+					{kod} için henüz öneri girilmedi. <a href="/panel">Panel</a>'den ekleyebilirsin.
+				</p>
+			</Kart>
+		) : (
+			<Fragment>
+				<Kart baslik="Fiyat ve hedefler" altBaslik="Grafik yakında (TradingView Lightweight Charts)">
+					<GrafikKutusu baslik={`${kod} fiyat grafiği`} />
+				</Kart>
+
+				<section class="izgara">
+					<Kart baslik="Konsensüs" class="genis">
+						<div class="hedef-kpiler">
+							<div class="hedef-kpi">
+								<span>En yüksek hedef</span>
+								<strong>{tl(enYuksek)}</strong>
+							</div>
+							<div class="hedef-kpi vurgu">
+								<span>Ortalama hedef</span>
+								<strong>{tl(ortalama)}</strong>
+							</div>
+							<div class="hedef-kpi">
+								<span>En düşük hedef</span>
+								<strong>{tl(enDusuk)}</strong>
+							</div>
+						</div>
+					</Kart>
+					<Kart baslik="Öneri türleri" class="dar">
+						<div class="tur-listesi">
+							{[...tavsiyeDagilimi.entries()].map(([tur, n]) => (
+								<div class="tur-satir">
+									<span>{tur}</span>
+									<strong>{n}</strong>
+								</div>
+							))}
+						</div>
+					</Kart>
+				</section>
+
+				<Kart baslik="Kurum hedefleri" altBaslik="Kaynak her satırda">
+					<div class="tablo-sarici">
+						<table>
+							<thead>
+								<tr>
+									<th>Kurum</th>
+									<th>Tavsiye</th>
+									<th class="sag">Giriş</th>
+									<th class="sag">Hedef</th>
+									<th class="sag">Stop</th>
+									<th class="sag">Potansiyel</th>
+									<th>Tarih</th>
+								</tr>
+							</thead>
+							<tbody>
+								{oneriler.map((o) => (
+									<tr>
+										<td data-etiket="Kurum">{o.kurum}</td>
+										<td data-etiket="Tavsiye">{o.tur}</td>
+										<td class="sag" data-etiket="Giriş">
+											{o.giris ?? '—'}
+										</td>
+										<td class="sag kalin" data-etiket="Hedef">
+											{o.hedef}
+										</td>
+										<td class="sag soluk" data-etiket="Stop">
+											{o.stop ?? '—'}
+										</td>
+										<td class="sag" data-etiket="Potansiyel">
+											{o.potansiyel ?? '—'}
+										</td>
+										<td class="soluk" data-etiket="Tarih">
+											{o.tarih}
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				</Kart>
+			</Fragment>
+		)
+	}
+</AnaLayout>
+
+<style>
+	.ust {
+		font-size: 13px;
+		color: var(--metin-ikincil);
+	}
+	.baslik-satir {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+	}
+	.hisse-rozet {
+		width: 52px;
+		height: 52px;
+		border-radius: 12px;
+		background: var(--koyu);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-family: var(--font-mono);
+		font-weight: 600;
+		font-size: 15px;
+		flex-shrink: 0;
+	}
+	.baslik-metin {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	h1 {
+		font-family: var(--font-mono);
+		font-size: 30px;
+		font-weight: 500;
+	}
+	.alt-baslik {
+		font-size: 13px;
+		color: var(--metin-ikincil);
+	}
+	.bos {
+		margin: 0;
+		font-size: 14px;
+		color: var(--metin-ikincil);
+		padding: 24px;
+		text-align: center;
+	}
+
+	.izgara {
+		display: grid;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		gap: 24px;
+	}
+	.izgara > :global(.genis) {
+		grid-column: span 7;
+	}
+	.izgara > :global(.dar) {
+		grid-column: span 5;
+	}
+
+	.hedef-kpiler {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 16px;
+	}
+	.hedef-kpi {
+		background: #faf9f5;
+		border: 1px solid var(--kenarlik);
+		border-radius: 12px;
+		padding: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		font-size: 13px;
+		color: var(--metin-ikincil);
+	}
+	.hedef-kpi.vurgu {
+		background: #eef0ff;
+		border-color: #d6d9ff;
+	}
+	.hedef-kpi strong {
+		font-family: var(--font-baslik);
+		font-size: 26px;
+		color: var(--metin);
+	}
+
+	.tur-listesi {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+	.tur-satir {
+		display: flex;
+		justify-content: space-between;
+		font-size: 14px;
+		padding: 6px 0;
+		border-bottom: 1px solid var(--cizgi);
+	}
+	.tur-satir:last-child {
+		border-bottom: 0;
+	}
+
+	.tablo-sarici {
+		overflow-x: auto;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+	th {
+		text-align: left;
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.6px;
+		color: var(--metin-ikincil);
+		padding: 0 12px 10px;
+		border-bottom: 1px solid var(--cizgi);
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+	th.sag {
+		text-align: right;
+	}
+	td {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--cizgi);
+		white-space: nowrap;
+	}
+	td.sag {
+		text-align: right;
+	}
+	td.kalin {
+		font-weight: 600;
+	}
+	td.soluk {
+		color: var(--metin-ikincil);
+	}
+
+	@media (max-width: 899px) {
+		.izgara {
+			display: flex;
+			flex-direction: column;
+		}
+		.hedef-kpiler {
+			grid-template-columns: 1fr;
+		}
+		table,
+		thead,
+		tbody,
+		tr,
+		td {
+			display: block;
+		}
+		thead {
+			display: none;
+		}
+		tbody tr {
+			border: 1px solid var(--kenarlik);
+			border-radius: 14px;
+			padding: 12px 14px;
+			margin-bottom: 10px;
+		}
+		td {
+			border: 0;
+			padding: 4px 0;
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			text-align: right;
+		}
+		td::before {
+			content: attr(data-etiket);
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--metin-ikincil);
+			text-align: left;
+		}
+	}
+</style>

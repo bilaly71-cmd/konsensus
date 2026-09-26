@@ -116,7 +116,7 @@ const oneriKolonlari = [
 				) : (
 					<div class="konsensus-listesi">
 						{konsensusListesi.map((k) => (
-							<a href="/hedef-fiyatlar" class="konsensus-satir">
+							<a href={`/hisse/${k.hisse}`} class="konsensus-satir">
 								<span class="konsensus-hisse">{k.hisse}</span>
 								<span class="konsensus-cubuk">
 									<span class="konsensus-dolu" style={`width:${Math.round((k.n / enCokKurum) * 100)}%`} />

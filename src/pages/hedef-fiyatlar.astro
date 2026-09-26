@@ -1,14 +1,160 @@
 ---
-import BosSayfa from '../components/BosSayfa.astro';
+export const prerender = false;
+
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import { getDb } from '../lib/db';
+import { tumOneriler, hisseleriOzetle } from '../lib/oneriler';
+
+const db = getDb();
+const oneriler = await tumOneriler(db);
+const ozet = hisseleriOzetle(oneriler);
+
+function tl(n: number | null): string {
+	if (n === null) return '—';
+	return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 ---
 
-<BosSayfa
-	baslik="Hedef fiyatlar"
-	grup="PİYASA"
-	aciklama="Kurumların hisse bazında hedef fiyatları ve konsensüs ortalaması."
-	gelecekler={[
-		'Hisse başına en yüksek, ortalama ve en düşük hedef',
-		'Son hedef revizyonları (yükselen / düşen)',
-		'Her hisse için ayrı sayfa ve fiyat grafiği',
-	]}
-/>
+<AnaLayout baslik="Hedef fiyatlar" aciklama="Kurumların hisse bazında hedef fiyatları ve konsensüs ortalaması.">
+	<SayfaBasligi
+		baslik="Hedef fiyatlar"
+		ust="PİYASA"
+		aciklama="Her hisse için kurumların verdiği en düşük, ortalama ve en yüksek hedef fiyat."
+	>
+		<Rozet>{ozet.length} hisse</Rozet>
+	</SayfaBasligi>
+
+	<Kart baslik="Tüm hisseler">
+		{
+			ozet.length === 0 ? (
+				<p class="bos">Henüz öneri girilmedi. Panelden ekleyince burada listelenecek.</p>
+			) : (
+				<div class="tablo-sarici">
+					<table>
+						<thead>
+							<tr>
+								<th>Hisse</th>
+								<th>Kurum</th>
+								<th>Öneri</th>
+								<th class="sag">En düşük hedef</th>
+								<th class="sag">Ortalama hedef</th>
+								<th class="sag">En yüksek hedef</th>
+								<th>Son</th>
+							</tr>
+						</thead>
+						<tbody>
+							{ozet.map((o) => (
+								<tr>
+									<td data-etiket="Hisse">
+										<a href={`/hisse/${o.hisse}`} class="hisse-link">
+											{o.hisse}
+										</a>
+									</td>
+									<td data-etiket="Kurum">{o.kurumSayisi}</td>
+									<td data-etiket="Öneri">{o.oneriSayisi}</td>
+									<td class="sag" data-etiket="En düşük hedef">{tl(o.enDusukHedef)}</td>
+									<td class="sag kalin" data-etiket="Ortalama hedef">{tl(o.ortalamaHedef)}</td>
+									<td class="sag" data-etiket="En yüksek hedef">{tl(o.enYuksekHedef)}</td>
+									<td class="soluk" data-etiket="Son">{o.sonTarih}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			)
+		}
+	</Kart>
+</AnaLayout>
+
+<style>
+	.bos {
+		margin: 0;
+		font-size: 14px;
+		color: var(--metin-ikincil);
+		padding: 24px;
+		text-align: center;
+		background: #faf9f5;
+		border-radius: 10px;
+	}
+	.tablo-sarici {
+		overflow-x: auto;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+	th {
+		text-align: left;
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.6px;
+		color: var(--metin-ikincil);
+		padding: 0 12px 10px;
+		border-bottom: 1px solid var(--cizgi);
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+	th.sag {
+		text-align: right;
+	}
+	td {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--cizgi);
+		white-space: nowrap;
+	}
+	td.sag {
+		text-align: right;
+	}
+	td.kalin {
+		font-weight: 600;
+	}
+	td.soluk {
+		color: var(--metin-ikincil);
+	}
+	.hisse-link {
+		font-family: var(--font-mono);
+		font-weight: 500;
+		color: var(--metin);
+	}
+	.hisse-link:hover {
+		color: var(--marka);
+	}
+
+	@media (max-width: 899px) {
+		table,
+		thead,
+		tbody,
+		tr,
+		td {
+			display: block;
+		}
+		thead {
+			display: none;
+		}
+		tbody tr {
+			border: 1px solid var(--kenarlik);
+			border-radius: 14px;
+			padding: 12px 14px;
+			margin-bottom: 10px;
+		}
+		td {
+			border: 0;
+			padding: 4px 0;
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			text-align: right;
+		}
+		td::before {
+			content: attr(data-etiket);
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--metin-ikincil);
+			text-align: left;
+		}
+	}
+</style>
