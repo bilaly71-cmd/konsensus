@@ -3,171 +3,464 @@ import AnaLayout from '../layouts/AnaLayout.astro';
 import SayfaBasligi from '../components/SayfaBasligi.astro';
 import Kart from '../components/Kart.astro';
 import Rozet from '../components/Rozet.astro';
+import { HISSE_GRUPLARI } from '../lib/teminat';
 
-// Tipik BIST kredili menkul kıymet işlemi kuralları (SPK tebliği bazlı).
-// Aracı kurumdan kuruma küçük farklar olabilir; Bilal isterse bu sayılar değişir.
-const BASLANGIC_ORAN = 50; // İlk işlemde istenen en düşük özkaynak oranı (%)
-const SURDURME_ORAN = 35; // Bu oranın altına inince teminat tamamlama çağrısı gelir (%)
+const gruplar = Object.entries(HISSE_GRUPLARI);
 ---
 
-<AnaLayout baslik="Teminat simülatörü">
+<AnaLayout
+	baslik="Teminat simülatörü"
+	aciklama="Kredili işlemde ve açığa satışta hisse grubuna göre teminat oranın nasıl değiştiğini gör."
+>
 	<SayfaBasligi
 		baslik="Teminat simülatörü"
 		ust="ARAÇLAR VE ARENA"
-		aciklama="Kredili işlemde hisse fiyatı düşerse özkaynak oranının nasıl değiştiğini gör. Tipik BIST kuralları kullanılır; kurumuna göre rakamlar değişebilir."
+		aciklama="Hisse grubuna (A/B/C/D) göre farklı teminat kuralları; kredili alım ve açığa satış için ayrı hesaplama."
 	>
 		<Rozet tur="ornek">Örnek hesaplama</Rozet>
 	</SayfaBasligi>
 
-	<div class="izgara">
-		<Kart baslik="Portföyünü gir" class="genis">
-			<div class="alan">
-				<label>
-					<span>Toplam portföy değeri (₺)</span>
-					<input type="number" id="portfoy" min="0" step="1000" value="100000" inputmode="decimal" />
-				</label>
-				<label>
-					<span>Kullandığın kredi / borç (₺)</span>
-					<input type="number" id="kredi" min="0" step="1000" value="40000" inputmode="decimal" />
-				</label>
-			</div>
-			<div class="ozet-satir">
-				<span>Özkaynağın</span>
-				<strong id="ozkaynak">—</strong>
-			</div>
-			<div class="ozet-satir">
-				<span>Şu anki özkaynak oranın</span>
-				<strong id="mevcutOran">—</strong>
-			</div>
-		</Kart>
+	<Kart etiket="EŞİKLER" baslik="Hisse grupları nedir?" altBaslik="Tipik değerler — kurumdan kuruma değişebilir">
+		<div class="grup-izgara">
+			{
+				gruplar.map(([kod, g]) => (
+					<div class="grup-kart">
+						<div class="grup-ust">
+							<span class="grup-kod">{kod}</span>
+							<span class="grup-ad">{g.ad}</span>
+						</div>
+						<p class="grup-aciklama">{g.aciklama}</p>
+						{g.krediyeKapali ? (
+							<p class="grup-kapali">Kredili işleme ve açığa satışa kapalı</p>
+						) : (
+							<dl>
+								<div>
+									<dt>Teminata kabul</dt>
+									<dd>%{Math.round(g.teminataKabulOrani * 100)}</dd>
+								</div>
+								<div>
+									<dt>Başlangıç oranı</dt>
+									<dd>%{g.baslangicOrani}</dd>
+								</div>
+								<div>
+									<dt>Sürdürme oranı</dt>
+									<dd>%{g.surdurmeOrani}</dd>
+								</div>
+								{g.acigaSatisaKapali && <p class="grup-kapali">Açığa satışa kapalı</p>}
+							</dl>
+						)}
+					</div>
+				))
+			}
+		</div>
+	</Kart>
 
-		<Kart etiket="EŞİKLER" baslik="Tipik kurallar" altBaslik="Kurumdan kuruma değişebilir" class="dar">
-			<div class="esik-satir">
-				<span class="nokta marka" />
-				<span class="esik-metin">Başlangıç oranı<br /><span class="soluk">İşleme başlarken istenen en düşük oran</span></span>
-				<strong>%{BASLANGIC_ORAN}</strong>
+	<div class="sekme-cubugu" role="tablist">
+		<button type="button" class="sekme aktif" data-sekme="kredili" role="tab" aria-selected="true">Kredili alım</button>
+		<button type="button" class="sekme" data-sekme="acik" role="tab" aria-selected="false">Açığa satış</button>
+	</div>
+
+	<div data-panel="kredili">
+		<div class="izgara">
+			<Kart baslik="Depoların (hesapların)ı gir" class="genis">
+				<div class="alan">
+					<label>
+						<span>Serbest depo — nakit (₺)</span>
+						<input type="number" id="serbestDepo" min="0" step="1000" value="20000" />
+					</label>
+					<label>
+						<span>Ek teminat deposu (₺)</span>
+						<input type="number" id="teminatDeposu" min="0" step="1000" value="0" />
+					</label>
+					<label>
+						<span>Ek teminatın hisse grubu</span>
+						<select id="teminatGrubu">
+							<option value="A">A Grubu</option>
+							<option value="B">B Grubu</option>
+							<option value="C">C Grubu</option>
+						</select>
+					</label>
+					<label>
+						<span>Kredili alınan/alınacak hisse değeri (₺)</span>
+						<input type="number" id="krediliDepo" min="0" step="1000" value="80000" />
+					</label>
+					<label>
+						<span>Bu hissenin grubu</span>
+						<select id="krediliGrubu">
+							<option value="A">A Grubu</option>
+							<option value="B">B Grubu</option>
+							<option value="C">C Grubu</option>
+							<option value="D">D Grubu (kredili kapalı)</option>
+						</select>
+					</label>
+					<label>
+						<span>Kullandığın kredi / borç (₺)</span>
+						<input type="number" id="kredi" min="0" step="1000" value="40000" />
+					</label>
+				</div>
+				<div class="ozet-satir">
+					<span>Toplam portföy değeri</span>
+					<strong id="k_toplamPortfoy">—</strong>
+				</div>
+				<div class="ozet-satir">
+					<span>Özkaynağın (haircut uygulanmış)</span>
+					<strong id="k_ozkaynak">—</strong>
+				</div>
+				<div class="ozet-satir">
+					<span>Şu anki özkaynak oranın</span>
+					<strong id="k_mevcutOran">—</strong>
+				</div>
+			</Kart>
+
+			<Kart baslik="Bu işlem için eşikler" class="dar">
+				<div class="esik-satir">
+					<span class="esik-metin">Gerekli başlangıç oranı<br /><span class="soluk">Seçtiğin gruba göre</span></span>
+					<strong id="k_baslangicEsik">—</strong>
+				</div>
+				<div class="esik-satir">
+					<span class="esik-metin">Sürdürme / çağrı oranı<br /><span class="soluk">Altına inince çağrı gelir</span></span>
+					<strong id="k_surdurmeEsik">—</strong>
+				</div>
+				<p class="not" id="k_kapaliUyari" style="display:none">
+					Seçtiğin grup kredili işleme kapalı — bu hisseyle kredi kullanamazsın.
+				</p>
+			</Kart>
+		</div>
+
+		<Kart baslik="Fiyat senaryosu" altBaslik="Kredili aldığın hisse şu kadar değişirse">
+			<div class="slider-sarici">
+				<input type="range" id="k_slider" min="-90" max="30" step="1" value="0" />
+				<div class="slider-etiketler">
+					<span>-%90</span>
+					<span id="k_sliderDeger" class="slider-deger">%0</span>
+					<span>+%30</span>
+				</div>
 			</div>
-			<div class="esik-satir">
-				<span class="nokta kehribar" />
-				<span class="esik-metin">Sürdürme / çağrı oranı<br /><span class="soluk">Altına inince teminat tamamlama çağrısı gelir</span></span>
-				<strong>%{SURDURME_ORAN}</strong>
+			<div class="sonuc-izgara">
+				<div class="sonuc">
+					<span>Yeni özkaynağın</span>
+					<strong id="k_yeniOzkaynak">—</strong>
+				</div>
+				<div class="sonuc">
+					<span>Yeni özkaynak oranın</span>
+					<strong id="k_yeniOran">—</strong>
+				</div>
 			</div>
-			<p class="not">
-				Çağrıya süresinde yanıt verilmezse ve oran düşmeye devam ederse aracı kurum pozisyonu
-				kısmen veya tamamen zorunlu olarak kapatabilir.
-			</p>
+			<div id="k_durum" class="durum-kutu">
+				<span id="k_durumMetin">Rakamları gir, kaydırıcıyı hareket ettir.</span>
+			</div>
+			<p class="esik-hesap" id="k_esikHesap"></p>
 		</Kart>
 	</div>
 
-	<Kart baslik="Fiyat senaryosu" altBaslik="Portföyündeki hisseler şu kadar değişirse">
-		<div class="slider-sarici">
-			<input type="range" id="slider" min="-60" max="20" step="1" value="0" />
-			<div class="slider-etiketler">
-				<span>-%60</span>
-				<span id="sliderDeger" class="slider-deger">%0</span>
-				<span>+%20</span>
-			</div>
+	<div data-panel="acik" hidden>
+		<div class="izgara">
+			<Kart baslik="Açık pozisyonunu gir" class="genis">
+				<div class="alan">
+					<label>
+						<span>Açığa sattığın tutar (₺)</span>
+						<input type="number" id="satisTutari" min="0" step="1000" value="50000" />
+					</label>
+					<label>
+						<span>Bloke edilen teminat (₺)</span>
+						<input type="number" id="blokeTeminat" min="0" step="1000" value="25000" />
+					</label>
+				</div>
+				<div class="ozet-satir">
+					<span>Teminat oranın (satış tutarına göre)</span>
+					<strong id="a_baslangicOran">—</strong>
+				</div>
+				<p class="not">
+					Açığa satışta risk fiyat <strong>yükselirse</strong> ortaya çıkar (tersi mantık): elindeki
+					hisseyi değil, borç aldığın hisseyi satmışsındır, geri almak zorundasın.
+				</p>
+			</Kart>
+			<Kart baslik="Eşikler" class="dar">
+				<div class="esik-satir">
+					<span class="esik-metin">Başlangıç teminat oranı<br /><span class="soluk">Tipik BIST kuralı</span></span>
+					<strong id="a_baslangicEsik">—</strong>
+				</div>
+				<div class="esik-satir">
+					<span class="esik-metin">Sürdürme / çağrı oranı<br /><span class="soluk">Altına inince çağrı gelir</span></span>
+					<strong id="a_surdurmeEsik">—</strong>
+				</div>
+			</Kart>
 		</div>
 
-		<div class="sonuc-izgara">
-			<div class="sonuc">
-				<span>Yeni portföy değeri</span>
-				<strong id="yeniPortfoy">—</strong>
+		<Kart baslik="Fiyat senaryosu" altBaslik="Açığa sattığın hisse şu kadar yükselirse/düşerse">
+			<div class="slider-sarici">
+				<input type="range" id="a_slider" min="-30" max="150" step="1" value="0" />
+				<div class="slider-etiketler">
+					<span>-%30</span>
+					<span id="a_sliderDeger" class="slider-deger">%0</span>
+					<span>+%150</span>
+				</div>
 			</div>
-			<div class="sonuc">
-				<span>Yeni özkaynağın</span>
-				<strong id="yeniOzkaynak">—</strong>
+			<div class="sonuc-izgara">
+				<div class="sonuc">
+					<span>Güncel pozisyon değeri</span>
+					<strong id="a_guncelDeger">—</strong>
+				</div>
+				<div class="sonuc">
+					<span>Kâr / zarar</span>
+					<strong id="a_zarar">—</strong>
+				</div>
+				<div class="sonuc">
+					<span>Kalan teminat oranı</span>
+					<strong id="a_yeniOran">—</strong>
+				</div>
 			</div>
-			<div class="sonuc">
-				<span>Yeni özkaynak oranın</span>
-				<strong id="yeniOran">—</strong>
+			<div id="a_durum" class="durum-kutu">
+				<span id="a_durumMetin">Rakamları gir, kaydırıcıyı hareket ettir.</span>
 			</div>
-		</div>
-
-		<div id="durum" class="durum-kutu">
-			<span id="durumMetin">Rakamları gir, kaydırıcıyı hareket ettir.</span>
-		</div>
-
-		<p class="esik-hesap" id="esikHesap"></p>
-	</Kart>
+			<p class="esik-hesap" id="a_esikHesap"></p>
+		</Kart>
+	</div>
 
 	<script>
-		const BASLANGIC_ORAN = 50;
-		const SURDURME_ORAN = 35;
-
-		const portfoyEl = document.getElementById('portfoy') as HTMLInputElement;
-		const krediEl = document.getElementById('kredi') as HTMLInputElement;
-		const sliderEl = document.getElementById('slider') as HTMLInputElement;
-
-		const ozkaynakEl = document.getElementById('ozkaynak')!;
-		const mevcutOranEl = document.getElementById('mevcutOran')!;
-		const sliderDegerEl = document.getElementById('sliderDeger')!;
-		const yeniPortfoyEl = document.getElementById('yeniPortfoy')!;
-		const yeniOzkaynakEl = document.getElementById('yeniOzkaynak')!;
-		const yeniOranEl = document.getElementById('yeniOran')!;
-		const durumKutuEl = document.getElementById('durum')!;
-		const durumMetinEl = document.getElementById('durumMetin')!;
-		const esikHesapEl = document.getElementById('esikHesap')!;
+		import {
+			HISSE_GRUPLARI,
+			ucDepoHesapla,
+			ucDepoSenaryo,
+			esikDegisimBul,
+			acikPozisyonHesapla,
+			acikPozisyonEsikBul,
+			ACIGA_SATIS,
+			type HisseGrubu,
+		} from '../lib/teminat';
 
 		const tl = (n: number) =>
 			new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
 		const yuzde = (n: number) => `%${n.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}`;
 
-		function hesapla() {
-			const portfoy = Math.max(0, Number(portfoyEl.value) || 0);
-			const kredi = Math.max(0, Number(krediEl.value) || 0);
-			const degisimYuzde = Number(sliderEl.value);
+		// --- Sekme geçişi ---
+		const sekmeler = document.querySelectorAll<HTMLButtonElement>('.sekme');
+		const paneller = document.querySelectorAll<HTMLElement>('[data-panel]');
+		sekmeler.forEach((s) =>
+			s.addEventListener('click', () => {
+				sekmeler.forEach((x) => {
+					x.classList.remove('aktif');
+					x.setAttribute('aria-selected', 'false');
+				});
+				s.classList.add('aktif');
+				s.setAttribute('aria-selected', 'true');
+				paneller.forEach((p) => (p.hidden = p.dataset.panel !== s.dataset.sekme));
+			}),
+		);
 
-			sliderDegerEl.textContent = `${degisimYuzde > 0 ? '+' : ''}%${degisimYuzde}`;
+		// --- Kredili alım paneli ---
+		const serbestDepoEl = document.getElementById('serbestDepo') as HTMLInputElement;
+		const teminatDeposuEl = document.getElementById('teminatDeposu') as HTMLInputElement;
+		const teminatGrubuEl = document.getElementById('teminatGrubu') as HTMLSelectElement;
+		const krediliDepoEl = document.getElementById('krediliDepo') as HTMLInputElement;
+		const krediliGrubuEl = document.getElementById('krediliGrubu') as HTMLSelectElement;
+		const krediEl = document.getElementById('kredi') as HTMLInputElement;
+		const kSliderEl = document.getElementById('k_slider') as HTMLInputElement;
 
-			const ozkaynak = portfoy - kredi;
-			const mevcutOran = portfoy > 0 ? (ozkaynak / portfoy) * 100 : 0;
-			ozkaynakEl.textContent = tl(ozkaynak);
-			mevcutOranEl.textContent = portfoy > 0 ? yuzde(mevcutOran) : '—';
+		function krediliGirdi() {
+			return {
+				serbestDepo: Math.max(0, Number(serbestDepoEl.value) || 0),
+				teminatDeposu: Math.max(0, Number(teminatDeposuEl.value) || 0),
+				teminatGrubu: teminatGrubuEl.value as HisseGrubu,
+				krediliDepo: Math.max(0, Number(krediliDepoEl.value) || 0),
+				krediliGrubu: krediliGrubuEl.value as HisseGrubu,
+				kredi: Math.max(0, Number(krediEl.value) || 0),
+			};
+		}
 
-			const yeniPortfoy = portfoy * (1 + degisimYuzde / 100);
-			const yeniOzkaynak = yeniPortfoy - kredi;
-			const yeniOran = yeniPortfoy > 0 ? (yeniOzkaynak / yeniPortfoy) * 100 : 0;
+		function kredilHesapla() {
+			const girdi = krediliGirdi();
+			const grupParam = HISSE_GRUPLARI[girdi.krediliGrubu];
+			const sonuc = ucDepoHesapla(girdi);
+			const degisim = Number(kSliderEl.value);
 
-			yeniPortfoyEl.textContent = tl(yeniPortfoy);
-			yeniOzkaynakEl.textContent = tl(yeniOzkaynak);
-			yeniOranEl.textContent = yeniPortfoy > 0 ? yuzde(yeniOran) : '—';
+			document.getElementById('k_toplamPortfoy')!.textContent = tl(sonuc.toplamPortfoyDegeri);
+			document.getElementById('k_ozkaynak')!.textContent = tl(sonuc.ozkaynak);
+			document.getElementById('k_mevcutOran')!.textContent = yuzde(sonuc.ozkaynakOrani);
+			document.getElementById('k_baslangicEsik')!.textContent = yuzde(grupParam.baslangicOrani);
+			document.getElementById('k_surdurmeEsik')!.textContent = yuzde(grupParam.surdurmeOrani);
+			(document.getElementById('k_kapaliUyari') as HTMLElement).style.display = grupParam.krediyeKapali
+				? ''
+				: 'none';
 
-			durumKutuEl.classList.remove('guvenli', 'uyari', 'tehlike');
-			if (kredi <= 0) {
-				durumMetinEl.textContent = 'Kredi kullanmıyorsan teminat tamamlama çağrısı riskin yok.';
-				durumKutuEl.classList.add('guvenli');
-			} else if (yeniOran >= BASLANGIC_ORAN) {
-				durumMetinEl.textContent = 'Güvenli bölge: oranın başlangıç seviyesinin üstünde.';
-				durumKutuEl.classList.add('guvenli');
-			} else if (yeniOran >= SURDURME_ORAN) {
-				durumMetinEl.textContent = 'Başlangıç seviyesinin altında, henüz çağrı sınırının üstünde.';
-				durumKutuEl.classList.add('uyari');
+			document.getElementById('k_sliderDeger')!.textContent = `${degisim > 0 ? '+' : ''}%${degisim}`;
+			const senaryo = ucDepoSenaryo(girdi, degisim);
+			document.getElementById('k_yeniOzkaynak')!.textContent = tl(senaryo.ozkaynak);
+			document.getElementById('k_yeniOran')!.textContent = yuzde(senaryo.ozkaynakOrani);
+
+			const durumKutu = document.getElementById('k_durum')!;
+			const durumMetin = document.getElementById('k_durumMetin')!;
+			durumKutu.classList.remove('guvenli', 'uyari', 'tehlike');
+			if (grupParam.krediyeKapali && girdi.kredi > 0) {
+				durumMetin.textContent = 'Bu grup kredili işleme kapalı. Kredi kullanamazsın.';
+				durumKutu.classList.add('tehlike');
+			} else if (girdi.kredi <= 0) {
+				durumMetin.textContent = 'Kredi kullanmıyorsan çağrı riskin yok.';
+				durumKutu.classList.add('guvenli');
+			} else if (senaryo.durum === 'guvenli') {
+				durumMetin.textContent = 'Güvenli bölge: oranın başlangıç seviyesinin üstünde.';
+				durumKutu.classList.add('guvenli');
+			} else if (senaryo.durum === 'uyari') {
+				durumMetin.textContent = 'Başlangıç seviyesinin altında, henüz çağrı sınırının üstünde.';
+				durumKutu.classList.add('uyari');
 			} else {
-				durumMetinEl.textContent = 'Teminat tamamlama çağrısı bölgesi: oran sürdürme sınırının altında.';
-				durumKutuEl.classList.add('tehlike');
+				durumMetin.textContent = 'Teminat tamamlama çağrısı bölgesi.';
+				durumKutu.classList.add('tehlike');
 			}
 
-			// Kaç % düşerse çağrı gelir? (V*(1+x) - D) / (V*(1+x)) = SURDURME/100 denklemini çöz
-			if (portfoy > 0 && kredi > 0 && kredi < portfoy) {
-				const esikOranDecimal = SURDURME_ORAN / 100;
-				const carpan = kredi / (portfoy * (1 - esikOranDecimal));
-				const esikDegisim = (carpan - 1) * 100;
-				if (esikDegisim < 0) {
-					esikHesapEl.textContent = `Bu portföyle fiyatlar yaklaşık %${Math.abs(esikDegisim).toFixed(1).replace('.', ',')} düşerse çağrı sınırına (%${SURDURME_ORAN}) inersin.`;
-				} else {
-					esikHesapEl.textContent = 'Zaten çağrı sınırının altındasın.';
-				}
+			const esikHesapEl = document.getElementById('k_esikHesap')!;
+			const esik = esikDegisimBul(girdi);
+			if (esik === null) {
+				esikHesapEl.textContent = girdi.kredi > 0 ? 'Bu portföyle çok büyük bir düşüşte bile çağrı sınırına inmiyorsun.' : '';
+			} else if (esik < 0) {
+				esikHesapEl.textContent = `Bu portföyle fiyat yaklaşık %${Math.abs(esik).toFixed(1).replace('.', ',')} düşerse çağrı sınırına inersin.`;
 			} else {
-				esikHesapEl.textContent = '';
+				esikHesapEl.textContent = 'Zaten çağrı sınırının altındasın.';
 			}
 		}
 
-		[portfoyEl, krediEl, sliderEl].forEach((el) => el.addEventListener('input', hesapla));
-		hesapla();
+		[serbestDepoEl, teminatDeposuEl, teminatGrubuEl, krediliDepoEl, krediliGrubuEl, krediEl, kSliderEl].forEach(
+			(el) => el.addEventListener('input', kredilHesapla),
+		);
+		kredilHesapla();
+
+		// --- Açığa satış paneli ---
+		const satisTutariEl = document.getElementById('satisTutari') as HTMLInputElement;
+		const blokeTeminatEl = document.getElementById('blokeTeminat') as HTMLInputElement;
+		const aSliderEl = document.getElementById('a_slider') as HTMLInputElement;
+
+		function acikHesapla() {
+			const satisTutari = Math.max(0, Number(satisTutariEl.value) || 0);
+			const blokeTeminat = Math.max(0, Number(blokeTeminatEl.value) || 0);
+			const degisim = Number(aSliderEl.value);
+
+			const baslangicOran = satisTutari > 0 ? (blokeTeminat / satisTutari) * 100 : 0;
+			document.getElementById('a_baslangicOran')!.textContent = satisTutari > 0 ? yuzde(baslangicOran) : '—';
+			document.getElementById('a_baslangicEsik')!.textContent = yuzde(ACIGA_SATIS.baslangicOrani);
+			document.getElementById('a_surdurmeEsik')!.textContent = yuzde(ACIGA_SATIS.surdurmeOrani);
+
+			document.getElementById('a_sliderDeger')!.textContent = `${degisim > 0 ? '+' : ''}%${degisim}`;
+			const sonuc = acikPozisyonHesapla({ satisTutari, blokeTeminat }, degisim);
+			document.getElementById('a_guncelDeger')!.textContent = tl(sonuc.guncelDeger);
+			document.getElementById('a_zarar')!.textContent = `${sonuc.zarar > 0 ? '-' : '+'}${tl(Math.abs(sonuc.zarar))}`;
+			document.getElementById('a_yeniOran')!.textContent = satisTutari > 0 ? yuzde(sonuc.ozkaynakOrani) : '—';
+
+			const durumKutu = document.getElementById('a_durum')!;
+			const durumMetin = document.getElementById('a_durumMetin')!;
+			durumKutu.classList.remove('guvenli', 'uyari', 'tehlike');
+			if (satisTutari <= 0) {
+				durumMetin.textContent = 'Rakamları gir.';
+			} else if (sonuc.durum === 'guvenli') {
+				durumMetin.textContent = 'Güvenli bölge.';
+				durumKutu.classList.add('guvenli');
+			} else if (sonuc.durum === 'uyari') {
+				durumMetin.textContent = 'Başlangıç seviyesinin altında, henüz çağrı sınırının üstünde.';
+				durumKutu.classList.add('uyari');
+			} else {
+				durumMetin.textContent = 'Teminat tamamlama çağrısı bölgesi.';
+				durumKutu.classList.add('tehlike');
+			}
+
+			const esikHesapEl = document.getElementById('a_esikHesap')!;
+			const esik = acikPozisyonEsikBul({ satisTutari, blokeTeminat });
+			if (esik === null) {
+				esikHesapEl.textContent = satisTutari > 0 ? 'Bu teminatla çok büyük bir yükselişte bile çağrı sınırına inmiyorsun.' : '';
+			} else {
+				esikHesapEl.textContent = `Fiyat yaklaşık %${esik.toFixed(1).replace('.', ',')} yükselirse çağrı sınırına inersin.`;
+			}
+		}
+		[satisTutariEl, blokeTeminatEl, aSliderEl].forEach((el) => el.addEventListener('input', acikHesapla));
+		acikHesapla();
 	</script>
 
 	<style>
+		.grup-izgara {
+			display: grid;
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			gap: 14px;
+		}
+		.grup-kart {
+			background: #faf9f5;
+			border: 1px solid var(--kenarlik);
+			border-radius: 12px;
+			padding: 14px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+		.grup-ust {
+			display: flex;
+			align-items: baseline;
+			gap: 8px;
+		}
+		.grup-kod {
+			font-family: var(--font-mono);
+			font-weight: 600;
+			font-size: 16px;
+		}
+		.grup-ad {
+			font-size: 12px;
+			color: var(--metin-ikincil);
+		}
+		.grup-aciklama {
+			margin: 0;
+			font-size: 12px;
+			color: var(--metin-ikincil);
+			line-height: 1.4;
+		}
+		.grup-kart dl {
+			margin: 0;
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+		.grup-kart dl > div {
+			display: flex;
+			justify-content: space-between;
+			font-size: 13px;
+		}
+		.grup-kart dt {
+			color: var(--metin-ikincil);
+		}
+		.grup-kart dd {
+			margin: 0;
+			font-weight: 600;
+		}
+		.grup-kapali {
+			margin: 0;
+			font-size: 12px;
+			font-weight: 600;
+			color: var(--dusus);
+		}
+
+		.sekme-cubugu {
+			display: flex;
+			gap: 8px;
+		}
+		.sekme {
+			height: 40px;
+			padding: 0 18px;
+			border-radius: 10px;
+			border: 1px solid var(--kenarlik);
+			background: var(--kart);
+			color: var(--metin-ikincil);
+			font: inherit;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+		.sekme.aktif {
+			background: var(--metin);
+			border-color: var(--metin);
+			color: #fff;
+		}
+
+		[data-panel] {
+			display: flex;
+			flex-direction: column;
+			gap: 24px;
+		}
+
 		.izgara {
 			display: grid;
 			grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -192,18 +485,20 @@ const SURDURME_ORAN = 35; // Bu oranın altına inince teminat tamamlama çağr�
 			font-weight: 500;
 			color: var(--metin-ikincil);
 		}
-		input[type='number'] {
+		input[type='number'],
+		select {
 			height: 44px;
 			border: 1px solid var(--kenarlik);
 			border-radius: 10px;
 			padding: 0 14px;
 			font: inherit;
-			font-size: 16px;
+			font-size: 15px;
 			font-weight: 600;
 			color: var(--metin);
 			background: #faf9f5;
 		}
-		input[type='number']:focus {
+		input:focus,
+		select:focus {
 			outline: 2px solid var(--marka);
 			outline-offset: 1px;
 		}
@@ -219,29 +514,19 @@ const SURDURME_ORAN = 35; // Bu oranın altına inince teminat tamamlama çağr�
 		.ozet-satir strong {
 			font-size: 17px;
 			color: var(--metin);
-		}
-		#mevcutOran {
 			font-family: var(--font-baslik);
 		}
 
 		.esik-satir {
-			display: grid;
-			grid-template-columns: 8px 1fr auto;
-			align-items: start;
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
 			gap: 12px;
-			padding: 4px 0;
+			padding: 8px 0;
+			border-bottom: 1px solid var(--cizgi);
 		}
-		.nokta {
-			width: 8px;
-			height: 8px;
-			border-radius: 4px;
-			margin-top: 6px;
-		}
-		.nokta.marka {
-			background: var(--marka);
-		}
-		.nokta.kehribar {
-			background: var(--kehribar);
+		.esik-satir:last-of-type {
+			border-bottom: 0;
 		}
 		.esik-metin {
 			font-size: 14px;
@@ -256,6 +541,7 @@ const SURDURME_ORAN = 35; // Bu oranın altına inince teminat tamamlama çağr�
 		.esik-satir strong {
 			font-family: var(--font-baslik);
 			font-size: 20px;
+			white-space: nowrap;
 		}
 		.not {
 			margin: 8px 0 0;
@@ -288,7 +574,6 @@ const SURDURME_ORAN = 35; // Bu oranın altına inince teminat tamamlama çağr�
 			font-weight: 600;
 			color: var(--metin);
 		}
-
 		.sonuc-izgara {
 			display: grid;
 			grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -307,10 +592,9 @@ const SURDURME_ORAN = 35; // Bu oranın altına inince teminat tamamlama çağr�
 		}
 		.sonuc strong {
 			font-family: var(--font-baslik);
-			font-size: 22px;
+			font-size: 20px;
 			color: var(--metin);
 		}
-
 		.durum-kutu {
 			border-radius: 10px;
 			padding: 12px 16px;
@@ -335,13 +619,17 @@ const SURDURME_ORAN = 35; // Bu oranın altına inince teminat tamamlama çağr�
 			border-color: #edc7c2;
 			color: var(--dusus);
 		}
-
 		.esik-hesap {
 			margin: 0;
 			font-size: 13px;
 			color: var(--metin-ikincil);
 		}
 
+		@media (max-width: 1100px) {
+			.grup-izgara {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+			}
+		}
 		@media (max-width: 899px) {
 			.izgara {
 				display: flex;
@@ -352,6 +640,12 @@ const SURDURME_ORAN = 35; // Bu oranın altına inince teminat tamamlama çağr�
 			}
 			.sonuc-izgara {
 				grid-template-columns: 1fr;
+			}
+			.grup-izgara {
+				grid-template-columns: 1fr;
+			}
+			.sekme-cubugu {
+				overflow-x: auto;
 			}
 		}
 	</style>
