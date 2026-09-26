@@ -42,6 +42,7 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 		/>
 	</head>
 	<body>
+		<a href="#icerik" class="icerige-atla">İçeriğe atla</a>
 		<div class="kabuk">
 			<!-- Masaüstü sol menü -->
 			<nav class="yan-menu" aria-label="Ana menü">
@@ -111,7 +112,7 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 					</button>
 				</header>
 
-				<main>
+				<main id="icerik">
 					<slot />
 				</main>
 
@@ -266,6 +267,23 @@ const sayfaBasligi = yol === '/' ? 'Konsensüs — BIST öneri ve hedef fiyat pl
 		</script>
 
 		<style>
+			.icerige-atla {
+				position: fixed;
+				top: -60px;
+				left: 12px;
+				z-index: 100;
+				background: var(--marka);
+				color: #fff;
+				padding: 10px 16px;
+				border-radius: 8px;
+				font-size: 14px;
+				font-weight: 600;
+				transition: top 0.15s ease;
+			}
+			.icerige-atla:focus {
+				top: 12px;
+				color: #fff;
+			}
 			.kabuk {
 				display: flex;
 				min-height: 100dvh;
