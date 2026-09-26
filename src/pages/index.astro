@@ -13,6 +13,18 @@ const kpiler = [
 	{ ad: 'Hedefi düşen', alt: 'son 24 saatte' },
 ];
 
+const sirketHaberleri = [
+	'[Şirket] KAP bildirimi: [özet]',
+	'[Şirket] yönetim kurulu kararı: [özet]',
+	'[Şirket] finansal sonuç açıkladı: [özet]',
+];
+
+const piyasaHaberleri = [
+	'[Başlık]: genel piyasa gündemi özeti',
+	'[Başlık]: makro veri / merkez bankası özeti',
+	'[Başlık]: küresel piyasalardan özet',
+];
+
 const oneriKolonlari = [
 	{ anahtar: 'kurum', baslik: 'Kurum' },
 	{ anahtar: 'hisse', baslik: 'Hisse', tur: 'hisse' as const },
@@ -32,6 +44,35 @@ const oneriKolonlari = [
 	>
 		<Rozet>Yapım aşamasında</Rozet>
 	</SayfaBasligi>
+
+	<section class="haber-izgara" aria-label="Haberler">
+		<Kart baslik="Şirket haberleri" altBaslik="KAP özetleri · kaynak linkli" class="haber-kart">
+			<Fragment slot="sag"><a href="/oneriler">Tümü</a></Fragment>
+			<ul class="haber-listesi">
+				{
+					sirketHaberleri.map((h) => (
+						<li>
+							<span class="nokta" />
+							<span class="metin">{h}</span>
+						</li>
+					))
+				}
+			</ul>
+		</Kart>
+		<Kart baslik="Piyasa haberleri" altBaslik="Genel gündem" class="haber-kart">
+			<Fragment slot="sag"><a href="/takvim">Tümü</a></Fragment>
+			<ul class="haber-listesi">
+				{
+					piyasaHaberleri.map((h) => (
+						<li>
+							<span class="nokta" />
+							<span class="metin">{h}</span>
+						</li>
+					))
+				}
+			</ul>
+		</Kart>
+	</section>
 
 	<section class="kpi-izgara" aria-label="Özet">
 		{
@@ -77,6 +118,50 @@ const oneriKolonlari = [
 </AnaLayout>
 
 <style>
+	.haber-izgara {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+	}
+	.haber-kart {
+		padding: 18px 20px;
+		gap: 10px;
+	}
+	.haber-listesi {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.haber-listesi li {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		padding: 7px 0;
+		border-bottom: 1px solid var(--cizgi);
+		font-size: 13px;
+	}
+	.haber-listesi li:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+	.haber-listesi .nokta {
+		flex-shrink: 0;
+		width: 5px;
+		height: 5px;
+		border-radius: 3px;
+		background: var(--kehribar);
+		margin-top: 7px;
+	}
+	.haber-listesi .metin {
+		color: var(--metin);
+		line-height: 1.4;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
 	.kpi-izgara {
 		display: grid;
 		grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -145,6 +230,13 @@ const oneriKolonlari = [
 		}
 	}
 	@media (max-width: 899px) {
+		.haber-izgara {
+			grid-template-columns: 1fr;
+			gap: 10px;
+		}
+		.haber-listesi .metin {
+			white-space: normal;
+		}
 		.kpi-izgara {
 			gap: 10px;
 		}
