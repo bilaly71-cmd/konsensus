@@ -9,13 +9,11 @@ import Buton from '../components/Buton.astro';
 import Tablo from '../components/Tablo.astro';
 import { bugunIstanbul } from '../lib/tarih';
 import { getDb } from '../lib/db';
+import { tariheGoreOneriler, konsensusHesapla } from '../lib/oneriler';
 
 const db = getDb();
 const bugun = bugunIstanbul();
-const { results: bugunkuOneriler } = await db
-	.prepare('SELECT * FROM oneriler WHERE tarih = ?1 ORDER BY olusturulma DESC')
-	.bind(bugun)
-	.all<Record<string, string>>();
+const bugunkuOneriler = await tariheGoreOneriler(db, bugun);
 
 const oneriSatirlari = bugunkuOneriler.map((o) => ({
 	kurum: o.kurum,
@@ -27,15 +25,7 @@ const oneriSatirlari = bugunkuOneriler.map((o) => ({
 	pot: o.potansiyel ?? '—',
 }));
 
-const kurumlarHisseBazinda = new Map<string, Set<string>>();
-for (const o of bugunkuOneriler) {
-	if (!kurumlarHisseBazinda.has(o.hisse)) kurumlarHisseBazinda.set(o.hisse, new Set());
-	kurumlarHisseBazinda.get(o.hisse)!.add(o.kurum);
-}
-const konsensusListesi = [...kurumlarHisseBazinda.entries()]
-	.map(([hisse, kurumlar]) => ({ hisse, kurumlar: [...kurumlar], n: kurumlar.size }))
-	.filter((k) => k.n >= 2)
-	.sort((a, b) => b.n - a.n);
+const konsensusListesi = konsensusHesapla(bugunkuOneriler);
 const enCokKurum = konsensusListesi[0]?.n || 1;
 
 const kpiler = [

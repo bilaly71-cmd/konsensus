@@ -1,14 +1,307 @@
 ---
-import BosSayfa from '../components/BosSayfa.astro';
+export const prerender = false;
+
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import Tablo from '../components/Tablo.astro';
+import { bugunIstanbul } from '../lib/tarih';
+import { getDb } from '../lib/db';
+import { tariheGoreOneriler, konsensusHesapla } from '../lib/oneriler';
+
+const db = getDb();
+const bugun = bugunIstanbul();
+const tarih = Astro.url.searchParams.get('tarih') || bugun;
+
+const oneriler = await tariheGoreOneriler(db, tarih);
+const konsensusListesi = konsensusHesapla(oneriler);
+const enCokKurum = konsensusListesi[0]?.n || 1;
+
+const kurumSayisi = new Set(oneriler.map((o) => o.kurum)).size;
+
+const turler = ['Tümü', 'Günlük', 'Haftalık', 'Model portföy', 'Takip listesi'];
+
+const satirlar = oneriler.map((o) => ({
+	kurum: o.kurum,
+	hisse: o.hisse,
+	tur: o.tur,
+	giris: o.giris ?? '—',
+	hedef: o.hedef,
+	stop: o.stop ?? '—',
+	pot: o.potansiyel ?? '—',
+}));
+
+const kolonlar = [
+	{ anahtar: 'kurum', baslik: 'Kurum' },
+	{ anahtar: 'hisse', baslik: 'Hisse', tur: 'hisse' as const },
+	{ anahtar: 'tur', baslik: 'Tür' },
+	{ anahtar: 'giris', baslik: 'Giriş', hiza: 'sag' as const },
+	{ anahtar: 'hedef', baslik: 'Hedef', hiza: 'sag' as const, tur: 'kalin' as const },
+	{ anahtar: 'stop', baslik: 'Stop', hiza: 'sag' as const, tur: 'soluk' as const },
+	{ anahtar: 'pot', baslik: 'Potansiyel', hiza: 'sag' as const, tur: 'yon' as const },
+];
+
+// Önceki / sonraki gün (basit gün ekleme, İstanbul tarih dizesi üzerinden)
+function gunEkle(tarihStr: string, gun: number): string {
+	const [y, a, g] = tarihStr.split('-').map(Number);
+	const d = new Date(Date.UTC(y, a - 1, g));
+	d.setUTCDate(d.getUTCDate() + gun);
+	return d.toISOString().slice(0, 10);
+}
+const oncekiGun = gunEkle(tarih, -1);
+const sonrakiGun = gunEkle(tarih, 1);
+const bugunMu = tarih === bugun;
+
+const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+	weekday: 'long',
+	timeZone: 'UTC',
+}).format(new Date(tarih + 'T00:00:00Z'));
 ---
 
-<BosSayfa
-	baslik="Öneriler"
-	grup="PİYASA"
-	aciklama="Aracı kurumların günlük, haftalık ve model portföy önerileri; her satırda kaynak kurum."
-	gelecekler={[
-		'Günün tüm önerileri: giriş, hedef, stop ve potansiyel',
-		'Günlük / Haftalık / Model portföy filtreleri',
-		'Konsensüs sayacı: aynı hisseyi öneren kurum sayısı',
-	]}
-/>
+<AnaLayout baslik="Öneriler" aciklama="Kurumların günlük, haftalık ve model portföy önerileri; her satırda kaynak kurum.">
+	<SayfaBasligi
+		baslik="Öneriler"
+		ust="PİYASA"
+		aciklama="Aracı kurumların kamuya açık raporlarından öneriler. Her satırda kaynak kurum belirtilir."
+	>
+		<Rozet>{oneriler.length} öneri</Rozet>
+	</SayfaBasligi>
+
+	<div class="tarih-cubugu">
+		<a href={`/oneriler?tarih=${oncekiGun}`} class="tarih-ok" aria-label="Önceki gün">‹</a>
+		<div class="tarih-orta">
+			<span class="tarih-metin">{tarihBaslik}</span>
+			{!bugunMu && <a href="/oneriler" class="bugune-don">bugüne dön</a>}
+		</div>
+		<a
+			href={`/oneriler?tarih=${sonrakiGun}`}
+			class:list={['tarih-ok', { pasif: sonrakiGun > bugun }]}
+			aria-label="Sonraki gün"
+		>
+			›
+		</a>
+	</div>
+
+	<section class="kpi-izgara" aria-label="Özet">
+		<div class="kpi">
+			<span class="kpi-ad">Toplam öneri</span>
+			<span class="kpi-deger">{oneriler.length}</span>
+		</div>
+		<div class="kpi">
+			<span class="kpi-ad">Kapsayan kurum</span>
+			<span class="kpi-deger">{kurumSayisi}</span>
+		</div>
+		<div class="kpi">
+			<span class="kpi-ad">Konsensüs hissesi</span>
+			<span class="kpi-deger">{konsensusListesi.length}</span>
+			<span class="kpi-alt">en az 2 kurumun önerdiği</span>
+		</div>
+	</section>
+
+	{
+		konsensusListesi.length > 0 && (
+			<Kart baslik="Günün konsensüsü" altBaslik="En çok kurumun aynı anda önerdiği hisseler">
+				<div class="konsensus-listesi">
+					{konsensusListesi.map((k) => (
+						<div class="konsensus-satir">
+							<span class="konsensus-hisse">{k.hisse}</span>
+							<span class="konsensus-cubuk">
+								<span class="konsensus-dolu" style={`width:${Math.round((k.n / enCokKurum) * 100)}%`} />
+							</span>
+							<span class="konsensus-kurumlar">{k.kurumlar.join(' · ')}</span>
+							<span class="konsensus-n">{k.n} kurum</span>
+						</div>
+					))}
+				</div>
+			</Kart>
+		)
+	}
+
+	<Kart baslik="Tüm öneriler">
+		<Fragment slot="sag">
+			<div class="filtreler" id="filtreler">
+				{turler.map((t, i) => (
+					<button type="button" class:list={['filtre-btn', { aktif: i === 0 }]} data-tur={t}>
+						{t}
+					</button>
+				))}
+			</div>
+		</Fragment>
+		<div id="tabloAlani">
+			<Tablo kolonlar={kolonlar} satirlar={satirlar} bosMesaj="Bu tarih için henüz öneri girilmedi." />
+		</div>
+	</Kart>
+
+	<script>
+		const filtrelerEl = document.getElementById('filtreler');
+		const tabloAlaniEl = document.getElementById('tabloAlani');
+		if (filtrelerEl && tabloAlaniEl) {
+			const satirlarEl = () => Array.from(tabloAlaniEl.querySelectorAll('tbody tr')) as HTMLTableRowElement[];
+			filtrelerEl.addEventListener('click', (e) => {
+				const btn = (e.target as HTMLElement).closest('.filtre-btn') as HTMLButtonElement | null;
+				if (!btn) return;
+				filtrelerEl.querySelectorAll('.filtre-btn').forEach((b) => b.classList.remove('aktif'));
+				btn.classList.add('aktif');
+				const tur = btn.dataset.tur;
+				satirlarEl().forEach((tr) => {
+					const turHucre = tr.children[2]?.textContent?.trim();
+					tr.style.display = tur === 'Tümü' || turHucre === tur ? '' : 'none';
+				});
+			});
+		}
+	</script>
+
+	<style>
+		.tarih-cubugu {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 16px;
+		}
+		.tarih-ok {
+			width: 36px;
+			height: 36px;
+			border-radius: 8px;
+			border: 1px solid var(--kenarlik);
+			background: var(--kart);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+			color: var(--metin);
+			flex-shrink: 0;
+		}
+		.tarih-ok.pasif {
+			opacity: 0.35;
+			pointer-events: none;
+		}
+		.tarih-orta {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 2px;
+			min-width: 220px;
+		}
+		.tarih-metin {
+			font-weight: 600;
+			font-size: 15px;
+		}
+		.bugune-don {
+			font-size: 12px;
+			font-weight: 600;
+		}
+
+		.kpi-izgara {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 16px;
+		}
+		.kpi {
+			background: var(--kart);
+			border: 1px solid var(--kenarlik);
+			border-radius: 14px;
+			padding: 18px 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+		.kpi-ad {
+			font-size: 13px;
+			color: var(--metin-ikincil);
+			font-weight: 500;
+		}
+		.kpi-deger {
+			font-family: var(--font-baslik);
+			font-size: 32px;
+			font-weight: 600;
+			line-height: 1;
+		}
+		.kpi-alt {
+			font-size: 12px;
+			color: var(--metin-ikincil);
+		}
+
+		.konsensus-listesi {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+		}
+		.konsensus-satir {
+			display: grid;
+			grid-template-columns: 72px minmax(0, 1fr) 110px;
+			grid-template-rows: auto auto;
+			align-items: center;
+			gap: 4px 16px;
+			padding: 4px 0;
+		}
+		.konsensus-hisse {
+			font-family: var(--font-mono);
+			font-weight: 500;
+			font-size: 14px;
+		}
+		.konsensus-cubuk {
+			height: 10px;
+			background: #efece4;
+			border-radius: 5px;
+			overflow: hidden;
+			display: block;
+		}
+		.konsensus-dolu {
+			display: block;
+			height: 10px;
+			background: var(--marka);
+			border-radius: 5px;
+		}
+		.konsensus-kurumlar {
+			grid-column: 2;
+			grid-row: 2;
+			font-size: 12px;
+			color: var(--metin-ikincil);
+		}
+		.konsensus-n {
+			grid-column: 3;
+			grid-row: 1 / span 2;
+			text-align: right;
+			font-size: 15px;
+			font-weight: 600;
+			align-self: center;
+		}
+
+		.filtreler {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 6px;
+			margin-left: auto;
+		}
+		.filtre-btn {
+			height: 32px;
+			padding: 0 12px;
+			border-radius: 16px;
+			border: 1px solid var(--kenarlik);
+			background: var(--kart);
+			color: var(--metin);
+			font: inherit;
+			font-size: 12px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+		.filtre-btn.aktif {
+			background: var(--metin);
+			border-color: var(--metin);
+			color: #fff;
+		}
+
+		@media (max-width: 899px) {
+			.kpi-izgara {
+				grid-template-columns: 1fr;
+			}
+			.filtreler {
+				margin-left: 0;
+			}
+		}
+	</style>
+</AnaLayout>
