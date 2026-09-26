@@ -46,7 +46,7 @@ function yonSinifi(deger: string) {
 										k.tur === 'yon' && yonSinifi(s[k.anahtar] ?? ''),
 									]}
 								>
-									{s[k.anahtar] ?? '—'}
+									{k.tur === 'hisse' && s[k.anahtar] ? <a href={`/hisse/${s[k.anahtar]}`}>{s[k.anahtar]}</a> : s[k.anahtar] ?? '—'}
 								</td>
 							))}
 						</tr>
