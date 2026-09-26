@@ -68,3 +68,12 @@ Sonra: Öneri karnesi, Fon akıllı para, bülten + e-posta, halka arz, Arena, k
 - Düzeltme (27.09.2026): `Tablo.astro`'da hisse hücreleri link değildi, düzeltildi. Ayrıca `GrafikKutusu` ve `AnaLayout` alt bilgisinde "TradingViewLightweight" bitişik yazım hatası vardı (satır sonu boşluğu Astro derleyicisinde kayboluyor), `{' '}` ile düzeltildi. İkisi de canlıda doğrulandı.
 - Tüm site (13 menü sayfası + ana sayfa + /oneriler + /hedef-fiyatlar + /hisse/[kod] + /panel + /bilesenler) tek tek HTTP durumu ve konsol hatası için tarandı (27.09.2026) — hepsi temiz.
 - Roadmap'te sırada olan "Sonra" maddeleri (Öneri karnesi, Fon akıllı para, bülten + e-posta, halka arz, Arena, kripto, takvim) gerçek dış veri kaynağı ve/veya Bilal'in iş kuralı tanımını gerektiriyor (fiyat geçmişi, fon portföy raporları, e-posta altyapısı, halka arz takvimi kaynağı vb.) — bunlar netleşmeden anlamlı/kalıcı bir uygulama yapılamaz, bir sonraki oturumda Bilal'e sorulmalı.
+- Bilal talimatı (27.09.2026): "Sormadan devam et, kendini geliştir, zekice detaylara önem ver, proaktif/sezgisel/kurgusal ol." Veri/kural gerektiren roadmap maddeleri yerine, mevcut sistemi gerçek ve kalıcı iyileştirmelerle güçlendirdim (uydurma veri eklemedim):
+  - Marka favicon'u (koyu kare + kehribar nokta + "K" monogramı), Astro'nun varsayılan logosunun yerine.
+  - Üst bardaki arama kutusu artık gerçekten çalışıyor: hisse kodu yazıp Enter'a basınca `/hisse/[KOD]`'a gider. `/` tuşu kutuya odaklanır (masaüstü) ya da arama diyaloğunu açar (mobil, ayrı koyu temalı `<dialog>`).
+  - OG/Twitter meta etiketleri + canonical link: linkler artık sosyal medyada/mesajlaşmada düzgün önizleniyor.
+  - `public/robots.txt` ve `src/pages/sitemap.xml.ts` (dinamik — D1'deki tüm hisse sayfalarını da otomatik listeler, `/panel` ve `/api` dışlanmış).
+  - Markalı `404.astro` sayfası.
+  - `/panel`: Kurum kutusu sayfa açılışında otomatik odaklı; formdaki herhangi bir kutudayken Enter'a basmak "Satır ekle" ile aynı işi yapıyor (klavyeden hızlı veri girişi).
+  - Erişilebilirlik: "İçeriğe atla" linki (klavye kullanıcıları için, Tab'a basınca görünür).
+  - Tüm site yeniden tek tek tarandı (17 yol, `/olmayan-sayfa` ile 404 dahil) — hepsi temiz, `robots.txt`/`sitemap.xml`/`favicon.svg` de dahil.
