@@ -68,6 +68,13 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 - Canlı veriyle uçtan uca test edildi (haber ekle → ana sayfada göründü → sil → temiz; karne kartı gerçek "garan · %100" verisini gösterdi).
 - Bu, Görev 5'i (eksik/yüzeysel kalanı derinleştir) tamamen kapatıyor — artık ana sayfada hiçbir statik/uydurma veri kalmadı, her kart ya gerçek D1 verisini ya da dürüst bir boş durumu gösteriyor.
 
+### 9. Opsiyon lab (27.09.2026, ek — bütçe kaldığı için)
+- Roadmap'in "ARAÇLAR VE ARENA" grubunda son eksik kalan sayfaydı (Teminat simülatörü ve Grafik oyunu zaten tamamdı). Bu tamamen matematiksel bir hesaplayıcı, dış veri gerektirmiyor — Görev 6'nın açık listesinde yoktu ama aynı ruhla (veri gerektirmeyen araçları tamamla) ekledim.
+- `src/lib/opsiyon.ts`: çok bacaklı opsiyon stratejisi vade sonu kâr/zarar hesabı (call/put, al/sat, kullanım fiyatı, prim, adet), başabaş noktası bulma (işaret değişimi taraması), sınırsız kâr/zarar tespiti (sağ uç eğimi). 6 hazır strateji şablonu (Uzun Call/Put, Boğa Call Yayılımı, Ayı Put Yayılımı, Straddle, Strangle).
+- `/opsiyon-lab`: hazır strateji seçimi, bacak tablosu (düzenlenebilir), TradingView Lightweight Charts ile kâr/zarar grafiği, özet kartları.
+- **Gerçek hata bulundu ve düzeltildi:** Grafik ilk yüklemede neredeyse boş görünüyordu (sadece sol kenarda küçük bir çizgi) — `lightweight-charts`'ın `createChart` çağrısı konteynerin genişliğini o anki (henüz tam oturmamış) haliyle okuyordu ve otomatik yeniden boyutlanmıyordu. `autoSize: true` seçeneğiyle düzeltildi. **Aynı hata `/grafik-oyunu`'nda da olabilirdi** (aynı kütüphane, aynı kurulum deseni) — oraya da önleyici olarak eklendi, ikisi de canlıda görsel olarak doğrulandı.
+- Matematik test edildi: Boğa Call Yayılımı (98 al/5 prim, 108 sat/2 prim) → Maks kâr ₺7, Maks zarar -₺3, başabaş ₺101 — elle hesapla doğrulandı, doğru.
+
 **Görev 6'nın tamamı bitti.** Bilal'in verdiği 6 maddelik listenin tamamı tamamlandı: Teminat simülatörü derinleştirme, Grafik oyunu, Panel akıllı ayrıştırma, Öneri Merkezi/hisse bağlantısı, gözden geçirme, ve bütçe kalırsa istenen üç ek modül (Öneri Karnesi, Fon Akıllı Para, Takvim ailesi) — hepsi canlıda, GitHub'da, test edilmiş durumda.
 
 ## Bilal'le teyit edilecekler

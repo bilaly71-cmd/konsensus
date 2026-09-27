@@ -1,13 +1,379 @@
 ---
-import BosSayfa from '../components/BosSayfa.astro';
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 ---
 
-<BosSayfa
+<AnaLayout
 	baslik="Opsiyon lab"
-	grup="ARAÇLAR VE ARENA"
-	aciklama="Opsiyon stratejilerini kâr / zarar grafiğiyle dene."
-	gelecekler={[
-		'Strateji kurucu',
-		'Vade sonu kâr / zarar grafiği',
-	]}
-/>
+	aciklama="Opsiyon stratejilerini kur, vade sonu kâr/zarar grafiğini canlı gör."
+>
+	<SayfaBasligi
+		baslik="Opsiyon lab"
+		ust="ARAÇLAR VE ARENA"
+		aciklama="Vade sonu (expiration) değerlemesi kullanılır; zaman değeri ve volatilite etkisi (Yunanlılar) hesaba katılmaz. Prim tahmini kullanıcıya aittir."
+	>
+		<Rozet tur="ornek">Eğitim amaçlı hesaplama</Rozet>
+	</SayfaBasligi>
+
+	<Kart baslik="Hazır strateji seç" altBaslik="Seçince bacaklar otomatik dolar, sonra düzenleyebilirsin">
+		<div class="strateji-izgara">
+			{
+				HAZIR_STRATEJILER.map((s, i) => (
+					<button type="button" class="strateji-btn" data-strateji={i}>
+						<span class="strateji-ad">{s.ad}</span>
+						<span class="strateji-aciklama">{s.aciklama}</span>
+					</button>
+				))
+			}
+		</div>
+	</Kart>
+
+	<Kart baslik="Bacakları düzenle" altBaslik="Al = uzun (satın aldın), Sat = kısa (yazdın)">
+		<label class="baz-fiyat">
+			<span>Dayanak varlık fiyatı (₺) — grafik aralığını belirler</span>
+			<input type="number" id="bazFiyat" min="0" step="1" value="100" />
+		</label>
+		<div class="tablo-sarici">
+			<table>
+				<thead>
+					<tr>
+						<th>Tür</th>
+						<th>Yön</th>
+						<th class="sag">Kullanım fiyatı</th>
+						<th class="sag">Prim</th>
+						<th class="sag">Adet</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody id="bacakGovde"></tbody>
+			</table>
+		</div>
+		<div class="dugmeler">
+			<button type="button" id="bacakEkleDugme" class="ikincil-btn">+ Bacak ekle</button>
+		</div>
+	</Kart>
+
+	<Kart baslik="Vade sonu kâr / zarar grafiği">
+		<div id="grafikAlani" class="grafik-alani"></div>
+		<p class="grafik-atif">
+			Grafik <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> Lightweight
+			Charts ile çizilir.
+		</p>
+		<div class="ozet-izgara">
+			<div class="ozet-kart">
+				<span>Maks kâr</span>
+				<strong id="maksKar">—</strong>
+			</div>
+			<div class="ozet-kart">
+				<span>Maks zarar</span>
+				<strong id="maksZarar">—</strong>
+			</div>
+			<div class="ozet-kart">
+				<span>Başabaş nokta(lar)ı</span>
+				<strong id="basabasNoktalari">—</strong>
+			</div>
+		</div>
+	</Kart>
+
+	<script>
+		import { createChart, LineSeries, ColorType } from 'lightweight-charts';
+		import { stratejiHesapla, HAZIR_STRATEJILER, type OpsiyonBacagi } from '../lib/opsiyon';
+
+		const bazFiyatEl = document.getElementById('bazFiyat') as HTMLInputElement;
+		const bacakGovdeEl = document.getElementById('bacakGovde')!;
+		const bacakEkleDugmeEl = document.getElementById('bacakEkleDugme')!;
+		const grafikAlaniEl = document.getElementById('grafikAlani')!;
+
+		let bacaklar: OpsiyonBacagi[] = HAZIR_STRATEJILER[0].bacaklarUret(100);
+
+		const chart = createChart(grafikAlaniEl, {
+			layout: { background: { type: ColorType.Solid, color: 'transparent' }, textColor: '#5B5F68' },
+			grid: { vertLines: { color: '#EEEBE3' }, horzLines: { color: '#EEEBE3' } },
+			rightPriceScale: { borderColor: '#E2DED3' },
+			timeScale: { borderColor: '#E2DED3', visible: false },
+			handleScroll: false,
+			handleScale: false,
+			height: 320,
+			autoSize: true,
+		});
+		const karSerisi = chart.addSeries(LineSeries, { color: '#3438C9', lineWidth: 2 });
+		const sifirSerisi = chart.addSeries(LineSeries, { color: '#B0B4BE', lineWidth: 1, lineStyle: 2 });
+
+		function bacaklariCiz() {
+			bacakGovdeEl.innerHTML = bacaklar
+				.map(
+					(b, i) => `<tr>
+						<td>
+							<select data-i="${i}" data-alan="tur">
+								<option value="call" ${b.tur === 'call' ? 'selected' : ''}>Call</option>
+								<option value="put" ${b.tur === 'put' ? 'selected' : ''}>Put</option>
+							</select>
+						</td>
+						<td>
+							<select data-i="${i}" data-alan="yon">
+								<option value="al" ${b.yon === 'al' ? 'selected' : ''}>Al</option>
+								<option value="sat" ${b.yon === 'sat' ? 'selected' : ''}>Sat</option>
+							</select>
+						</td>
+						<td class="sag"><input type="number" class="sayi-kutu" data-i="${i}" data-alan="kullanimFiyati" value="${b.kullanimFiyati}" step="0.5" /></td>
+						<td class="sag"><input type="number" class="sayi-kutu" data-i="${i}" data-alan="prim" value="${b.prim}" step="0.1" /></td>
+						<td class="sag"><input type="number" class="sayi-kutu" data-i="${i}" data-alan="adet" value="${b.adet}" min="1" step="1" /></td>
+						<td><button type="button" class="sil" data-i="${i}">Kaldır</button></td>
+					</tr>`,
+				)
+				.join('');
+		}
+
+		bacakGovdeEl.addEventListener('change', (e) => {
+			const el = e.target as HTMLInputElement | HTMLSelectElement;
+			const i = Number(el.dataset.i);
+			const alan = el.dataset.alan;
+			if (!alan || Number.isNaN(i)) return;
+			if (alan === 'tur' || alan === 'yon') {
+				(bacaklar[i] as any)[alan] = el.value;
+			} else {
+				(bacaklar[i] as any)[alan] = Number(el.value) || 0;
+			}
+			hesaplaVeCiz();
+		});
+		bacakGovdeEl.addEventListener('click', (e) => {
+			const buton = (e.target as HTMLElement).closest('.sil') as HTMLElement | null;
+			if (!buton) return;
+			const i = Number(buton.dataset.i);
+			bacaklar.splice(i, 1);
+			bacaklariCiz();
+			hesaplaVeCiz();
+		});
+
+		bacakEkleDugmeEl.addEventListener('click', () => {
+			const baz = Number(bazFiyatEl.value) || 100;
+			bacaklar.push({ tur: 'call', yon: 'al', kullanimFiyati: baz, prim: Math.round(baz * 0.04 * 100) / 100, adet: 1 });
+			bacaklariCiz();
+			hesaplaVeCiz();
+		});
+
+		document.querySelectorAll<HTMLButtonElement>('.strateji-btn').forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const idx = Number(btn.dataset.strateji);
+				const baz = Number(bazFiyatEl.value) || 100;
+				bacaklar = HAZIR_STRATEJILER[idx].bacaklarUret(baz);
+				bacaklariCiz();
+				hesaplaVeCiz();
+			});
+		});
+
+		bazFiyatEl.addEventListener('input', hesaplaVeCiz);
+
+		const tl = (n: number) =>
+			new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+
+		function hesaplaVeCiz() {
+			if (bacaklar.length === 0) {
+				karSerisi.setData([]);
+				sifirSerisi.setData([]);
+				document.getElementById('maksKar')!.textContent = '—';
+				document.getElementById('maksZarar')!.textContent = '—';
+				document.getElementById('basabasNoktalari')!.textContent = '—';
+				return;
+			}
+			const kullanimFiyatlari = bacaklar.map((b) => b.kullanimFiyati);
+			const baz = Number(bazFiyatEl.value) || 100;
+			const altSinir = Math.max(0, Math.min(...kullanimFiyatlari, baz) * 0.5);
+			const ustSinir = Math.max(...kullanimFiyatlari, baz) * 1.5;
+
+			const sonuc = stratejiHesapla(bacaklar, altSinir, ustSinir);
+
+			// lightweight-charts zaman ekseni ister; S değerini zaman gibi kullanıyoruz
+			// (üstte gizli), gerçek etiketler fiyat ekseninde (value) görünüyor.
+			const baslangicZaman = Math.floor(Date.UTC(2024, 0, 1) / 1000);
+			const GUN = 86400;
+			karSerisi.setData(sonuc.noktalar.map((n, i) => ({ time: baslangicZaman + i * GUN, value: Math.round(n.karZarar * 100) / 100 })));
+			sifirSerisi.setData(sonuc.noktalar.map((n, i) => ({ time: baslangicZaman + i * GUN, value: 0 })));
+			chart.timeScale().fitContent();
+
+			document.getElementById('maksKar')!.textContent = sonuc.ustSinirsizKar ? `${tl(sonuc.maksKar)}+ (sınırsız)` : tl(sonuc.maksKar);
+			document.getElementById('maksZarar')!.textContent = sonuc.ustSinirsizZarar
+				? `${tl(sonuc.maksZarar)}− (sınırsız)`
+				: tl(sonuc.maksZarar);
+			document.getElementById('basabasNoktalari')!.textContent =
+				sonuc.basabasNoktalari.length > 0
+					? sonuc.basabasNoktalari.map((b) => `₺${b.toFixed(2)}`).join(' ve ')
+					: 'Yok (her zaman kâr/zarar)';
+		}
+
+		bacaklariCiz();
+		hesaplaVeCiz();
+	</script>
+
+	<style>
+		.strateji-izgara {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 12px;
+		}
+		.strateji-btn {
+			text-align: left;
+			background: #faf9f5;
+			border: 1px solid var(--kenarlik);
+			border-radius: 12px;
+			padding: 14px;
+			cursor: pointer;
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+		.strateji-btn:hover {
+			border-color: var(--marka);
+			background: #eef0ff;
+		}
+		.strateji-ad {
+			font-weight: 600;
+			font-size: 14px;
+		}
+		.strateji-aciklama {
+			font-size: 12px;
+			color: var(--metin-ikincil);
+			line-height: 1.4;
+		}
+
+		.baz-fiyat {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			font-size: 13px;
+			font-weight: 500;
+			color: var(--metin-ikincil);
+			max-width: 320px;
+			margin-bottom: 16px;
+		}
+		.baz-fiyat input {
+			height: 44px;
+			border: 1px solid var(--kenarlik);
+			border-radius: 10px;
+			padding: 0 14px;
+			font: inherit;
+			font-size: 15px;
+			font-weight: 600;
+			background: #faf9f5;
+		}
+
+		.tablo-sarici {
+			overflow-x: auto;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 13px;
+		}
+		th {
+			text-align: left;
+			font-size: 11px;
+			font-weight: 600;
+			color: var(--metin-ikincil);
+			padding: 0 8px 8px;
+			border-bottom: 1px solid var(--cizgi);
+			text-transform: uppercase;
+			white-space: nowrap;
+		}
+		th.sag {
+			text-align: right;
+		}
+		td {
+			padding: 6px 8px;
+			border-bottom: 1px solid var(--cizgi);
+		}
+		td.sag {
+			text-align: right;
+		}
+		select,
+		.sayi-kutu {
+			height: 36px;
+			border: 1px solid var(--kenarlik);
+			border-radius: 6px;
+			padding: 0 8px;
+			font: inherit;
+			font-size: 13px;
+			background: #faf9f5;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		.sayi-kutu {
+			text-align: right;
+			max-width: 100px;
+		}
+		.sil {
+			border: 0;
+			background: transparent;
+			color: var(--dusus);
+			font-weight: 600;
+			font-size: 12px;
+			cursor: pointer;
+			padding: 4px 8px;
+		}
+		.dugmeler {
+			margin-top: 14px;
+		}
+		.ikincil-btn {
+			height: 44px;
+			padding: 0 18px;
+			border-radius: 10px;
+			border: 1px solid var(--kenarlik);
+			background: var(--kart);
+			font: inherit;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+		.ikincil-btn:hover {
+			border-color: var(--marka);
+			color: var(--marka);
+		}
+
+		.grafik-alani {
+			width: 100%;
+			border: 1px solid var(--kenarlik);
+			border-radius: 12px;
+			overflow: hidden;
+			background: #faf9f5;
+		}
+		.grafik-atif {
+			margin: 8px 0 0;
+			font-size: 11px;
+			color: var(--metin-ikincil);
+		}
+		.ozet-izgara {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 16px;
+			margin-top: 16px;
+		}
+		.ozet-kart {
+			background: #faf9f5;
+			border: 1px solid var(--kenarlik);
+			border-radius: 12px;
+			padding: 14px 16px;
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			font-size: 13px;
+			color: var(--metin-ikincil);
+		}
+		.ozet-kart strong {
+			font-family: var(--font-baslik);
+			font-size: 18px;
+			color: var(--metin);
+		}
+
+		@media (max-width: 899px) {
+			.strateji-izgara {
+				grid-template-columns: 1fr;
+			}
+			.ozet-izgara {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</AnaLayout>
