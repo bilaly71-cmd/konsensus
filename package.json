@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.3",
-    "astro": "^7.3.5"
+    "astro": "^7.3.5",
+    "lightweight-charts": "^5.2.1"
   },
   "allowScripts": {
     "esbuild": true,

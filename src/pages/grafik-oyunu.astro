@@ -1,13 +1,406 @@
 ---
-import BosSayfa from '../components/BosSayfa.astro';
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
 ---
 
-<BosSayfa
+<AnaLayout
 	baslik="Grafik oyunu"
-	grup="ARAÇLAR VE ARENA"
-	aciklama="Grafik burada kesildi. Sence devamı? Herkese aynı grafik, tek tahmin hakkı."
-	gelecekler={[
-		'Günün grafiği: yükselir mi, düşer mi?',
-		'Seri ve skor tablosu',
-	]}
-/>
+	aciklama="Grafik burada kesildi. Sence devamı yükselir mi, düşer mi? Herkese aynı sentetik desen, tek tahmin hakkı."
+>
+	<SayfaBasligi
+		baslik="Grafik oyunu"
+		ust="ARAÇLAR VE ARENA"
+		aciklama="Grafik yapay olarak üretilir (gerçek hisse verisi değildir); klasik teknik analiz formasyonlarına dayanır. Yatırım tavsiyesi değildir."
+	>
+		<Rozet tur="ornek">Sentetik veri</Rozet>
+	</SayfaBasligi>
+
+	<Kart baslik="Sence devamı?" altBaslik="Grafik burada kesildi, tek tahmin hakkın var">
+		<div id="grafikAlani" class="grafik-alani"></div>
+		<p class="grafik-atif">
+			Grafik <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> Lightweight
+			Charts ile çizilir · Fiyat serisi tamamen sentetiktir, gerçek hisse verisi değildir.
+		</p>
+		<div class="tahmin-dugmeleri">
+			<button type="button" class="tahmin yukselir" data-tahmin="yukselir">▲ Yükselir</button>
+			<button type="button" class="tahmin duser" data-tahmin="duser">▼ Düşer</button>
+		</div>
+		<div id="sonucAlani" class="sonuc-alani" hidden>
+			<div id="sonucRozet" class="sonuc-rozet"></div>
+			<h3 id="sonucDesenAdi"></h3>
+			<p id="sonucAciklama"></p>
+			<button type="button" id="yeniOyunDugme" class="yeni-oyun">Yeni oyun</button>
+		</div>
+	</Kart>
+
+	<section class="skor-izgara">
+		<div class="skor-kart">
+			<span>Bu oturumdaki serin</span>
+			<strong id="oturumSeri">0</strong>
+		</div>
+		<div class="skor-kart">
+			<span>Bu oturum doğru / toplam</span>
+			<strong id="oturumSkor">0 / 0</strong>
+		</div>
+		<div class="skor-kart vurgu">
+			<span>En uzun serin (bu tarayıcıda)</span>
+			<strong id="enUzunSeri">0</strong>
+		</div>
+	</section>
+
+	<Kart baslik="Herkesin sicili" altBaslik="Bu siteyi oynayan herkesin toplam sonucu">
+		<div id="sicilBos" class="bos">Henüz kimse oynamadı, ilk sen ol.</div>
+		<div id="sicilIcerik" style="display:none">
+			<div class="genel-sicil">
+				<span>Toplam oyun</span>
+				<strong id="sicilToplam">—</strong>
+				<span>Genel doğruluk</span>
+				<strong id="sicilOran">—</strong>
+			</div>
+			<div class="tablo-sarici">
+				<table>
+					<thead>
+						<tr><th>Desen</th><th class="sag">Oynanma</th><th class="sag">Doğruluk</th></tr>
+					</thead>
+					<tbody id="sicilGovde"></tbody>
+				</table>
+			</div>
+		</div>
+	</Kart>
+
+	<script>
+		import { createChart, LineSeries, ColorType } from 'lightweight-charts';
+		import { desenUret, cozumUret, DESEN_BILGISI, type UretilenDesen } from '../lib/desenler';
+
+		const grafikAlaniEl = document.getElementById('grafikAlani')!;
+		const sonucAlaniEl = document.getElementById('sonucAlani')!;
+		const sonucRozetEl = document.getElementById('sonucRozet')!;
+		const sonucDesenAdiEl = document.getElementById('sonucDesenAdi')!;
+		const sonucAciklamaEl = document.getElementById('sonucAciklama')!;
+		const yeniOyunDugmeEl = document.getElementById('yeniOyunDugme')!;
+		const tahminDugmeleri = document.querySelectorAll<HTMLButtonElement>('.tahmin');
+		const oturumSeriEl = document.getElementById('oturumSeri')!;
+		const oturumSkorEl = document.getElementById('oturumSkor')!;
+		const enUzunSeriEl = document.getElementById('enUzunSeri')!;
+
+		const chart = createChart(grafikAlaniEl, {
+			layout: { background: { type: ColorType.Solid, color: 'transparent' }, textColor: '#5B5F68' },
+			grid: { vertLines: { color: '#EEEBE3' }, horzLines: { color: '#EEEBE3' } },
+			rightPriceScale: { borderColor: '#E2DED3' },
+			timeScale: { borderColor: '#E2DED3', timeVisible: false, secondsVisible: false },
+			handleScroll: false,
+			handleScale: false,
+			height: 320,
+		});
+		const seri = chart.addSeries(LineSeries, { color: '#3438C9', lineWidth: 2 });
+		const cozumSerisi = chart.addSeries(LineSeries, {
+			color: '#9A9EA8',
+			lineWidth: 2,
+			lineStyle: 2, // kesikli
+		});
+
+		type Puan = { time: number; value: number };
+		const GUN = 86400;
+		let baslangicZaman = Math.floor(Date.UTC(2024, 0, 1) / 1000);
+
+		function seriyeCevir(degerler: number[], baslaZaman: number): Puan[] {
+			return degerler.map((v, i) => ({ time: baslaZaman + i * GUN, value: Math.round(v * 100) / 100 }));
+		}
+
+		let mevcutDesen: UretilenDesen | null = null;
+		let tahminYapildi = false;
+
+		function localStorageOku(anahtar: string, varsayilan: number): number {
+			try {
+				const deger = localStorage.getItem(anahtar);
+				return deger ? Number(deger) || varsayilan : varsayilan;
+			} catch {
+				return varsayilan;
+			}
+		}
+		function localStorageYaz(anahtar: string, deger: number) {
+			try {
+				localStorage.setItem(anahtar, String(deger));
+			} catch {
+				/* sessiz geç */
+			}
+		}
+
+		let oturumDogru = 0;
+		let oturumToplam = 0;
+		let mevcutSeri = localStorageOku('oyun_mevcutSeri', 0);
+		let enUzunSeri = localStorageOku('oyun_enUzunSeri', 0);
+		enUzunSeriEl.textContent = String(enUzunSeri);
+		oturumSeriEl.textContent = String(mevcutSeri);
+
+		function yeniOyunBaslat() {
+			mevcutDesen = desenUret();
+			tahminYapildi = false;
+			sonucAlaniEl.hidden = true;
+			tahminDugmeleri.forEach((b) => (b.disabled = false));
+			cozumSerisi.setData([]);
+			seri.setData(seriyeCevir(mevcutDesen.seri, baslangicZaman));
+			chart.timeScale().fitContent();
+		}
+
+		async function sonucGonder(desen: string, tahmin: string, dogruMu: boolean) {
+			try {
+				await fetch('/api/oyun', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ desen, tahmin, dogruMu }),
+				});
+			} catch {
+				/* sicil güncellenemese de oyun devam etsin */
+			}
+			sicilYukle();
+		}
+
+		tahminDugmeleri.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				if (tahminYapildi || !mevcutDesen) return;
+				tahminYapildi = true;
+				tahminDugmeleri.forEach((b) => (b.disabled = true));
+
+				const tahmin = btn.dataset.tahmin as 'yukselir' | 'duser';
+				const dogruMu = tahmin === mevcutDesen.dogruYon;
+
+				const cozum = cozumUret(mevcutDesen);
+				const sonBaslangic = baslangicZaman + (mevcutDesen.seri.length - 1) * GUN;
+				const cozumNoktalari = seriyeCevir([mevcutDesen.seri[mevcutDesen.seri.length - 1], ...cozum], sonBaslangic);
+				cozumSerisi.setData(cozumNoktalari);
+				chart.timeScale().fitContent();
+
+				const bilgi = DESEN_BILGISI[mevcutDesen.desen];
+				sonucRozetEl.textContent = dogruMu ? 'Doğru tahmin! 🎉' : 'Yanlış tahmin';
+				sonucRozetEl.className = `sonuc-rozet ${dogruMu ? 'dogru' : 'yanlis'}`;
+				sonucDesenAdiEl.textContent = `${bilgi.ad} — gerçekte ${mevcutDesen.dogruYon === 'yukselir' ? 'yükseldi' : 'düştü'}`;
+				sonucAciklamaEl.textContent = bilgi.aciklama;
+				sonucAlaniEl.hidden = false;
+
+				oturumToplam++;
+				if (dogruMu) {
+					oturumDogru++;
+					mevcutSeri++;
+					if (mevcutSeri > enUzunSeri) {
+						enUzunSeri = mevcutSeri;
+						localStorageYaz('oyun_enUzunSeri', enUzunSeri);
+					}
+				} else {
+					mevcutSeri = 0;
+				}
+				localStorageYaz('oyun_mevcutSeri', mevcutSeri);
+				oturumSeriEl.textContent = String(mevcutSeri);
+				oturumSkorEl.textContent = `${oturumDogru} / ${oturumToplam}`;
+				enUzunSeriEl.textContent = String(enUzunSeri);
+
+				sonucGonder(mevcutDesen.desen, tahmin, dogruMu);
+			});
+		});
+
+		yeniOyunDugmeEl.addEventListener('click', yeniOyunBaslat);
+
+		async function sicilYukle() {
+			try {
+				const yanit = await fetch('/api/oyun');
+				const veri = await yanit.json();
+				const genel = veri.genel || { toplam: 0, dogruSayisi: 0 };
+				if (!genel.toplam) return;
+				(document.getElementById('sicilBos') as HTMLElement).style.display = 'none';
+				(document.getElementById('sicilIcerik') as HTMLElement).style.display = '';
+				document.getElementById('sicilToplam')!.textContent = String(genel.toplam);
+				const oran = genel.toplam > 0 ? (genel.dogruSayisi / genel.toplam) * 100 : 0;
+				document.getElementById('sicilOran')!.textContent = `%${oran.toFixed(0)}`;
+				const govde = document.getElementById('sicilGovde')!;
+				govde.innerHTML = (veri.desenBazinda || [])
+					.map((d: { desen: string; toplam: number; dogruSayisi: number }) => {
+						const bilgi = DESEN_BILGISI[d.desen as keyof typeof DESEN_BILGISI];
+						const oranD = d.toplam > 0 ? (d.dogruSayisi / d.toplam) * 100 : 0;
+						return `<tr><td>${bilgi?.ad ?? d.desen}</td><td class="sag">${d.toplam}</td><td class="sag">%${oranD.toFixed(0)}</td></tr>`;
+					})
+					.join('');
+			} catch {
+				/* sicil olmadan da oyun oynanabilir */
+			}
+		}
+
+		yeniOyunBaslat();
+		sicilYukle();
+	</script>
+
+	<style>
+		.grafik-alani {
+			width: 100%;
+			border: 1px solid var(--kenarlik);
+			border-radius: 12px;
+			overflow: hidden;
+			background: #faf9f5;
+		}
+		.grafik-atif {
+			margin: 8px 0 0;
+			font-size: 11px;
+			color: var(--metin-ikincil);
+		}
+		.tahmin-dugmeleri {
+			display: flex;
+			gap: 10px;
+			margin-top: 16px;
+		}
+		.tahmin {
+			flex-grow: 1;
+			height: 52px;
+			border-radius: 10px;
+			border: 0;
+			font: inherit;
+			font-size: 16px;
+			font-weight: 600;
+			color: #fff;
+			cursor: pointer;
+		}
+		.tahmin:disabled {
+			opacity: 0.6;
+			cursor: default;
+		}
+		.tahmin.yukselir {
+			background: var(--yukselis);
+		}
+		.tahmin.duser {
+			background: var(--dusus);
+		}
+		.sonuc-alani {
+			margin-top: 16px;
+			padding-top: 16px;
+			border-top: 1px solid var(--cizgi);
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+		.sonuc-rozet {
+			display: inline-flex;
+			align-self: flex-start;
+			font-size: 13px;
+			font-weight: 700;
+			padding: 4px 12px;
+			border-radius: 20px;
+		}
+		.sonuc-rozet.dogru {
+			background: #e3f2ea;
+			color: var(--yukselis);
+		}
+		.sonuc-rozet.yanlis {
+			background: #f8e4e2;
+			color: var(--dusus);
+		}
+		.sonuc-alani h3 {
+			margin: 0;
+			font-size: 18px;
+		}
+		.sonuc-alani p {
+			margin: 0;
+			font-size: 14px;
+			color: var(--metin-ikincil);
+		}
+		.yeni-oyun {
+			align-self: flex-start;
+			margin-top: 8px;
+			height: 44px;
+			padding: 0 20px;
+			border-radius: 10px;
+			border: 0;
+			background: var(--marka);
+			color: #fff;
+			font: inherit;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+
+		.skor-izgara {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 16px;
+		}
+		.skor-kart {
+			background: var(--kart);
+			border: 1px solid var(--kenarlik);
+			border-radius: 14px;
+			padding: 18px 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			font-size: 13px;
+			color: var(--metin-ikincil);
+		}
+		.skor-kart.vurgu {
+			background: var(--koyu);
+			border-color: var(--koyu);
+			color: #aeb3bf;
+		}
+		.skor-kart strong {
+			font-family: var(--font-baslik);
+			font-size: 30px;
+			color: var(--metin);
+		}
+		.skor-kart.vurgu strong {
+			color: var(--kehribar);
+		}
+
+		.bos {
+			font-size: 14px;
+			color: var(--metin-ikincil);
+			padding: 24px;
+			text-align: center;
+			background: #faf9f5;
+			border-radius: 10px;
+		}
+		.genel-sicil {
+			display: flex;
+			align-items: baseline;
+			gap: 10px;
+			margin-bottom: 16px;
+			font-size: 13px;
+			color: var(--metin-ikincil);
+		}
+		.genel-sicil strong {
+			font-family: var(--font-baslik);
+			font-size: 20px;
+			color: var(--metin);
+			margin-right: 16px;
+		}
+		.tablo-sarici {
+			overflow-x: auto;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 13px;
+		}
+		th {
+			text-align: left;
+			font-size: 11px;
+			font-weight: 600;
+			color: var(--metin-ikincil);
+			padding: 0 10px 8px;
+			border-bottom: 1px solid var(--cizgi);
+			text-transform: uppercase;
+		}
+		th.sag {
+			text-align: right;
+		}
+		td {
+			padding: 8px 10px;
+			border-bottom: 1px solid var(--cizgi);
+		}
+		td.sag {
+			text-align: right;
+		}
+
+		@media (max-width: 899px) {
+			.skor-izgara {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</AnaLayout>
