@@ -12,76 +12,89 @@ const bugun = bugunIstanbul();
 ---
 
 <AnaLayout baslik="Yönetim paneli">
-	<SayfaBasligi baslik="Yönetim paneli" ust="PANEL" aciklama="Öneri satırlarını tek tek ekle, kontrol et, kaydet.">
+	<SayfaBasligi baslik="Yönetim paneli" ust="PANEL" aciklama="Bülteni yapıştır, sistem alanlara ayırsın, kontrol edip kaydet.">
 		<Rozet tur="marka">Sadece Bilal</Rozet>
 	</SayfaBasligi>
 
-	<Kart baslik="1. Öneri ekle" altBaslik="Her kutuya ilgili bilgiyi yaz, sonra Satır ekle'ye bas">
-		<label class="tarih-alan">
-			<span>Öneri tarihi</span>
-			<input type="date" id="tarih" value={bugun} />
-		</label>
-		<div class="form-izgara">
+	<Kart baslik="1. Bülteni yapıştır" altBaslik="Kurumdan gelen metni olduğu gibi yapıştır — sistem alanlara ayırmaya çalışır">
+		<div class="tarih-alan">
 			<label>
-				<span>Kurum *</span>
-				<input type="text" id="fKurum" placeholder="örn. Garanti BBVA Yatırım" autofocus />
-			</label>
-			<label>
-				<span>Hisse kodu *</span>
-				<input type="text" id="fHisse" placeholder="örn. THYAO" />
-			</label>
-			<label>
-				<span>Tür</span>
-				<select id="fTur">
-					<option>Günlük</option>
-					<option>Haftalık</option>
-					<option>Model portföy</option>
-					<option>Takip listesi</option>
-				</select>
-			</label>
-			<label>
-				<span>Giriş</span>
-				<input type="text" id="fGiris" placeholder="isteğe bağlı" />
-			</label>
-			<label>
-				<span>Hedef *</span>
-				<input type="text" id="fHedef" placeholder="örn. 365" />
-			</label>
-			<label>
-				<span>Stop</span>
-				<input type="text" id="fStop" placeholder="isteğe bağlı" />
-			</label>
-			<label>
-				<span>Potansiyel</span>
-				<input type="text" id="fPotansiyel" placeholder="örn. +%10,6" />
+				<span>Öneri tarihi</span>
+				<input type="date" id="tarih" value={bugun} />
 			</label>
 		</div>
-		<p id="formHata" class="durum-mesaji hata"></p>
+		<p class="ipucu">
+			Serbest metin de olur ("Garanti BBVA Yatırım: THYAO için 330 TL girişle 365 TL hedef, 310 TL
+			stop, günlük işlem"), Excel/Sheets'ten kopyalanmış satırlar da. Birden fazla öneriyi alt alta
+			veya boş satırla ayırarak yapıştırabilirsin — her biri ayrı satır olarak ayrıştırılır.
+		</p>
+		<textarea id="bulten" rows="7" placeholder="Bülteni buraya yapıştır..."></textarea>
 		<div class="dugmeler">
-			<Buton id="ekleDugme" type="button">Satır ekle</Buton>
+			<Buton id="ayristirDugme" type="button">Ayrıştır ve önizle</Buton>
 		</div>
 	</Kart>
 
 	<details class="toplu">
-		<summary>Çok satırı Excel/Sheets'ten toplu yapıştırmak istersen (isteğe bağlı)</summary>
+		<summary>Tek satırı elle, kutu kutu eklemek istersen (isteğe bağlı)</summary>
 		<div class="toplu-icerik">
-			<p class="ipucu">
-				Excel veya Google Sheets'te satırları seçip kopyala, aşağıya yapıştır — sütunlar otomatik
-				ayrılır. Sıra: Kurum, Hisse, Tür, Giriş, Hedef, Stop, Potansiyel.
-			</p>
-			<textarea id="girdi" rows="6" placeholder="Excel/Sheets'ten kopyaladığın satırları buraya yapıştır"></textarea>
+			<div class="form-izgara">
+				<label>
+					<span>Kurum *</span>
+					<input type="text" id="fKurum" placeholder="örn. Garanti BBVA Yatırım" />
+				</label>
+				<label>
+					<span>Hisse kodu *</span>
+					<input type="text" id="fHisse" placeholder="örn. THYAO" />
+				</label>
+				<label>
+					<span>Tür</span>
+					<select id="fTur">
+						<option>Günlük</option>
+						<option>Haftalık</option>
+						<option>Model portföy</option>
+						<option>Takip listesi</option>
+					</select>
+				</label>
+				<label>
+					<span>Giriş</span>
+					<input type="text" id="fGiris" placeholder="isteğe bağlı" />
+				</label>
+				<label>
+					<span>Hedef *</span>
+					<input type="text" id="fHedef" placeholder="örn. 365" />
+				</label>
+				<label>
+					<span>Stop</span>
+					<input type="text" id="fStop" placeholder="isteğe bağlı" />
+				</label>
+				<label>
+					<span>Potansiyel</span>
+					<input type="text" id="fPotansiyel" placeholder="örn. +%10,6" />
+				</label>
+			</div>
+			<p id="formHata" class="durum-mesaji hata"></p>
 			<div class="dugmeler">
-				<Buton id="cevirDugme" tur="ikincil" type="button">Yapıştırılanı listeye ekle</Buton>
+				<Buton id="ekleDugme" tur="ikincil" type="button">Satır ekle</Buton>
 			</div>
 		</div>
 	</details>
 
-	<Kart baslik="2. Kontrol et ve onayla" altBaslik="Yanlış satırı listeden kaldırabilirsin">
+	<Kart baslik="2. Kontrol et ve onayla" altBaslik="Otomatik ayrıştırılan alanları buradan düzeltebilirsin">
 		<div id="onizlemeBos" class="bos">Henüz satır eklemedin.</div>
 		<div id="onizlemeSarici" class="tablo-sarici" style="display:none">
 			<table>
 				<thead>
-					<tr><th>Kurum</th><th>Hisse</th><th>Tür</th><th>Giriş</th><th>Hedef</th><th>Stop</th><th>Potansiyel</th><th></th></tr>
+					<tr>
+						<th></th>
+						<th>Kurum</th>
+						<th>Hisse</th>
+						<th>Tür</th>
+						<th>Giriş</th>
+						<th>Hedef</th>
+						<th>Stop</th>
+						<th>Potansiyel</th>
+						<th></th>
+					</tr>
 				</thead>
 				<tbody id="onizlemeGovde"></tbody>
 			</table>
@@ -107,9 +120,13 @@ const bugun = bugunIstanbul();
 	</Kart>
 
 	<script>
-		type Satir = { kurum: string; hisse: string; tur: string; giris: string; hedef: string; stop: string; potansiyel: string };
+		import { bulteniAyristir, type TaslakSatir } from '../../lib/ayristir';
 
 		const tarihEl = document.getElementById('tarih') as HTMLInputElement;
+
+		const bultenEl = document.getElementById('bulten') as HTMLTextAreaElement;
+		const ayristirDugmeEl = document.getElementById('ayristirDugme')!;
+
 		const fKurum = document.getElementById('fKurum') as HTMLInputElement;
 		const fHisse = document.getElementById('fHisse') as HTMLInputElement;
 		const fTur = document.getElementById('fTur') as HTMLSelectElement;
@@ -119,9 +136,6 @@ const bugun = bugunIstanbul();
 		const fPotansiyel = document.getElementById('fPotansiyel') as HTMLInputElement;
 		const formHataEl = document.getElementById('formHata')!;
 		const ekleDugmeEl = document.getElementById('ekleDugme')!;
-
-		const girdiEl = document.getElementById('girdi') as HTMLTextAreaElement;
-		const cevirDugmeEl = document.getElementById('cevirDugme')!;
 
 		const onizlemeBosEl = document.getElementById('onizlemeBos')!;
 		const onizlemeSariciEl = document.getElementById('onizlemeSarici')!;
@@ -135,7 +149,22 @@ const bugun = bugunIstanbul();
 		const kayitliGovdeEl = document.getElementById('kayitliGovde')!;
 		const yenileDugmeEl = document.getElementById('yenileDugme')!;
 
+		type Satir = TaslakSatir;
 		let satirlar: Satir[] = [];
+
+		const ALANLAR: (keyof Satir)[] = ['kurum', 'hisse', 'tur', 'giris', 'hedef', 'stop', 'potansiyel'];
+
+		function hucreYaz(satir: Satir, alan: keyof Satir, index: number): string {
+			const deger = String(satir[alan] ?? '');
+			const eksikMi = (alan === 'kurum' || alan === 'hisse' || alan === 'hedef') && !deger;
+			return `<input type="text" class="hucre ${eksikMi ? 'eksik' : ''}" data-index="${index}" data-alan="${alan}" value="${deger.replace(/"/g, '&quot;')}" />`;
+		}
+
+		function guvenRozeti(skor: number): string {
+			if (skor >= 3) return '<span class="guven yuksek" title="Kurum, hisse ve hedef bulundu">✓</span>';
+			if (skor >= 1) return '<span class="guven orta" title="Bazı alanlar eksik, kontrol et">?</span>';
+			return '<span class="guven dusuk" title="Neredeyse hiçbir alan bulunamadı, elle doldur">!</span>';
+		}
 
 		function onizlemeCiz() {
 			if (satirlar.length === 0) {
@@ -148,7 +177,11 @@ const bugun = bugunIstanbul();
 			onizlemeGovdeEl.innerHTML = satirlar
 				.map(
 					(s, i) =>
-						`<tr><td>${s.kurum}</td><td>${s.hisse}</td><td>${s.tur || 'Günlük'}</td><td>${s.giris || '—'}</td><td>${s.hedef}</td><td>${s.stop || '—'}</td><td>${s.potansiyel || '—'}</td><td><button type="button" class="sil" data-kaldir="${i}">Kaldır</button></td></tr>`,
+						`<tr>
+							<td class="guven-hucre">${guvenRozeti(s.guvenSkoru ?? 3)}</td>
+							${ALANLAR.map((a) => `<td>${hucreYaz(s, a, i)}</td>`).join('')}
+							<td><button type="button" class="sil" data-kaldir="${i}">Kaldır</button></td>
+						</tr>`,
 				)
 				.join('');
 		}
@@ -161,7 +194,36 @@ const bugun = bugunIstanbul();
 			onizlemeCiz();
 		});
 
-		// --- 1. Tek tek ekleme formu ---
+		// Hücre düzenleme: input event delegation
+		onizlemeGovdeEl.addEventListener('input', (e) => {
+			const hedef = e.target as HTMLInputElement;
+			if (!hedef.classList.contains('hucre')) return;
+			const index = Number(hedef.dataset.index);
+			const alan = hedef.dataset.alan as keyof Satir;
+			if (!satirlar[index]) return;
+			(satirlar[index] as any)[alan] = alan === 'hisse' ? hedef.value.toUpperCase() : hedef.value;
+			hedef.classList.toggle('eksik', (alan === 'kurum' || alan === 'hisse' || alan === 'hedef') && !hedef.value);
+		});
+
+		// --- 1. Bülten yapıştır + akıllı ayrıştır ---
+		function ayristirVeEkle() {
+			const yeni = bulteniAyristir(bultenEl.value);
+			if (yeni.length === 0) return;
+			satirlar.push(...yeni);
+			onizlemeCiz();
+			bultenEl.value = '';
+			durumMesajiEl.textContent = `${yeni.length} satır ayrıştırıldı, aşağıdan kontrol et.`;
+			durumMesajiEl.className = 'durum-mesaji basarili';
+		}
+		ayristirDugmeEl.addEventListener('click', ayristirVeEkle);
+		bultenEl.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+				e.preventDefault();
+				ayristirVeEkle();
+			}
+		});
+
+		// --- 2. Tek tek ekleme formu (isteğe bağlı) ---
 		function satirEkle() {
 			const kurum = fKurum.value.trim();
 			const hisse = fHisse.value.trim().toUpperCase();
@@ -179,9 +241,9 @@ const bugun = bugunIstanbul();
 				hedef,
 				stop: fStop.value.trim(),
 				potansiyel: fPotansiyel.value.trim(),
+				guvenSkoru: 3,
 			});
 			onizlemeCiz();
-			// Formu temizle, bir sonraki satır için hazır olsun (tarih ve tür kalsın)
 			fKurum.value = '';
 			fHisse.value = '';
 			fGiris.value = '';
@@ -191,7 +253,6 @@ const bugun = bugunIstanbul();
 			fKurum.focus();
 		}
 		ekleDugmeEl.addEventListener('click', satirEkle);
-		// Hızlı veri girişi: hangi kutudaysan olsun Enter'a basınca satır eklensin
 		[fKurum, fHisse, fTur, fGiris, fHedef, fStop, fPotansiyel].forEach((el) => {
 			el.addEventListener('keydown', (e) => {
 				if (e.key === 'Enter') {
@@ -201,41 +262,15 @@ const bugun = bugunIstanbul();
 			});
 		});
 
-		// --- 2. Toplu yapıştırma (Excel/Sheets) ---
-		function satirlariAyristir(metin: string): Satir[] {
-			return metin
-				.split('\n')
-				.map((s) => s.trim())
-				.filter(Boolean)
-				.map((satir) => {
-					let parcalar: string[];
-					if (satir.includes('\t')) parcalar = satir.split('\t');
-					else if (satir.includes('|')) parcalar = satir.split('|');
-					else if (satir.includes(';')) parcalar = satir.split(';');
-					else if (satir.includes(',')) parcalar = satir.split(',');
-					else parcalar = satir.split(/\s{2,}/);
-					parcalar = parcalar.map((p) => p.trim());
-					const [kurum = '', hisse = '', tur = '', giris = '', hedef = '', stop = '', potansiyel = ''] = parcalar;
-					return { kurum, hisse: hisse.toUpperCase(), tur, giris, hedef, stop, potansiyel };
-				})
-				.filter((s) => s.kurum && s.hisse);
-		}
-
-		cevirDugmeEl.addEventListener('click', () => {
-			const yeni = satirlariAyristir(girdiEl.value);
-			satirlar.push(...yeni);
-			onizlemeCiz();
-			girdiEl.value = '';
-		});
-
 		// --- Kaydetme ---
 		kaydetDugmeEl.addEventListener('click', async () => {
 			const gecerli = satirlar.filter((s) => s.kurum && s.hisse && s.hedef);
 			if (gecerli.length === 0) {
-				durumMesajiEl.textContent = 'Önce en az bir satır ekle (kurum, hisse ve hedef zorunlu).';
+				durumMesajiEl.textContent = 'Önce en az bir geçerli satır oluştur (kurum, hisse ve hedef zorunlu).';
 				durumMesajiEl.className = 'durum-mesaji hata';
 				return;
 			}
+			const eksikSayisi = satirlar.length - gecerli.length;
 			(kaydetDugmeEl as HTMLButtonElement).disabled = true;
 			durumMesajiEl.textContent = 'Kaydediliyor...';
 			durumMesajiEl.className = 'durum-mesaji';
@@ -247,9 +282,12 @@ const bugun = bugunIstanbul();
 				});
 				const veri = await yanit.json();
 				if (!yanit.ok) throw new Error(veri.hata || 'Kayıt başarısız.');
-				durumMesajiEl.textContent = `${veri.eklenen} öneri kaydedildi.`;
+				durumMesajiEl.textContent =
+					eksikSayisi > 0
+						? `${veri.eklenen} öneri kaydedildi. ${eksikSayisi} satır eksik bilgi yüzünden atlandı (listede kaldı, düzeltip tekrar kaydedebilirsin).`
+						: `${veri.eklenen} öneri kaydedildi.`;
 				durumMesajiEl.className = 'durum-mesaji basarili';
-				satirlar = [];
+				satirlar = satirlar.filter((s) => !gecerli.includes(s));
 				onizlemeCiz();
 				kayitliListeYukle();
 			} catch (e) {
@@ -314,6 +352,7 @@ const bugun = bugunIstanbul();
 			display: grid;
 			grid-template-columns: repeat(4, minmax(0, 1fr));
 			gap: 14px;
+			margin-top: 12px;
 		}
 		label {
 			display: flex;
@@ -356,9 +395,6 @@ const bugun = bugunIstanbul();
 			color: var(--marka);
 		}
 		.toplu-icerik {
-			display: flex;
-			flex-direction: column;
-			gap: 12px;
 			padding-bottom: 20px;
 		}
 		.ipucu {
@@ -402,15 +438,69 @@ const bugun = bugunIstanbul();
 			font-weight: 600;
 			letter-spacing: 0.5px;
 			color: var(--metin-ikincil);
-			padding: 0 10px 8px;
+			padding: 0 8px 8px;
 			border-bottom: 1px solid var(--cizgi);
 			text-transform: uppercase;
 			white-space: nowrap;
 		}
 		td {
-			padding: 8px 10px;
+			padding: 6px;
 			border-bottom: 1px solid var(--cizgi);
 			white-space: nowrap;
+		}
+		.hucre {
+			height: 36px;
+			min-width: 90px;
+			border: 1px solid transparent;
+			border-radius: 6px;
+			padding: 0 8px;
+			font: inherit;
+			font-size: 13px;
+			font-weight: 500;
+			background: transparent;
+			color: var(--metin);
+			width: 100%;
+			box-sizing: border-box;
+		}
+		.hucre:hover {
+			border-color: var(--kenarlik);
+			background: #faf9f5;
+		}
+		.hucre:focus {
+			border-color: var(--marka);
+			background: #fff;
+			outline: none;
+		}
+		.hucre.eksik {
+			background: #f8e4e2;
+			border-color: #edc7c2;
+		}
+		.guven-hucre {
+			text-align: center;
+			width: 28px;
+		}
+		.guven {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			font-size: 11px;
+			font-weight: 700;
+			cursor: help;
+		}
+		.guven.yuksek {
+			background: #e3f2ea;
+			color: var(--yukselis);
+		}
+		.guven.orta {
+			background: #fbf0dd;
+			color: var(--etiket-metin);
+		}
+		.guven.dusuk {
+			background: #f8e4e2;
+			color: var(--dusus);
 		}
 		.sil {
 			border: 0;
