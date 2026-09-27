@@ -71,8 +71,8 @@ import Rozet from '../components/Rozet.astro';
 	</Kart>
 
 	<script>
-		import { createChart, LineSeries, ColorType } from 'lightweight-charts';
-		import { desenUret, cozumUret, DESEN_BILGISI, type UretilenDesen } from '../lib/desenler';
+		import { createChart, CandlestickSeries, ColorType } from 'lightweight-charts';
+		import { desenUret, cozumUret, serigeMumCevir, DESEN_BILGISI, type UretilenDesen } from '../lib/desenler';
 
 		const grafikAlaniEl = document.getElementById('grafikAlani')!;
 		const sonucAlaniEl = document.getElementById('sonucAlani')!;
@@ -95,19 +95,26 @@ import Rozet from '../components/Rozet.astro';
 			height: 320,
 			autoSize: true,
 		});
-		const seri = chart.addSeries(LineSeries, { color: '#3438C9', lineWidth: 2 });
-		const cozumSerisi = chart.addSeries(LineSeries, {
-			color: '#9A9EA8',
-			lineWidth: 2,
-			lineStyle: 2, // kesikli
+		// Klasik TradingView mum renkleri: yükseliş yeşil, düşüş kırmızı (bkz. tasarım sistemi)
+		const mumSerisi = chart.addSeries(CandlestickSeries, {
+			upColor: '#0F7A4B',
+			downColor: '#B83227',
+			wickUpColor: '#0F7A4B',
+			wickDownColor: '#B83227',
+			borderVisible: false,
 		});
 
-		type Puan = { time: number; value: number };
 		const GUN = 86400;
 		let baslangicZaman = Math.floor(Date.UTC(2024, 0, 1) / 1000);
 
-		function seriyeCevir(degerler: number[], baslaZaman: number): Puan[] {
-			return degerler.map((v, i) => ({ time: baslaZaman + i * GUN, value: Math.round(v * 100) / 100 }));
+		function mumVerisiUret(mumlar: { open: number; high: number; low: number; close: number }[], baslaZaman: number) {
+			return mumlar.map((m, i) => ({
+				time: baslaZaman + i * GUN,
+				open: Math.round(m.open * 100) / 100,
+				high: Math.round(m.high * 100) / 100,
+				low: Math.round(m.low * 100) / 100,
+				close: Math.round(m.close * 100) / 100,
+			}));
 		}
 
 		let mevcutDesen: UretilenDesen | null = null;
@@ -136,13 +143,16 @@ import Rozet from '../components/Rozet.astro';
 		enUzunSeriEl.textContent = String(enUzunSeri);
 		oturumSeriEl.textContent = String(mevcutSeri);
 
+		let mevcutMumlar: ReturnType<typeof mumVerisiUret> = [];
+
 		function yeniOyunBaslat() {
 			mevcutDesen = desenUret();
 			tahminYapildi = false;
 			sonucAlaniEl.hidden = true;
 			tahminDugmeleri.forEach((b) => (b.disabled = false));
-			cozumSerisi.setData([]);
-			seri.setData(seriyeCevir(mevcutDesen.seri, baslangicZaman));
+			const mumlar = serigeMumCevir(mevcutDesen.seri);
+			mevcutMumlar = mumVerisiUret(mumlar, baslangicZaman);
+			mumSerisi.setData(mevcutMumlar);
 			chart.timeScale().fitContent();
 		}
 
@@ -169,9 +179,11 @@ import Rozet from '../components/Rozet.astro';
 				const dogruMu = tahmin === mevcutDesen.dogruYon;
 
 				const cozum = cozumUret(mevcutDesen);
-				const sonBaslangic = baslangicZaman + (mevcutDesen.seri.length - 1) * GUN;
-				const cozumNoktalari = seriyeCevir([mevcutDesen.seri[mevcutDesen.seri.length - 1], ...cozum], sonBaslangic);
-				cozumSerisi.setData(cozumNoktalari);
+				const sonKapanis = mevcutMumlar[mevcutMumlar.length - 1].close;
+				const cozumMumlari = serigeMumCevir(cozum, sonKapanis);
+				const sonBaslangic = baslangicZaman + mevcutMumlar.length * GUN;
+				const tumMumlar = [...mevcutMumlar, ...mumVerisiUret(cozumMumlari, sonBaslangic)];
+				mumSerisi.setData(tumMumlar);
 				chart.timeScale().fitContent();
 
 				const bilgi = DESEN_BILGISI[mevcutDesen.desen];

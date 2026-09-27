@@ -77,6 +77,12 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 
 **Görev 6'nın tamamı bitti.** Bilal'in verdiği 6 maddelik listenin tamamı tamamlandı: Teminat simülatörü derinleştirme, Grafik oyunu, Panel akıllı ayrıştırma, Öneri Merkezi/hisse bağlantısı, gözden geçirme, ve bütçe kalırsa istenen üç ek modül (Öneri Karnesi, Fon Akıllı Para, Takvim ailesi) — hepsi canlıda, GitHub'da, test edilmiş durumda.
 
+### 10. Grafik oyunu: mum grafiğine (candlestick) çevrildi (27.09.2026, Bilal talebiyle)
+- Bilal talebi: "grafik oyununda grafiği mum grafik yap, fitilleri ekle, yükselen mumlar yeşil düşenler kırmızı olsun, klasik tradingview görünümü gibi olsun".
+- `src/lib/desenler.ts`'e `serigeMumCevir(seri, oncekiKapanis?)` eklendi: var olan "kapanış serisi" mantığını bozmadan, her nokta için önceki kapanışı açılış sayıp gövde büyüklüğüyle orantılı, gerçekçi fitiller (yüksek/düşük) üretiyor. Desen üretim algoritmalarının kendisine dokunulmadı (OBO/TOBO/vb. hâlâ aynı geometriyle üretiliyor), sadece görselleştirme katmanı mum oldu.
+- `/grafik-oyunu`: `LineSeries` yerine `CandlestickSeries` — yükseliş `#0F7A4B` (tasarım sistemindeki yeşil), düşüş `#B83227` (kırmızı), fitil renkleri gövdeyle aynı, `borderVisible:false` (düz/dolu TradingView görünümü). Tahmin sonrası "çözüm" artık ayrı kesikli çizgi değil, AYNI mum serisine eklenen devam mumları — kesintisiz, tek parça bir grafik.
+- Canlıda görsel olarak doğrulandı: masaüstü ve mobilde net, okunaklı mum grafiği; tahmin sonrası devam mumları sorunsuz ekleniyor.
+
 ## Bilal'le teyit edilecekler
 
 - **Teminat simülatörü grup yüzdeleri (öncelikli):** A/B/C/D grupları ve %90/70/50/0 haircut + %50/60/75/100 başlangıç + %35/40/50/100 sürdürme rakamları genel/tipik varsayımdır, gerçek BIST duyurusu veya Bilal'in kullandığı aracı kurumun tam listesiyle karşılaştırılmadı. Kendi kurumunun "kredili işleme kabul edilen paylar ve teminat oranları" listesi varsa (genelde kurumun web sitesinde PDF olarak yayınlanır), bana verirse rakamları gerçeğe göre güncellerim.

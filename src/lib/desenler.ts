@@ -155,3 +155,29 @@ export function cozumUret(desen: UretilenDesen): number[] {
 	const devam = araDegerler(sonDeger, sonDeger + yon * TABAN * 0.16, 14, GURULTU * 1.2);
 	return devam;
 }
+
+// --- Mum (candlestick) verisine çevirme ---
+// `seri` bir dizi "kapanış" değeri gibi düşünülür; her adım için önceki
+// kapanış = bu mumun açılışı, gövdenin ötesine uzanan fitiller (high/low)
+// gövde büyüklüğüne göre ölçeklenerek eklenir — gerçekçi mum görünümü verir.
+
+export type Mum = { open: number; high: number; low: number; close: number };
+
+export function serigeMumCevir(seri: number[], oncekiKapanis?: number): Mum[] {
+	const mumlar: Mum[] = [];
+	let acilis = oncekiKapanis ?? seri[0] - gurultu(GURULTU * 0.6);
+	for (const kapanis of seri) {
+		const govde = Math.abs(kapanis - acilis);
+		const fitilTaban = TABAN * 0.0015; // düz mumlarda bile küçük bir fitil olsun
+		const ustFitil = govde * (0.15 + Math.random() * 0.5) + fitilTaban;
+		const altFitil = govde * (0.15 + Math.random() * 0.5) + fitilTaban;
+		mumlar.push({
+			open: acilis,
+			close: kapanis,
+			high: Math.max(acilis, kapanis) + ustFitil,
+			low: Math.min(acilis, kapanis) - altFitil,
+		});
+		acilis = kapanis;
+	}
+	return mumlar;
+}
