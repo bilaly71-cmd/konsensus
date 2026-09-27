@@ -9,7 +9,7 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 2. [x] Grafik tamamlama oyunu — sentetik desen üretimi (OBO, TOBO, çift tepe/dip, üçgenler, bayrak)
 3. [x] Hisse önerileri veri girişi — akıllı ayrıştırma (serbest metinden otomatik alan çıkarma)
 4. [ ] Öneri Merkezi + hisse sayfalarını 3'teki veri yapısına tam bağla
-5. [ ] Eksik/yüzeysel kalan her şeyi gözden geçir, derinleştir
+5. [~] Eksik/yüzeysel kalan her şeyi gözden geçir, derinleştir (sürüyor)
 6. [ ] Bütçe kalırsa: Öneri Karnesi, Fon Akıllı Para, Takvim
 
 ## Kararlar ve gerekçeler
@@ -34,6 +34,12 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 - Panel artık **3 katmanlı**: (1) bülten yapıştır + akıllı ayrıştır (birincil yöntem), (2) katlanır "tek tek ekle" formu (istisnai/tek satır durumlar için), (3) düzenlenebilir önizleme tablosu — her hücre doğrudan tıklanıp düzeltilebiliyor (eskiden sadece "satırı sil, formdan yeniden ekle" vardı, artık hatalı bir hücreyi tek tıkla düzeltmek yeterli). Her satırın başında bir güven rozeti (✓ yüksek / ? orta / ! düşük) var, kaç alanın güvenle bulunduğunu gösteriyor.
 - Gerçek örnek cümlelerle test edildi (bkz. konuşma günlüğü): "Garanti BBVA Yatırım: THYAO hissesi için 330 TL girişle 365 TL hedef, 310 TL stop", "Deniz Yatırım THYAO Model portföy hedef 390 TL potansiyel %18,2", "Şeker Yatırım: SISE hissesi için haftalık işlemde 45 TL giriş, 50 TL hedef" — üçü de tüm alanları doğru çıkardı. Test sırasında 3 gerçek hata bulundu ve düzeltildi: (a) kurum adı içindeki kısaltma ("BBVA") hisse kodu sanılıyordu, (b) "330 TL girişle 365 TL hedef" gibi cümlelerde giriş değeri yanlışlıkla hedefin sayısını alıyordu, (c) kurum adı olmayan bir ":" (ör. "hedef: 120") kurum ayracı sanılıyordu.
 - Ana sayfa, `/oneriler` ve `/hisse/[kod]` zaten Adım 3-5'te D1'e bağlanmıştı; bu değişiklikle veri girişi kolaylaştı ama okuma tarafında değişiklik gerekmedi (Görev 4 zaten karşılanmış durumda, ayrıca doğrulandı).
+
+### 4. Görev 4 doğrulaması + Görev 5 (gözden geçirme) (27.09.2026)
+- Görev 4 (Öneri Merkezi + hisse sayfalarının veri yapısına bağlanması) önceki oturumda zaten yapılmıştı; kod taraması ile doğrulandı, ek iş gerekmedi.
+- Gözden geçirmede bulunan yüzeysel nokta: ana sayfadaki "Hedefi yükselen" / "Hedefi düşen" KPI'ları hep "—" gösteriyordu ("yakında" notuyla bırakılmıştı). Şimdi gerçek: `hedefRevizyonlariHesapla` aynı kurumun aynı hisse için önceki tarihli girişiyle bugünkü girişini karşılaştırıyor, farkı buluyor. Ana sayfaya ayrıca yeni bir "Hedef revizyonları" kartı eklendi (tasarım mockup'ında vardı, siteye hiç eklenmemişti) — yükselen/düşen oku, eski→yeni hedef, ilgili hisse sayfasına link.
+- Gerçek veriyle uçtan uca test edildi (iki farklı tarihte aynı kurum+hisse için hedef girildi, KPI ve kart doğru güncellendi, test verisi temizlendi).
+- Devam eden gözden geçirme: sırada ana sayfadaki "Şirket haberleri"/"Piyasa haberleri" kutularının hâlâ statik örnek metin olması var — bunu Görev 6 sonrası, zaman kalırsa ele alacağım (aynı panel-yapıştır-kaydet deseniyle çözülebilir ama görev listesinde açıkça istenmedi, önceliklendirmedim).
 
 ## Bilal'le teyit edilecekler
 

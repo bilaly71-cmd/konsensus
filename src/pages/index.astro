@@ -9,11 +9,15 @@ import Buton from '../components/Buton.astro';
 import Tablo from '../components/Tablo.astro';
 import { bugunIstanbul } from '../lib/tarih';
 import { getDb } from '../lib/db';
-import { tariheGoreOneriler, konsensusHesapla } from '../lib/oneriler';
+import { tariheGoreOneriler, konsensusHesapla, tumOneriler, hedefRevizyonlariHesapla } from '../lib/oneriler';
 
 const db = getDb();
 const bugun = bugunIstanbul();
 const bugunkuOneriler = await tariheGoreOneriler(db, bugun);
+const tumKayitlar = await tumOneriler(db);
+const revizyonlar = hedefRevizyonlariHesapla(tumKayitlar, bugun);
+const revizyonYukselen = revizyonlar.filter((r) => r.yon === 'yukselir').length;
+const revizyonDusen = revizyonlar.filter((r) => r.yon === 'duser').length;
 
 const oneriSatirlari = bugunkuOneriler.map((o) => ({
 	kurum: o.kurum,
@@ -31,8 +35,8 @@ const enCokKurum = konsensusListesi[0]?.n || 1;
 const kpiler = [
 	{ ad: 'Bugünkü öneri', deger: String(bugunkuOneriler.length), alt: 'kurumlardan derlenir' },
 	{ ad: 'Konsensüs hissesi', deger: String(konsensusListesi.length), alt: 'en az 2 kurumun önerdiği' },
-	{ ad: 'Hedefi yükselen', deger: '—', alt: 'yakında: hedef geçmişi' },
-	{ ad: 'Hedefi düşen', deger: '—', alt: 'yakında: hedef geçmişi' },
+	{ ad: 'Hedefi yükselen', deger: String(revizyonYukselen), alt: 'bugün, önceki girişe göre' },
+	{ ad: 'Hedefi düşen', deger: String(revizyonDusen), alt: 'bugün, önceki girişe göre' },
 ];
 
 const sirketHaberleri = [
@@ -142,6 +146,28 @@ const oneriKolonlari = [
 		<Tablo kolonlar={oneriKolonlari} satirlar={oneriSatirlari} bosMesaj="Bugün için henüz öneri girilmedi." />
 	</Kart>
 
+	{
+		revizyonlar.length > 0 && (
+			<Kart baslik="Hedef revizyonları" altBaslik="Bugün, aynı kurumun önceki girişine göre">
+				<div class="revizyon-listesi">
+					{revizyonlar.map((r) => (
+						<a href={`/hisse/${r.hisse}`} class="revizyon-satir">
+							<span class:list={['revizyon-ok', r.yon]}>{r.yon === 'yukselir' ? '▲' : '▼'}</span>
+							<span class="revizyon-orta">
+								<span class="revizyon-hisse">{r.hisse}</span>
+								<span class="revizyon-kurum">{r.kurum}</span>
+							</span>
+							<span class="revizyon-degerler">
+								<span class="eski">{r.eskiHedef} →</span>
+								<span class:list={['yeni', r.yon]}>{r.yeniHedef}</span>
+							</span>
+						</a>
+					))}
+				</div>
+			</Kart>
+		)
+	}
+
 	<section class="izgara">
 		<Kart etiket="ARAÇLAR" baslik="Teminat simülatörü" class="genis">
 			<p class="metin">
@@ -157,6 +183,75 @@ const oneriKolonlari = [
 </AnaLayout>
 
 <style>
+	.revizyon-listesi {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.revizyon-satir {
+		display: grid;
+		grid-template-columns: 32px minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 14px;
+		padding: 8px 0;
+		border-bottom: 1px solid var(--cizgi);
+		color: var(--metin);
+	}
+	.revizyon-satir:last-child {
+		border-bottom: 0;
+	}
+	.revizyon-ok {
+		width: 28px;
+		height: 28px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 13px;
+		font-weight: 700;
+	}
+	.revizyon-ok.yukselir {
+		background: #e3f2ea;
+		color: var(--yukselis);
+	}
+	.revizyon-ok.duser {
+		background: #f8e4e2;
+		color: var(--dusus);
+	}
+	.revizyon-orta {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+	.revizyon-hisse {
+		font-family: var(--font-mono);
+		font-weight: 500;
+		font-size: 14px;
+	}
+	.revizyon-kurum {
+		font-size: 12px;
+		color: var(--metin-ikincil);
+	}
+	.revizyon-degerler {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		white-space: nowrap;
+	}
+	.revizyon-degerler .eski {
+		font-size: 13px;
+		color: var(--metin-ikincil);
+	}
+	.revizyon-degerler .yeni {
+		font-size: 14px;
+		font-weight: 600;
+	}
+	.revizyon-degerler .yeni.yukselir {
+		color: var(--yukselis);
+	}
+	.revizyon-degerler .yeni.duser {
+		color: var(--dusus);
+	}
 	.konsensus-listesi {
 		display: flex;
 		flex-direction: column;
