@@ -1,14 +1,24 @@
 ---
-import BosSayfa from '../components/BosSayfa.astro';
+export const prerender = false;
+
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import TakvimListesi from '../components/TakvimListesi.astro';
+import { getDb } from '../lib/db';
+import { tureGoreTakvimEtkinlikleri } from '../lib/takvim';
+
+const db = getDb();
+const etkinlikler = await tureGoreTakvimEtkinlikleri(db, 'halka_arz');
 ---
 
-<BosSayfa
-	baslik="Halka arz"
-	grup="TAKVİM"
-	aciklama="Yaklaşan ve devam eden halka arzlar."
-	gelecekler={[
-		'Talep toplama tarihleri',
-		'Fiyat, lot ve dağıtım bilgileri',
-		'Geçmiş halka arzların performansı',
-	]}
-/>
+<AnaLayout baslik="Halka arz" aciklama="Yaklaşan ve devam eden halka arzlar.">
+	<SayfaBasligi baslik="Halka arz" ust="TAKVİM" aciklama="Yaklaşan ve devam eden halka arzlar.">
+		<Rozet>{etkinlikler.length} kayıt</Rozet>
+	</SayfaBasligi>
+
+	<Kart baslik="Halka arzlar">
+		<TakvimListesi etkinlikler={etkinlikler} bosMesaj="Henüz halka arz girilmedi." />
+	</Kart>
+</AnaLayout>

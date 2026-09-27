@@ -1,14 +1,36 @@
 ---
-import BosSayfa from '../components/BosSayfa.astro';
+export const prerender = false;
+
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import TakvimListesi from '../components/TakvimListesi.astro';
+import { getDb } from '../lib/db';
+import { tumTakvimEtkinlikleri } from '../lib/takvim';
+import { bugunIstanbul } from '../lib/tarih';
+
+const db = getDb();
+const tumu = await tumTakvimEtkinlikleri(db);
+const bugun = bugunIstanbul();
+const gelecek = tumu.filter((e) => e.tarih >= bugun);
+const gecmis = tumu.filter((e) => e.tarih < bugun).sort((a, b) => (a.tarih < b.tarih ? 1 : -1));
 ---
 
-<BosSayfa
-	baslik="Takvim"
-	grup="TAKVİM"
-	aciklama="Temettü, bedelsiz, genel kurul ve diğer şirket olayları."
-	gelecekler={[
-		'Haftalık şirket olayları takvimi',
-		'Temettü ve bedelsiz tarihleri',
-		'Hisseye göre filtre',
-	]}
-/>
+<AnaLayout baslik="Takvim" aciklama="Temettü, bedelsiz, genel kurul ve diğer şirket olayları.">
+	<SayfaBasligi baslik="Takvim" ust="TAKVİM" aciklama="Temettü, bedelsiz, genel kurul ve diğer şirket olayları.">
+		<Rozet>{gelecek.length} yaklaşan</Rozet>
+	</SayfaBasligi>
+
+	<Kart baslik="Yaklaşan etkinlikler">
+		<TakvimListesi etkinlikler={gelecek} bosMesaj="Yaklaşan etkinlik yok." />
+	</Kart>
+
+	{
+		gecmis.length > 0 && (
+			<Kart baslik="Geçmiş" altBaslik="Son eklenenler">
+				<TakvimListesi etkinlikler={gecmis.slice(0, 20)} />
+			</Kart>
+		)
+	}
+</AnaLayout>

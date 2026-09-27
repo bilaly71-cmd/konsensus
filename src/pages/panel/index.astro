@@ -167,6 +167,39 @@ const bugun = bugunIstanbul();
 		<div id="fonListesi" class="fon-listesi"></div>
 	</Kart>
 
+	<Kart baslik="5. Takvim etkinliği ekle" altBaslik="Temettü, bedelsiz, genel kurul, halka arz, SPK bülteni">
+		<div class="form-izgara">
+			<label>
+				<span>Tarih *</span>
+				<input type="date" id="takvimTarih" />
+			</label>
+			<label>
+				<span>Tür</span>
+				<select id="takvimTur">
+					<option value="temettu">Temettü</option>
+					<option value="bedelsiz">Bedelsiz</option>
+					<option value="genel_kurul">Genel kurul</option>
+					<option value="halka_arz">Halka arz</option>
+					<option value="spk_bulten">SPK bülteni</option>
+					<option value="diger">Diğer</option>
+				</select>
+			</label>
+			<label>
+				<span>Hisse</span>
+				<input type="text" id="takvimHisse" placeholder="isteğe bağlı" />
+			</label>
+			<label>
+				<span>Başlık *</span>
+				<input type="text" id="takvimBaslik" placeholder="örn. Net %10 temettü dağıtımı" />
+			</label>
+		</div>
+		<p id="takvimHata" class="durum-mesaji hata"></p>
+		<div class="dugmeler">
+			<Buton id="takvimEkleDugme" tur="ikincil" type="button">Etkinlik ekle</Buton>
+		</div>
+		<div id="takvimListesi" class="fon-listesi"></div>
+	</Kart>
+
 	<script>
 		import { bulteniAyristir, type TaslakSatir } from '../../lib/ayristir';
 
@@ -540,6 +573,82 @@ const bugun = bugunIstanbul();
 				.join('')}`;
 		}
 		fonListesiYukle();
+
+		// --- 5. Takvim etkinliği ekle ---
+		const takvimTarihEl = document.getElementById('takvimTarih') as HTMLInputElement;
+		const takvimTurEl = document.getElementById('takvimTur') as HTMLSelectElement;
+		const takvimHisseEl = document.getElementById('takvimHisse') as HTMLInputElement;
+		const takvimBaslikEl = document.getElementById('takvimBaslik') as HTMLInputElement;
+		const takvimHataEl = document.getElementById('takvimHata')!;
+		const takvimEkleDugmeEl = document.getElementById('takvimEkleDugme')!;
+		const takvimListesiEl = document.getElementById('takvimListesi')!;
+
+		takvimTarihEl.value = tarihEl.value;
+
+		async function takvimEkle() {
+			const tarih = takvimTarihEl.value;
+			const baslik = takvimBaslikEl.value.trim();
+			if (!tarih || !baslik) {
+				takvimHataEl.textContent = 'Tarih ve başlık zorunlu.';
+				return;
+			}
+			takvimHataEl.textContent = '';
+			(takvimEkleDugmeEl as HTMLButtonElement).disabled = true;
+			try {
+				const yanit = await fetch('/api/takvim', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						satirlar: [{ tarih, tur: takvimTurEl.value, hisse: takvimHisseEl.value.trim(), baslik }],
+					}),
+				});
+				if (!yanit.ok) throw new Error((await yanit.json()).hata || 'Kayıt başarısız.');
+				takvimBaslikEl.value = '';
+				takvimHisseEl.value = '';
+				takvimBaslikEl.focus();
+				takvimListesiYukle();
+			} catch (e) {
+				takvimHataEl.textContent = e instanceof Error ? e.message : 'Kayıt başarısız.';
+			} finally {
+				(takvimEkleDugmeEl as HTMLButtonElement).disabled = false;
+			}
+		}
+		takvimEkleDugmeEl.addEventListener('click', takvimEkle);
+		[takvimTarihEl, takvimHisseEl, takvimBaslikEl].forEach((el) => {
+			el.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					takvimEkle();
+				}
+			});
+		});
+
+		async function takvimSil(id: number) {
+			await fetch(`/api/takvim?id=${id}`, { method: 'DELETE' });
+			takvimListesiYukle();
+		}
+		takvimListesiEl.addEventListener('click', (e) => {
+			const buton = (e.target as HTMLElement).closest('.sil') as HTMLElement | null;
+			if (!buton) return;
+			takvimSil(Number(buton.dataset.id));
+		});
+
+		async function takvimListesiYukle() {
+			const yanit = await fetch('/api/takvim');
+			const veri = await yanit.json();
+			const satirlar = (veri.satirlar || []).slice(0, 10);
+			if (satirlar.length === 0) {
+				takvimListesiEl.innerHTML = '<p class="bos">Henüz etkinlik girilmedi.</p>';
+				return;
+			}
+			takvimListesiEl.innerHTML = `<p class="ipucu">Son eklenenler:</p>${satirlar
+				.map(
+					(s: any) =>
+						`<div class="fon-satir"><span>${s.tarih} · ${s.tur}${s.hisse ? ' · ' + s.hisse : ''} · ${s.baslik}</span><button type="button" class="sil" data-id="${s.id}">Sil</button></div>`,
+				)
+				.join('')}`;
+		}
+		takvimListesiYukle();
 	</script>
 
 	<style>

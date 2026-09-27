@@ -10,7 +10,7 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 3. [x] Hisse önerileri veri girişi — akıllı ayrıştırma (serbest metinden otomatik alan çıkarma)
 4. [ ] Öneri Merkezi + hisse sayfalarını 3'teki veri yapısına tam bağla
 5. [~] Eksik/yüzeysel kalan her şeyi gözden geçir, derinleştir (sürüyor)
-6. [~] Bütçe kalırsa: Öneri Karnesi [x], Fon Akıllı Para [x], Takvim (sürüyor)
+6. [x] Bütçe kalırsa: Öneri Karnesi [x], Fon Akıllı Para [x], Takvim + Halka arz + SPK bülteni [x] — hepsi tamamlandı
 
 ## Kararlar ve gerekçeler
 
@@ -55,10 +55,20 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 - `/hisse/[kod]` sayfasına "Fonlardaki durumu" kartı eklendi (varsa gösteriliyor, yoksa hiç görünmüyor) — Görev 4'ün ruhunu (veri yapısını gerçek sayfalara bağlama) buraya da genişletmiş oldum.
 - Canlı veriyle uçtan uca test edildi (ekle → /fon-radar ve /hisse/TESTH'de göründü → sil → temiz).
 
+### 7. Takvim + Halka arz + SPK bülteni (27.09.2026)
+- Üç nav öğesi (Takvim, Halka arz, SPK bülteni) TEK ortak tabloya (`migrations/0005_takvim.sql` → `takvim_etkinlikleri`) bağlandı: tarih, tür (temettü/bedelsiz/genel_kurul/halka_arz/spk_bulten/diğer), isteğe bağlı hisse, başlık, açıklama. Gerekçe: üç sayfa da aynı "tarihli olay listesi" şeklini paylaşıyor, tek tablo + tür filtresiyle kod tekrarı önlendi.
+- `src/lib/takvim.ts`, `src/pages/api/takvim.ts`, ortak `src/components/TakvimListesi.astro` (gün kutusu tasarımı — orijinal `tasarim/Main.dc.html` mockup'ındaki "Bu hafta takvim" kartıyla aynı görsel dilde).
+- `/takvim`: tüm etkinlikler (yaklaşan + geçmiş ayrı). `/halka-arz` ve `/spk-bulteni`: kendi türlerine filtrelenmiş görünüm.
+- `/panel`'e "5. Takvim etkinliği ekle" bölümü.
+- Canlı veriyle uçtan uca test edildi (ekle → `/takvim`'de gün kutusu doğru göründü → sil → temiz). Tüm site (19 yol + 4 API) son kez tarandı, hepsi 200.
+
+**Görev 6'nın tamamı bitti.** Bilal'in verdiği 6 maddelik listenin tamamı tamamlandı: Teminat simülatörü derinleştirme, Grafik oyunu, Panel akıllı ayrıştırma, Öneri Merkezi/hisse bağlantısı, gözden geçirme, ve bütçe kalırsa istenen üç ek modül (Öneri Karnesi, Fon Akıllı Para, Takvim ailesi) — hepsi canlıda, GitHub'da, test edilmiş durumda.
+
 ## Bilal'le teyit edilecekler
 
 - **Teminat simülatörü grup yüzdeleri (öncelikli):** A/B/C/D grupları ve %90/70/50/0 haircut + %50/60/75/100 başlangıç + %35/40/50/100 sürdürme rakamları genel/tipik varsayımdır, gerçek BIST duyurusu veya Bilal'in kullandığı aracı kurumun tam listesiyle karşılaştırılmadı. Kendi kurumunun "kredili işleme kabul edilen paylar ve teminat oranları" listesi varsa (genelde kurumun web sitesinde PDF olarak yayınlanır), bana verirse rakamları gerçeğe göre güncellerim.
 - Açığa satışın başlangıç/sürdürme oranları (%50/%35) da aynı şekilde tipik varsayım, teyit edilebilir.
+- **Öneri karnesi / Fon radar / Takvim'in "elle giriş" tasarımı:** Üçü de gerçek bir veri kaynağı (fiyat API'si, TEFAS, KAP otomasyonu) olmadığı için tamamen Bilal'in panelden elle gireceği varsayımıyla kuruldu. Bu, roadmap'in "Sonra" notundaki "gerçek dış veri kaynağı gerekiyor" tespitini farklı bir şekilde çözüyor: veri kaynağı seçmek yerine, zaten CLAUDE.md'nin "Rakip sitelerden veri çekilmez" ilkesiyle uyumlu olan "Bilal kürasyon yapar" modelini üç modüle de yaydım. Bu yaklaşımın Bilal'in gerçek iş akışına (ne sıklıkla, ne kadar veri gireceği) uygun olup olmadığı teyit edilmeli — eğer bu çok fazla elle iş yükü yaratıyorsa, gelecekte bir piyasa veri sağlayıcısı (ör. bir API aboneliği) konuşulabilir.
 
 ## Hata çıkma ihtimali olan yerler
 
@@ -67,3 +77,5 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 - **Grafik oyunu — sicil verisi herkese açık ve kimliksiz:** `/api/oyun` şu an kimlik doğrulama yapmıyor, herkes sonuç POST edebilir (oyunun doğası gereği anonim skor kaydı bu şekilde çalışır, ama teorik olarak biri API'ye doğrudan sahte "doğru" sonuçlar gönderebilir). Düşük risk (sadece eğlence/istatistik amaçlı, gerçek para/işlem yok) ama bilinmesi gereken bir açık.
 - **Panel akıllı ayrıştırma — bitişik iki sayı belirsizliği:** "hedef: 120,50 stop: 95" gibi İKİ alan-değer çiftinin birbirine bitişik yazıldığı cümlelerde (aralarında başka kelime olmadan), ikinci sayı bazen yanlış alana atanabiliyor (test örneğinde "stop" yanlışlıkla "hedef"in değerini aldı, doğrusu düzenlenebilir tablodan tek tıkla düzeltildi). Kök sebep: "sayı hemen öncesinde/sonrasında" yakınlık sezgisiyle çalışıyor, cümle dilbilgisini anlamıyor. Kalıcı çözüm gerçek bir dil modeli (LLM) ile ayrıştırma olurdu ama bu proje kapsamında (statik site + D1, sunucu tarafı AI çağrısı yok) tercih edilmedi — mevcut haliyle "çoğu satırı doğru çıkarır, geri kalanı 5 saniyede elle düzeltirsin" seviyesinde, ki zaten hedeflenen buydu.
 - **Panel akıllı ayrıştırma — kurum/hisse tespiti genel olarak sezgiseldir:** Regex tabanlı olduğu için alışılmadık cümle yapılarında (kısaltma kullanımı, farklı sıralama) yanlış veya boş çıkabilir. Güven rozeti (✓/?/!) bunu görünür kılıyor ama garanti değil — Bilal'in ilk birkaç bülteni yapıştırdığında sonuçları dikkatlice kontrol etmesi, tuhaf durumlar görürse bana örnek metni iletmesi kalıcı iyileştirme için değerli olur.
+- **Öneri karnesi — sonuç işaretleme, gerçek üretim ortamında bir kez çift-tetiklenme gibi görünen bir olay yaşandı** (bkz. karar günlüğü #5): sebebi muhtemelen benim testimle Bilal'in eşzamanlı gerçek kullanımıydı, kod hatası değildi; yine de olay delegasyonu + kilit ile daha sağlam hale getirildi. Yine de "aynı anda iki kişi/sekme panelde işlem yaparsa ne olur" senaryosu tam test edilmedi — tek kullanıcılı (sadece Bilal) bir panel olduğu için düşük risk.
+- **Fon radar / Takvim'de veri doğrulama yok:** `/api/fon` ve `/api/takvim` sadece zorunlu alanların dolu olup olmadığını kontrol ediyor, tarih formatı veya tür değerinin geçerliliğini sıkı doğrulamıyor (ör. `tur` alanına rastgele bir string yazılırsa sessizce kaydedilir, sayfada bilinmeyen bir rozet olarak görünebilir). Pratikte panel arayüzü zaten sadece geçerli seçenekleri sunduğu için (select kutuları) bu bir sorun yaratmaz; sadece API'ye doğrudan istek atılırsa ortaya çıkabilecek teorik bir durum.
