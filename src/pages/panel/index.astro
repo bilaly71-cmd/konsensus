@@ -119,6 +119,19 @@ const bugun = bugunIstanbul();
 		</div>
 	</Kart>
 
+	<Kart baslik="3. Öneri karnesi — sonuç işaretle" altBaslik="Gerçek fiyat verisi yok; sonucu buradan sen işaretlersin">
+		<Fragment slot="sag"><button type="button" id="bekleyenYenileDugme" class="yenile">Yenile</button></Fragment>
+		<div id="bekleyenBos" class="bos">Yükleniyor...</div>
+		<div id="bekleyenSarici" class="tablo-sarici" style="display:none">
+			<table>
+				<thead>
+					<tr><th>Tarih</th><th>Kurum</th><th>Hisse</th><th>Hedef</th><th>Stop</th><th class="sag">Sonuç</th></tr>
+				</thead>
+				<tbody id="bekleyenGovde"></tbody>
+			</table>
+		</div>
+	</Kart>
+
 	<script>
 		import { bulteniAyristir, type TaslakSatir } from '../../lib/ayristir';
 
@@ -336,6 +349,73 @@ const bugun = bugunIstanbul();
 		tarihEl.addEventListener('change', kayitliListeYukle);
 		yenileDugmeEl.addEventListener('click', kayitliListeYukle);
 		kayitliListeYukle();
+
+		// --- 3. Öneri karnesi: sonuç bekleyenleri işaretle ---
+		const bekleyenBosEl = document.getElementById('bekleyenBos')!;
+		const bekleyenSariciEl = document.getElementById('bekleyenSarici')!;
+		const bekleyenGovdeEl = document.getElementById('bekleyenGovde')!;
+		const bekleyenYenileDugmeEl = document.getElementById('bekleyenYenileDugme')!;
+
+		let sonucIsleniyor = false; // aynı anda birden fazla PATCH gitmesini engeller
+
+		async function sonucIsaretle(id: number, sonuc: string) {
+			if (sonucIsleniyor) return;
+			sonucIsleniyor = true;
+			try {
+				await fetch('/api/oneriler', {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id, sonuc }),
+				});
+				await bekleyenListeYukle();
+				kayitliListeYukle();
+			} finally {
+				sonucIsleniyor = false;
+			}
+		}
+
+		// Satır içi onclick yerine tek bir delegasyon dinleyicisi kullanılıyor —
+		// bu, yeniden çizim sırasında olası çift bağlanma/çift tetiklenme
+		// riskini ortadan kaldırır (önizleme tablosundaki "Kaldır" ile aynı desen).
+		bekleyenGovdeEl.addEventListener('click', (e) => {
+			const buton = (e.target as HTMLElement).closest('.sonuc-btn') as HTMLButtonElement | null;
+			if (!buton) return;
+			const id = Number(buton.dataset.id);
+			const sonuc = buton.dataset.sonuc!;
+			sonucIsaretle(id, sonuc);
+		});
+
+		async function bekleyenListeYukle() {
+			const yanit = await fetch('/api/oneriler?durum=bekleyen');
+			const veri = await yanit.json();
+			const satirlar = veri.satirlar || [];
+			if (satirlar.length === 0) {
+				bekleyenBosEl.textContent = 'Sonuç bekleyen öneri yok.';
+				bekleyenBosEl.style.display = '';
+				bekleyenSariciEl.style.display = 'none';
+				return;
+			}
+			bekleyenBosEl.style.display = 'none';
+			bekleyenSariciEl.style.display = '';
+			bekleyenGovdeEl.innerHTML = satirlar
+				.map(
+					(s: any) => `<tr>
+						<td>${s.tarih}</td>
+						<td>${s.kurum}</td>
+						<td>${s.hisse}</td>
+						<td>${s.hedef}</td>
+						<td>${s.stop ?? '—'}</td>
+						<td class="sag sonuc-dugmeleri">
+							<button type="button" class="sonuc-btn hedef" data-id="${s.id}" data-sonuc="hedef">Hedefe ulaştı</button>
+							<button type="button" class="sonuc-btn stop" data-id="${s.id}" data-sonuc="stop">Stop oldu</button>
+							<button type="button" class="sonuc-btn sure" data-id="${s.id}" data-sonuc="sure_doldu">Süre doldu</button>
+						</td>
+					</tr>`,
+				)
+				.join('');
+		}
+		bekleyenYenileDugmeEl.addEventListener('click', bekleyenListeYukle);
+		bekleyenListeYukle();
 	</script>
 
 	<style>
@@ -510,6 +590,38 @@ const bugun = bugunIstanbul();
 			font-size: 12px;
 			cursor: pointer;
 			padding: 4px 8px;
+		}
+		.sonuc-dugmeleri {
+			display: flex;
+			gap: 6px;
+			justify-content: flex-end;
+			flex-wrap: wrap;
+		}
+		.sonuc-btn {
+			height: 32px;
+			padding: 0 10px;
+			border-radius: 8px;
+			border: 1px solid var(--kenarlik);
+			background: var(--kart);
+			font: inherit;
+			font-size: 12px;
+			font-weight: 600;
+			cursor: pointer;
+			white-space: nowrap;
+		}
+		.sonuc-btn.hedef:hover {
+			background: #e3f2ea;
+			border-color: #c5e3d2;
+			color: var(--yukselis);
+		}
+		.sonuc-btn.stop:hover {
+			background: #f8e4e2;
+			border-color: #edc7c2;
+			color: var(--dusus);
+		}
+		.sonuc-btn.sure:hover {
+			background: #f1eee6;
+			color: var(--metin-ikincil);
 		}
 		.yenile {
 			border: 0;

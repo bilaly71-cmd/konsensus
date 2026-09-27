@@ -1,14 +1,223 @@
 ---
-import BosSayfa from '../components/BosSayfa.astro';
+export const prerender = false;
+
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import { getDb } from '../lib/db';
+import { tumOneriler, kurumKarneleriHesapla } from '../lib/oneriler';
+
+const db = getDb();
+const oneriler = await tumOneriler(db);
+const karneler = kurumKarneleriHesapla(oneriler);
+
+const genelToplam = karneler.reduce((a, k) => a + k.toplamSonuclu, 0);
+const genelHedef = karneler.reduce((a, k) => a + k.hedefSayisi, 0);
+const genelOran = genelToplam > 0 ? (genelHedef / genelToplam) * 100 : 0;
+const bekleyenSayisi = oneriler.filter((o) => !o.sonuc).length;
 ---
 
-<BosSayfa
+<AnaLayout
 	baslik="Öneri karnesi"
-	grup="PİYASA"
-	aciklama="Önerilerin hedefe ulaşma oranı, kurum kurum ve açık yöntemle."
-	gelecekler={[
-		'Kurumların isabet sıralaması',
-		'Günlük önerilerin 5 işlem günü içindeki sonucu',
-		'Yöntemin açık anlatımı',
-	]}
-/>
+	aciklama="Kurumların önerilerinin hedefe ulaşma oranı — sonuçlar elle işaretlenir, yöntem açıkça anlatılır."
+>
+	<SayfaBasligi baslik="Öneri karnesi" ust="PİYASA" aciklama="Kurumların geçmiş önerilerinin sonuçlanma oranı.">
+		<Rozet>{genelToplam} sonuçlanmış öneri</Rozet>
+	</SayfaBasligi>
+
+	<Kart etiket="YÖNTEM" baslik="Bu karne nasıl hesaplanıyor?">
+		<p class="yontem-metin">
+			Konsensüs şu an gerçek zamanlı/geçmiş fiyat verisi kullanmıyor (bir piyasa veri kaynağı henüz
+			seçilmedi). Bu yüzden her önerinin sonucu (<strong>hedefe ulaştı</strong>,{' '}
+			<strong>stop oldu</strong> veya <strong>süre doldu</strong>) yönetici tarafından, önerinin
+			verildiği kurumun sonraki raporlarına veya kamuya açık fiyat bilgisine bakılarak elle
+			işaretlenir. Karne, sadece <strong>sonucu işaretlenmiş</strong> önerilerden hesaplanır; henüz
+			sonuçlanmamış (bekleyen) öneriler orana dahil edilmez.
+		</p>
+		{bekleyenSayisi > 0 && (
+			<p class="bekleyen-not">
+				Şu an <strong>{bekleyenSayisi}</strong> öneri sonuç bekliyor — <a href="/panel">panelden</a> işaretlenebilir.
+			</p>
+		)}
+	</Kart>
+
+	<section class="ozet-izgara">
+		<div class="ozet-kart">
+			<span>Genel isabet oranı</span>
+			<strong>{genelToplam > 0 ? `%${genelOran.toFixed(0)}` : '—'}</strong>
+		</div>
+		<div class="ozet-kart">
+			<span>Sonuçlanmış öneri</span>
+			<strong>{genelToplam}</strong>
+		</div>
+		<div class="ozet-kart">
+			<span>Sonuç bekleyen</span>
+			<strong>{bekleyenSayisi}</strong>
+		</div>
+	</section>
+
+	<Kart baslik="Kurum sıralaması" altBaslik="En az bir sonuçlanmış önerisi olan kurumlar">
+		{
+			karneler.length === 0 ? (
+				<p class="bos">Henüz sonuçlanmış öneri yok. Panelden bir önerinin sonucunu işaretleyince burada görünecek.</p>
+			) : (
+				<div class="tablo-sarici">
+					<table>
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Kurum</th>
+								<th class="sag">Hedefe ulaştı</th>
+								<th class="sag">Stop oldu</th>
+								<th class="sag">Süre doldu</th>
+								<th class="sag">Toplam</th>
+								<th class="sag">İsabet</th>
+							</tr>
+						</thead>
+						<tbody>
+							{karneler.map((k, i) => (
+								<tr>
+									<td data-etiket="#">{i + 1}</td>
+									<td class="kalin" data-etiket="Kurum">{k.kurum}</td>
+									<td class="sag yukselis" data-etiket="Hedefe ulaştı">{k.hedefSayisi}</td>
+									<td class="sag dusus" data-etiket="Stop oldu">{k.stopSayisi}</td>
+									<td class="sag soluk" data-etiket="Süre doldu">{k.sureDolduSayisi}</td>
+									<td class="sag" data-etiket="Toplam">{k.toplamSonuclu}</td>
+									<td class="sag kalin" data-etiket="İsabet">%{k.isabetOrani.toFixed(0)}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			)
+		}
+	</Kart>
+</AnaLayout>
+
+<style>
+	.yontem-metin {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.6;
+		color: #3f434c;
+	}
+	.bekleyen-not {
+		margin: 12px 0 0;
+		padding-top: 12px;
+		border-top: 1px solid var(--cizgi);
+		font-size: 13px;
+		color: var(--metin-ikincil);
+	}
+	.ozet-izgara {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 16px;
+	}
+	.ozet-kart {
+		background: var(--kart);
+		border: 1px solid var(--kenarlik);
+		border-radius: 14px;
+		padding: 18px 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		font-size: 13px;
+		color: var(--metin-ikincil);
+	}
+	.ozet-kart strong {
+		font-family: var(--font-baslik);
+		font-size: 32px;
+		color: var(--metin);
+	}
+	.bos {
+		margin: 0;
+		font-size: 14px;
+		color: var(--metin-ikincil);
+		padding: 24px;
+		text-align: center;
+		background: #faf9f5;
+		border-radius: 10px;
+	}
+	.tablo-sarici {
+		overflow-x: auto;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+	th {
+		text-align: left;
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.6px;
+		color: var(--metin-ikincil);
+		padding: 0 12px 10px;
+		border-bottom: 1px solid var(--cizgi);
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+	th.sag {
+		text-align: right;
+	}
+	td {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--cizgi);
+		white-space: nowrap;
+	}
+	td.sag {
+		text-align: right;
+	}
+	td.kalin {
+		font-weight: 600;
+	}
+	td.soluk {
+		color: var(--metin-ikincil);
+	}
+	td.yukselis {
+		color: var(--yukselis);
+		font-weight: 600;
+	}
+	td.dusus {
+		color: var(--dusus);
+		font-weight: 600;
+	}
+
+	@media (max-width: 899px) {
+		.ozet-izgara {
+			grid-template-columns: 1fr;
+		}
+		table,
+		thead,
+		tbody,
+		tr,
+		td {
+			display: block;
+		}
+		thead {
+			display: none;
+		}
+		tbody tr {
+			border: 1px solid var(--kenarlik);
+			border-radius: 14px;
+			padding: 12px 14px;
+			margin-bottom: 10px;
+		}
+		td {
+			border: 0;
+			padding: 4px 0;
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			text-align: right;
+		}
+		td::before {
+			content: attr(data-etiket);
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--metin-ikincil);
+			text-align: left;
+		}
+	}
+</style>

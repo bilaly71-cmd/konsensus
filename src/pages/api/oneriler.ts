@@ -17,6 +17,14 @@ type OneriGirdi = {
 
 export const GET: APIRoute = async ({ locals, url }) => {
 	const db = getDb();
+
+	if (url.searchParams.get('durum') === 'bekleyen') {
+		const { results } = await db
+			.prepare('SELECT * FROM oneriler WHERE sonuc IS NULL ORDER BY tarih ASC LIMIT 200')
+			.all();
+		return Response.json({ satirlar: results });
+	}
+
 	const tarih = url.searchParams.get('tarih') ?? bugunIstanbul();
 	const { results } = await db
 		.prepare('SELECT * FROM oneriler WHERE tarih = ?1 ORDER BY olusturulma DESC')
@@ -71,5 +79,28 @@ export const DELETE: APIRoute = async ({ locals, url }) => {
 	const id = url.searchParams.get('id');
 	if (!id) return Response.json({ hata: 'id gerekli.' }, { status: 400 });
 	await db.prepare('DELETE FROM oneriler WHERE id = ?1').bind(id).run();
+	return Response.json({ ok: true });
+};
+
+const GECERLI_SONUCLAR = new Set(['hedef', 'stop', 'sure_doldu', null]);
+
+// Öneri karnesi: bir önerinin sonucunu işaretler (gerçek fiyat verisi yok,
+// Bilal panelden elle işaretler — bkz. DURUM.md).
+export const PATCH: APIRoute = async ({ request }) => {
+	const db = getDb();
+	let govde: { id?: number; sonuc?: string | null };
+	try {
+		govde = await request.json();
+	} catch {
+		return Response.json({ hata: 'Geçersiz JSON gövdesi.' }, { status: 400 });
+	}
+	if (!govde.id || !GECERLI_SONUCLAR.has(govde.sonuc ?? null)) {
+		return Response.json({ hata: 'id zorunlu, sonuc: hedef | stop | sure_doldu | null olmalı.' }, { status: 400 });
+	}
+	const sonucTarihi = govde.sonuc ? bugunIstanbul() : null;
+	await db
+		.prepare('UPDATE oneriler SET sonuc = ?1, sonuc_tarihi = ?2 WHERE id = ?3')
+		.bind(govde.sonuc ?? null, sonucTarihi, govde.id)
+		.run();
 	return Response.json({ ok: true });
 };

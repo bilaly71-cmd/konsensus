@@ -10,7 +10,7 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 3. [x] Hisse önerileri veri girişi — akıllı ayrıştırma (serbest metinden otomatik alan çıkarma)
 4. [ ] Öneri Merkezi + hisse sayfalarını 3'teki veri yapısına tam bağla
 5. [~] Eksik/yüzeysel kalan her şeyi gözden geçir, derinleştir (sürüyor)
-6. [ ] Bütçe kalırsa: Öneri Karnesi, Fon Akıllı Para, Takvim
+6. [~] Bütçe kalırsa: Öneri Karnesi [x] tamamlandı, Fon Akıllı Para, Takvim (sürüyor)
 
 ## Kararlar ve gerekçeler
 
@@ -40,6 +40,13 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 - Gözden geçirmede bulunan yüzeysel nokta: ana sayfadaki "Hedefi yükselen" / "Hedefi düşen" KPI'ları hep "—" gösteriyordu ("yakında" notuyla bırakılmıştı). Şimdi gerçek: `hedefRevizyonlariHesapla` aynı kurumun aynı hisse için önceki tarihli girişiyle bugünkü girişini karşılaştırıyor, farkı buluyor. Ana sayfaya ayrıca yeni bir "Hedef revizyonları" kartı eklendi (tasarım mockup'ında vardı, siteye hiç eklenmemişti) — yükselen/düşen oku, eski→yeni hedef, ilgili hisse sayfasına link.
 - Gerçek veriyle uçtan uca test edildi (iki farklı tarihte aynı kurum+hisse için hedef girildi, KPI ve kart doğru güncellendi, test verisi temizlendi).
 - Devam eden gözden geçirme: sırada ana sayfadaki "Şirket haberleri"/"Piyasa haberleri" kutularının hâlâ statik örnek metin olması var — bunu Görev 6 sonrası, zaman kalırsa ele alacağım (aynı panel-yapıştır-kaydet deseniyle çözülebilir ama görev listesinde açıkça istenmedi, önceliklendirmedim).
+
+### 5. Öneri Karnesi (27.09.2026)
+- Gerçek fiyat verisi/API yok, bu yüzden karne "sonuc" alanına dayanıyor: `migrations/0003_oneri_sonuc.sql` ile `oneriler` tablosuna `sonuc` (hedef | stop | sure_doldu | NULL) ve `sonuc_tarihi` eklendi. Bilal panelden her önerinin sonucunu (kendi takip ettiği fiyattan/kurumun sonraki raporundan görerek) elle işaretliyor.
+- `/api/oneriler` PATCH ile sonuç güncelleniyor, `GET ?durum=bekleyen` tüm tarihlerdeki sonuçsuz önerileri getiriyor.
+- `/panel`'e 3. bölüm eklendi: "Öneri karnesi — sonuç işaretle", tüm bekleyen önerileri (tarihe göre eskiden yeniye) listeler, her satırda üç buton.
+- `/oneri-karnesi`: yöntem açıklaması (şeffaflık — CLAUDE.md'nin "içerik kuralları" ruhuna uygun: nasıl hesaplandığı gizlenmiyor), genel isabet oranı, kurum sıralaması tablosu.
+- **Gerçek üretim verisiyle bulunan ve düzeltilen hata:** İlk "sonuç işaretle" denemesinde Bilal'in gerçek THYAO/garan önerisi de yanlışlıkla "hedefe ulaştı" işaretlendi (benim test satırımla aynı anda). İlk başta bunu satır-içi `onclick`'in çift tetiklenmesinden kaynaklı bir kod hatası sandım; meğer Bilal da o sırada gerçekten panelde işlem yapıyormuş (kendi ifadesiyle doğrulandı) — yani veri kaybı değil, iki eşzamanlı gerçek işlemdi. Yine de kalıcı olarak daha sağlam hale getirdim: satır-içi `onclick` yerine tek bir olay delegasyonu + "aynı anda tek istek" kilidi eklendi (`sonucIsleniyor` bayrağı) — bu, gelecekte gerçek bir çifte-tıklama veya yarış durumu olursa da koruma sağlıyor. Bilal'in gerçek işaretlemesi (`THYAO/garan → hedef`) geri yüklendi, test satırları temizlendi.
 
 ## Bilal'le teyit edilecekler
 

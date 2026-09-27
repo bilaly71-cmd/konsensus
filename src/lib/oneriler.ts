@@ -10,6 +10,8 @@ export type OneriKaydi = {
 	potansiyel: string | null;
 	kaynak_url: string | null;
 	olusturulma: string;
+	sonuc: 'hedef' | 'stop' | 'sure_doldu' | null;
+	sonuc_tarihi: string | null;
 };
 
 export async function tariheGoreOneriler(db: D1Database, tarih: string): Promise<OneriKaydi[]> {
@@ -134,4 +136,47 @@ export function konsensusHesapla(oneriler: OneriKaydi[], minKurum = 2): Konsensu
 		.map(([hisse, kurumlar]) => ({ hisse, kurumlar: [...kurumlar], n: kurumlar.size }))
 		.filter((k) => k.n >= minKurum)
 		.sort((a, b) => b.n - a.n);
+}
+
+// --- Öneri karnesi ---
+// Not: gerçek fiyat verisi yok, "sonuc" alanı Bilal tarafından panelden elle
+// işaretlenir (hedefe ulaştı / stop oldu / süre doldu). Karne, sadece sonucu
+// işaretlenmiş (bekleyen değil) önerilerden hesaplanır.
+
+export type KurumKarnesi = {
+	kurum: string;
+	toplamSonuclu: number;
+	hedefSayisi: number;
+	stopSayisi: number;
+	sureDolduSayisi: number;
+	isabetOrani: number; // %, hedef / (hedef+stop+süre dolu)
+};
+
+export function kurumKarneleriHesapla(oneriler: OneriKaydi[]): KurumKarnesi[] {
+	const gruplar = new Map<string, OneriKaydi[]>();
+	for (const o of oneriler) {
+		if (!o.sonuc) continue;
+		if (!gruplar.has(o.kurum)) gruplar.set(o.kurum, []);
+		gruplar.get(o.kurum)!.push(o);
+	}
+	return [...gruplar.entries()]
+		.map(([kurum, satirlar]) => {
+			const hedefSayisi = satirlar.filter((s) => s.sonuc === 'hedef').length;
+			const stopSayisi = satirlar.filter((s) => s.sonuc === 'stop').length;
+			const sureDolduSayisi = satirlar.filter((s) => s.sonuc === 'sure_doldu').length;
+			const toplamSonuclu = satirlar.length;
+			return {
+				kurum,
+				toplamSonuclu,
+				hedefSayisi,
+				stopSayisi,
+				sureDolduSayisi,
+				isabetOrani: toplamSonuclu > 0 ? (hedefSayisi / toplamSonuclu) * 100 : 0,
+			};
+		})
+		.sort((a, b) => b.isabetOrani - a.isabetOrani || b.toplamSonuclu - a.toplamSonuclu);
+}
+
+export function bekleyenOnerileriBul(oneriler: OneriKaydi[]): OneriKaydi[] {
+	return oneriler.filter((o) => !o.sonuc);
 }
