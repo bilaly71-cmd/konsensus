@@ -18,6 +18,12 @@ import Rozet from '../components/Rozet.astro';
 	</SayfaBasligi>
 
 	<Kart baslik="Sence devamı?" altBaslik="Grafik burada kesildi, tek tahmin hakkın var">
+		<div class="kategori-cubugu" role="tablist" aria-label="Formasyon kategorisi">
+			<button type="button" class="kategori-btn aktif" data-kategori="">Tümü</button>
+			<button type="button" class="kategori-btn" data-kategori="fiyat-aksiyonu">Fiyat Aksiyonu</button>
+			<button type="button" class="kategori-btn" data-kategori="klasik">Klasik</button>
+			<button type="button" class="kategori-btn" data-kategori="harmonik">Harmonik</button>
+		</div>
 		<div id="grafikAlani" class="grafik-alani"></div>
 		<p class="grafik-atif">
 			Grafik <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> Lightweight
@@ -71,8 +77,18 @@ import Rozet from '../components/Rozet.astro';
 	</Kart>
 
 	<script>
-		import { createChart, CandlestickSeries, ColorType } from 'lightweight-charts';
-		import { desenUret, cozumUret, serigeMumCevir, DESEN_BILGISI, type UretilenDesen } from '../lib/desenler';
+		import { createChart, CandlestickSeries, LineSeries, ColorType } from 'lightweight-charts';
+		import {
+			desenUret,
+			cozumUret,
+			DESEN_BILGISI,
+			DESEN_KATEGORISI,
+			KATEGORI_ADLARI,
+			type UretilenDesen,
+			type Kategori,
+			type Mum,
+			type CizgiSegmenti,
+		} from '../lib/desenler';
 
 		const grafikAlaniEl = document.getElementById('grafikAlani')!;
 		const sonucAlaniEl = document.getElementById('sonucAlani')!;
@@ -106,10 +122,11 @@ import Rozet from '../components/Rozet.astro';
 
 		const GUN = 86400;
 		let baslangicZaman = Math.floor(Date.UTC(2024, 0, 1) / 1000);
+		const zamanDizisi = (indeks: number) => baslangicZaman + indeks * GUN;
 
-		function mumVerisiUret(mumlar: { open: number; high: number; low: number; close: number }[], baslaZaman: number) {
+		function mumVerisiUret(mumlar: Mum[], baslaIndeks = 0) {
 			return mumlar.map((m, i) => ({
-				time: baslaZaman + i * GUN,
+				time: zamanDizisi(baslaIndeks + i),
 				open: Math.round(m.open * 100) / 100,
 				high: Math.round(m.high * 100) / 100,
 				low: Math.round(m.low * 100) / 100,
@@ -117,8 +134,55 @@ import Rozet from '../components/Rozet.astro';
 			}));
 		}
 
+		// Destek/direnç/trend/harmonik çizgileri için ayrı ince çizgi serileri.
+		// Her yeni oyunda öncekiler temizlenip yeniden oluşturuluyor.
+		const CIZGI_RENKLERI: Record<CizgiSegmenti['tur'], { color: string; lineStyle?: 0 | 1 | 2 | 3 | 4 }> = {
+			destek: { color: '#0F7A4B', lineStyle: 2 },
+			direnc: { color: '#B83227', lineStyle: 2 },
+			boyun: { color: '#5B5F68', lineStyle: 0 },
+			'trend-ust': { color: '#3438C9', lineStyle: 0 },
+			'trend-alt': { color: '#3438C9', lineStyle: 0 },
+			harmonik: { color: '#E9A23B', lineStyle: 1 },
+		};
+		let cizgiSerileri: any[] = [];
+
+		function cizgileriTemizle() {
+			cizgiSerileri.forEach((s) => chart.removeSeries(s));
+			cizgiSerileri = [];
+		}
+
+		function cizgileriCiz(cizgiler: CizgiSegmenti[]) {
+			cizgileriTemizle();
+			for (const c of cizgiler) {
+				const renk = CIZGI_RENKLERI[c.tur];
+				const s = chart.addSeries(LineSeries, {
+					color: renk.color,
+					lineWidth: c.tur === 'harmonik' ? 2 : 1,
+					lineStyle: renk.lineStyle ?? 0,
+					lastValueVisible: false,
+					priceLineVisible: false,
+					crosshairMarkerVisible: false,
+				});
+				s.setData([
+					{ time: zamanDizisi(c.i1), value: Math.round(c.v1 * 100) / 100 },
+					{ time: zamanDizisi(c.i2), value: Math.round(c.v2 * 100) / 100 },
+				]);
+				cizgiSerileri.push(s);
+			}
+		}
+
 		let mevcutDesen: UretilenDesen | null = null;
 		let tahminYapildi = false;
+		let seciliKategori: Kategori | undefined;
+
+		document.querySelectorAll<HTMLButtonElement>('.kategori-btn').forEach((btn) => {
+			btn.addEventListener('click', () => {
+				document.querySelectorAll('.kategori-btn').forEach((b) => b.classList.remove('aktif'));
+				btn.classList.add('aktif');
+				seciliKategori = (btn.dataset.kategori || undefined) as Kategori | undefined;
+				yeniOyunBaslat();
+			});
+		});
 
 		function localStorageOku(anahtar: string, varsayilan: number): number {
 			try {
@@ -146,13 +210,13 @@ import Rozet from '../components/Rozet.astro';
 		let mevcutMumlar: ReturnType<typeof mumVerisiUret> = [];
 
 		function yeniOyunBaslat() {
-			mevcutDesen = desenUret();
+			mevcutDesen = desenUret(undefined, seciliKategori);
 			tahminYapildi = false;
 			sonucAlaniEl.hidden = true;
 			tahminDugmeleri.forEach((b) => (b.disabled = false));
-			const mumlar = serigeMumCevir(mevcutDesen.seri);
-			mevcutMumlar = mumVerisiUret(mumlar, baslangicZaman);
+			mevcutMumlar = mumVerisiUret(mevcutDesen.mumlar);
 			mumSerisi.setData(mevcutMumlar);
+			cizgileriCiz(mevcutDesen.cizgiler);
 			chart.timeScale().fitContent();
 		}
 
@@ -178,18 +242,16 @@ import Rozet from '../components/Rozet.astro';
 				const tahmin = btn.dataset.tahmin as 'yukselir' | 'duser';
 				const dogruMu = tahmin === mevcutDesen.dogruYon;
 
-				const cozum = cozumUret(mevcutDesen);
-				const sonKapanis = mevcutMumlar[mevcutMumlar.length - 1].close;
-				const cozumMumlari = serigeMumCevir(cozum, sonKapanis);
-				const sonBaslangic = baslangicZaman + mevcutMumlar.length * GUN;
-				const tumMumlar = [...mevcutMumlar, ...mumVerisiUret(cozumMumlari, sonBaslangic)];
+				const cozumMumlari = cozumUret(mevcutDesen);
+				const tumMumlar = [...mevcutMumlar, ...mumVerisiUret(cozumMumlari, mevcutMumlar.length)];
 				mumSerisi.setData(tumMumlar);
 				chart.timeScale().fitContent();
 
 				const bilgi = DESEN_BILGISI[mevcutDesen.desen];
 				sonucRozetEl.textContent = dogruMu ? 'Doğru tahmin! 🎉' : 'Yanlış tahmin';
 				sonucRozetEl.className = `sonuc-rozet ${dogruMu ? 'dogru' : 'yanlis'}`;
-				sonucDesenAdiEl.textContent = `${bilgi.ad} — gerçekte ${mevcutDesen.dogruYon === 'yukselir' ? 'yükseldi' : 'düştü'}`;
+				const kategoriAdi = KATEGORI_ADLARI[DESEN_KATEGORISI[mevcutDesen.desen]];
+				sonucDesenAdiEl.textContent = `${bilgi.ad} (${kategoriAdi}) — gerçekte ${mevcutDesen.dogruYon === 'yukselir' ? 'yükseldi' : 'düştü'}`;
 				sonucAciklamaEl.textContent = bilgi.aciklama;
 				sonucAlaniEl.hidden = false;
 
@@ -244,6 +306,29 @@ import Rozet from '../components/Rozet.astro';
 	</script>
 
 	<style>
+		.kategori-cubugu {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-bottom: 14px;
+		}
+		.kategori-btn {
+			height: 36px;
+			padding: 0 14px;
+			border-radius: 18px;
+			border: 1px solid var(--kenarlik);
+			background: var(--kart);
+			color: var(--metin-ikincil);
+			font: inherit;
+			font-size: 13px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+		.kategori-btn.aktif {
+			background: var(--metin);
+			border-color: var(--metin);
+			color: #fff;
+		}
 		.grafik-alani {
 			width: 100%;
 			border: 1px solid var(--kenarlik);
