@@ -7,10 +7,13 @@ import Rozet from '../../components/Rozet.astro';
 import GrafikKutusu from '../../components/GrafikKutusu.astro';
 import { getDb } from '../../lib/db';
 import { hisseyeGoreOneriler, sayiyaCevir } from '../../lib/oneriler';
+import { hisseyeGoreFonHareketleri, HAREKET_ETIKETLERI } from '../../lib/fon';
 
 const kod = (Astro.params.kod || '').toUpperCase();
 const db = getDb();
 const oneriler = await hisseyeGoreOneriler(db, kod);
+const fonHareketleri = await hisseyeGoreFonHareketleri(db, kod);
+const fonSayisi = new Set(fonHareketleri.filter((f) => f.hareket !== 'cikti').map((f) => f.fon_adi)).size;
 
 const hedefler = oneriler.map((o) => sayiyaCevir(o.hedef)).filter((n): n is number => n !== null);
 const enDusuk = hedefler.length ? Math.min(...hedefler) : null;
@@ -126,6 +129,39 @@ function tl(n: number | null): string {
 					</div>
 				</Kart>
 			</Fragment>
+		)
+	}
+
+	{
+		fonHareketleri.length > 0 && (
+			<Kart baslik="Fonlardaki durumu" altBaslik={`${fonSayisi} fon portföyünde tutuyor`}>
+				<div class="tablo-sarici">
+					<table>
+						<thead>
+							<tr>
+								<th>Dönem</th>
+								<th>Fon</th>
+								<th>Hareket</th>
+								<th class="sag">Ağırlık</th>
+							</tr>
+						</thead>
+						<tbody>
+							{fonHareketleri.map((f) => (
+								<tr>
+									<td data-etiket="Dönem">{f.donem}</td>
+									<td data-etiket="Fon">{f.fon_adi}</td>
+									<td data-etiket="Hareket">
+										<span class:list={['hareket-rozet', f.hareket]}>{HAREKET_ETIKETLERI[f.hareket]}</span>
+									</td>
+									<td class="sag" data-etiket="Ağırlık">
+										{f.agirlik ?? '—'}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			</Kart>
 		)
 	}
 </AnaLayout>
@@ -265,6 +301,28 @@ function tl(n: number | null): string {
 	}
 	td.soluk {
 		color: var(--metin-ikincil);
+	}
+	.hareket-rozet {
+		font-size: 12px;
+		font-weight: 600;
+		padding: 3px 8px;
+		border-radius: 20px;
+	}
+	.hareket-rozet.yeni {
+		background: #e3f2ea;
+		color: var(--yukselis);
+	}
+	.hareket-rozet.artirdi {
+		background: #eef0ff;
+		color: #2b2fa8;
+	}
+	.hareket-rozet.azaltti {
+		background: #fbf0dd;
+		color: var(--etiket-metin);
+	}
+	.hareket-rozet.cikti {
+		background: #f8e4e2;
+		color: var(--dusus);
 	}
 
 	@media (max-width: 899px) {

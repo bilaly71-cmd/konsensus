@@ -10,7 +10,7 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 3. [x] Hisse önerileri veri girişi — akıllı ayrıştırma (serbest metinden otomatik alan çıkarma)
 4. [ ] Öneri Merkezi + hisse sayfalarını 3'teki veri yapısına tam bağla
 5. [~] Eksik/yüzeysel kalan her şeyi gözden geçir, derinleştir (sürüyor)
-6. [~] Bütçe kalırsa: Öneri Karnesi [x] tamamlandı, Fon Akıllı Para, Takvim (sürüyor)
+6. [~] Bütçe kalırsa: Öneri Karnesi [x], Fon Akıllı Para [x], Takvim (sürüyor)
 
 ## Kararlar ve gerekçeler
 
@@ -47,6 +47,13 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 - `/panel`'e 3. bölüm eklendi: "Öneri karnesi — sonuç işaretle", tüm bekleyen önerileri (tarihe göre eskiden yeniye) listeler, her satırda üç buton.
 - `/oneri-karnesi`: yöntem açıklaması (şeffaflık — CLAUDE.md'nin "içerik kuralları" ruhuna uygun: nasıl hesaplandığı gizlenmiyor), genel isabet oranı, kurum sıralaması tablosu.
 - **Gerçek üretim verisiyle bulunan ve düzeltilen hata:** İlk "sonuç işaretle" denemesinde Bilal'in gerçek THYAO/garan önerisi de yanlışlıkla "hedefe ulaştı" işaretlendi (benim test satırımla aynı anda). İlk başta bunu satır-içi `onclick`'in çift tetiklenmesinden kaynaklı bir kod hatası sandım; meğer Bilal da o sırada gerçekten panelde işlem yapıyormuş (kendi ifadesiyle doğrulandı) — yani veri kaybı değil, iki eşzamanlı gerçek işlemdi. Yine de kalıcı olarak daha sağlam hale getirdim: satır-içi `onclick` yerine tek bir olay delegasyonu + "aynı anda tek istek" kilidi eklendi (`sonucIsleniyor` bayrağı) — bu, gelecekte gerçek bir çifte-tıklama veya yarış durumu olursa da koruma sağlıyor. Bilal'in gerçek işaretlemesi (`THYAO/garan → hedef`) geri yüklendi, test satırları temizlendi.
+
+### 6. Fon Akıllı Para (27.09.2026)
+- Gerçek veri kaynağı yok (TEFAS/KAP raporları otomatik çekilemiyor), aynı "panel'den elle gir" deseni kullanıldı. `migrations/0004_fon_hareketleri.sql`: `fon_hareketleri` tablosu (dönem, fon adı, hisse, hareket: yeni/artırdı/azalttı/çıktı, ağırlık).
+- `src/lib/fon.ts`, `src/pages/api/fon.ts` (GET/POST/DELETE), `/panel`'e "4. Fon hareketi ekle" bölümü (basit form, Enter'la ekleme, son 10 kaydı gösterip silme).
+- `/fon-radar`: hisse bazında "kaç fon tutuyor" özet çubuğu + tüm hareketler tablosu.
+- `/hisse/[kod]` sayfasına "Fonlardaki durumu" kartı eklendi (varsa gösteriliyor, yoksa hiç görünmüyor) — Görev 4'ün ruhunu (veri yapısını gerçek sayfalara bağlama) buraya da genişletmiş oldum.
+- Canlı veriyle uçtan uca test edildi (ekle → /fon-radar ve /hisse/TESTH'de göründü → sil → temiz).
 
 ## Bilal'le teyit edilecekler
 

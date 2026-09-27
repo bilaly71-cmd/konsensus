@@ -1,14 +1,218 @@
 ---
-import BosSayfa from '../components/BosSayfa.astro';
+export const prerender = false;
+
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Kart from '../components/Kart.astro';
+import Rozet from '../components/Rozet.astro';
+import { getDb } from '../lib/db';
+import { tumFonHareketleri, hisseFonOzetiHesapla, HAREKET_ETIKETLERI } from '../lib/fon';
+
+const db = getDb();
+const hareketler = await tumFonHareketleri(db);
+const ozet = hisseFonOzetiHesapla(hareketler);
+const enCokFon = ozet[0]?.fonSayisi || 1;
 ---
 
-<BosSayfa
+<AnaLayout
 	baslik="Fon radar"
-	grup="AKILLI PARA"
-	aciklama="Yatırım fonlarının portföy raporlarından hangi hisseleri topladığı."
-	gelecekler={[
-		'Aylık portföy raporlarından yeni eklenen hisseler',
-		'Hisse başına kaç fonun tuttuğu',
-		'Fon bazında ağırlık değişimleri',
-	]}
-/>
+	aciklama="Yatırım fonlarının aylık portföy raporlarından hangi hisseleri topladığı."
+>
+	<SayfaBasligi
+		baslik="Fon radar"
+		ust="AKILLI PARA"
+		aciklama="Fonların kamuya açık aylık portföy raporlarından derlenir. Rapor dönemi her satırda belirtilir."
+	>
+		<Rozet>{hareketler.length} hareket</Rozet>
+	</SayfaBasligi>
+
+	{
+		ozet.length > 0 && (
+			<Kart baslik="Hangi hisseyi kaç fon tutuyor" altBaslik="Çıkışlar hariç, güncel fon sayısı">
+				<div class="ozet-listesi">
+					{ozet.map((o) => (
+						<a href={`/hisse/${o.hisse}`} class="ozet-satir">
+							<span class="ozet-hisse">{o.hisse}</span>
+							<span class="ozet-cubuk">
+								<span class="ozet-dolu" style={`width:${Math.round((o.fonSayisi / enCokFon) * 100)}%`} />
+							</span>
+							<span class="ozet-sayi">{o.fonSayisi} fon</span>
+						</a>
+					))}
+				</div>
+			</Kart>
+		)
+	}
+
+	<Kart baslik="Tüm fon hareketleri" altBaslik="Son raporlanan dönemden itibaren">
+		{
+			hareketler.length === 0 ? (
+				<p class="bos">Henüz fon hareketi girilmedi.</p>
+			) : (
+				<div class="tablo-sarici">
+					<table>
+						<thead>
+							<tr>
+								<th>Dönem</th>
+								<th>Fon</th>
+								<th>Hisse</th>
+								<th>Hareket</th>
+								<th class="sag">Ağırlık</th>
+							</tr>
+						</thead>
+						<tbody>
+							{hareketler.map((h) => (
+								<tr>
+									<td data-etiket="Dönem">{h.donem}</td>
+									<td data-etiket="Fon">{h.fon_adi}</td>
+									<td data-etiket="Hisse">
+										<a href={`/hisse/${h.hisse}`}>{h.hisse}</a>
+									</td>
+									<td data-etiket="Hareket">
+										<span class:list={['hareket-rozet', h.hareket]}>{HAREKET_ETIKETLERI[h.hareket]}</span>
+									</td>
+									<td class="sag" data-etiket="Ağırlık">
+										{h.agirlik ?? '—'}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			)
+		}
+	</Kart>
+</AnaLayout>
+
+<style>
+	.ozet-listesi {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+	.ozet-satir {
+		display: grid;
+		grid-template-columns: 72px minmax(0, 1fr) 70px;
+		align-items: center;
+		gap: 14px;
+		color: var(--metin);
+	}
+	.ozet-hisse {
+		font-family: var(--font-mono);
+		font-weight: 500;
+		font-size: 14px;
+	}
+	.ozet-cubuk {
+		height: 14px;
+		background: #f1eee6;
+		border-radius: 4px;
+		overflow: hidden;
+		display: block;
+	}
+	.ozet-dolu {
+		display: block;
+		height: 14px;
+		background: var(--yukselis);
+		opacity: 0.85;
+	}
+	.ozet-sayi {
+		font-size: 13px;
+		font-weight: 600;
+		text-align: right;
+	}
+	.bos {
+		margin: 0;
+		font-size: 14px;
+		color: var(--metin-ikincil);
+		padding: 24px;
+		text-align: center;
+		background: #faf9f5;
+		border-radius: 10px;
+	}
+	.tablo-sarici {
+		overflow-x: auto;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+	th {
+		text-align: left;
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.6px;
+		color: var(--metin-ikincil);
+		padding: 0 12px 10px;
+		border-bottom: 1px solid var(--cizgi);
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+	th.sag {
+		text-align: right;
+	}
+	td {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--cizgi);
+		white-space: nowrap;
+	}
+	td.sag {
+		text-align: right;
+	}
+	.hareket-rozet {
+		font-size: 12px;
+		font-weight: 600;
+		padding: 3px 8px;
+		border-radius: 20px;
+	}
+	.hareket-rozet.yeni {
+		background: #e3f2ea;
+		color: var(--yukselis);
+	}
+	.hareket-rozet.artirdi {
+		background: #eef0ff;
+		color: #2b2fa8;
+	}
+	.hareket-rozet.azaltti {
+		background: #fbf0dd;
+		color: var(--etiket-metin);
+	}
+	.hareket-rozet.cikti {
+		background: #f8e4e2;
+		color: var(--dusus);
+	}
+
+	@media (max-width: 899px) {
+		table,
+		thead,
+		tbody,
+		tr,
+		td {
+			display: block;
+		}
+		thead {
+			display: none;
+		}
+		tbody tr {
+			border: 1px solid var(--kenarlik);
+			border-radius: 14px;
+			padding: 12px 14px;
+			margin-bottom: 10px;
+		}
+		td {
+			border: 0;
+			padding: 4px 0;
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			text-align: right;
+		}
+		td::before {
+			content: attr(data-etiket);
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--metin-ikincil);
+			text-align: left;
+		}
+	}
+</style>

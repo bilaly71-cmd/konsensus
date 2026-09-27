@@ -132,6 +132,41 @@ const bugun = bugunIstanbul();
 		</div>
 	</Kart>
 
+	<Kart baslik="4. Fon hareketi ekle" altBaslik="Aylık portföy raporlarından — TEFAS/KAP'tan elle gireceksin">
+		<div class="form-izgara">
+			<label>
+				<span>Dönem (ay) *</span>
+				<input type="text" id="fonDonem" placeholder="örn. 2026-08" />
+			</label>
+			<label>
+				<span>Fon adı *</span>
+				<input type="text" id="fonAdi" placeholder="örn. Ak Portföy Hisse Senedi Fonu" />
+			</label>
+			<label>
+				<span>Hisse kodu *</span>
+				<input type="text" id="fonHisse" placeholder="örn. THYAO" />
+			</label>
+			<label>
+				<span>Hareket</span>
+				<select id="fonHareket">
+					<option value="yeni">Yeni aldı</option>
+					<option value="artirdi">Artırdı</option>
+					<option value="azaltti">Azalttı</option>
+					<option value="cikti">Tamamen çıktı</option>
+				</select>
+			</label>
+			<label>
+				<span>Ağırlık</span>
+				<input type="text" id="fonAgirlik" placeholder="isteğe bağlı, örn. %3,2" />
+			</label>
+		</div>
+		<p id="fonHata" class="durum-mesaji hata"></p>
+		<div class="dugmeler">
+			<Buton id="fonEkleDugme" tur="ikincil" type="button">Fon hareketi ekle</Buton>
+		</div>
+		<div id="fonListesi" class="fon-listesi"></div>
+	</Kart>
+
 	<script>
 		import { bulteniAyristir, type TaslakSatir } from '../../lib/ayristir';
 
@@ -416,6 +451,95 @@ const bugun = bugunIstanbul();
 		}
 		bekleyenYenileDugmeEl.addEventListener('click', bekleyenListeYukle);
 		bekleyenListeYukle();
+
+		// --- 4. Fon hareketi ekle ---
+		const fonDonemEl = document.getElementById('fonDonem') as HTMLInputElement;
+		const fonAdiEl = document.getElementById('fonAdi') as HTMLInputElement;
+		const fonHisseEl = document.getElementById('fonHisse') as HTMLInputElement;
+		const fonHareketEl = document.getElementById('fonHareket') as HTMLSelectElement;
+		const fonAgirlikEl = document.getElementById('fonAgirlik') as HTMLInputElement;
+		const fonHataEl = document.getElementById('fonHata')!;
+		const fonEkleDugmeEl = document.getElementById('fonEkleDugme')!;
+		const fonListesiEl = document.getElementById('fonListesi')!;
+
+		// Bugünün ayını varsayılan dönem olarak öner (YYYY-MM)
+		fonDonemEl.value = new Date().toISOString().slice(0, 7);
+
+		async function fonEkle() {
+			const donem = fonDonemEl.value.trim();
+			const fonAdi = fonAdiEl.value.trim();
+			const hisse = fonHisseEl.value.trim().toUpperCase();
+			if (!donem || !fonAdi || !hisse) {
+				fonHataEl.textContent = 'Dönem, fon adı ve hisse kodu zorunlu.';
+				return;
+			}
+			fonHataEl.textContent = '';
+			(fonEkleDugmeEl as HTMLButtonElement).disabled = true;
+			try {
+				const yanit = await fetch('/api/fon', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						satirlar: [
+							{
+								donem,
+								fon_adi: fonAdi,
+								hisse,
+								hareket: fonHareketEl.value,
+								agirlik: fonAgirlikEl.value.trim(),
+							},
+						],
+					}),
+				});
+				if (!yanit.ok) throw new Error((await yanit.json()).hata || 'Kayıt başarısız.');
+				fonAdiEl.value = '';
+				fonHisseEl.value = '';
+				fonAgirlikEl.value = '';
+				fonAdiEl.focus();
+				fonListesiYukle();
+			} catch (e) {
+				fonHataEl.textContent = e instanceof Error ? e.message : 'Kayıt başarısız.';
+			} finally {
+				(fonEkleDugmeEl as HTMLButtonElement).disabled = false;
+			}
+		}
+		fonEkleDugmeEl.addEventListener('click', fonEkle);
+		[fonDonemEl, fonAdiEl, fonHisseEl, fonAgirlikEl].forEach((el) => {
+			el.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					fonEkle();
+				}
+			});
+		});
+
+		async function fonSil(id: number) {
+			await fetch(`/api/fon?id=${id}`, { method: 'DELETE' });
+			fonListesiYukle();
+		}
+
+		fonListesiEl.addEventListener('click', (e) => {
+			const buton = (e.target as HTMLElement).closest('.sil') as HTMLElement | null;
+			if (!buton) return;
+			fonSil(Number(buton.dataset.id));
+		});
+
+		async function fonListesiYukle() {
+			const yanit = await fetch('/api/fon');
+			const veri = await yanit.json();
+			const satirlar = (veri.satirlar || []).slice(0, 10);
+			if (satirlar.length === 0) {
+				fonListesiEl.innerHTML = '<p class="bos">Henüz fon hareketi girilmedi.</p>';
+				return;
+			}
+			fonListesiEl.innerHTML = `<p class="ipucu">Son eklenenler:</p>${satirlar
+				.map(
+					(s: any) =>
+						`<div class="fon-satir"><span>${s.donem} · <strong>${s.hisse}</strong> · ${s.fon_adi} · ${s.hareket}</span><button type="button" class="sil" data-id="${s.id}">Sil</button></div>`,
+				)
+				.join('')}`;
+		}
+		fonListesiYukle();
 	</script>
 
 	<style>
@@ -590,6 +714,22 @@ const bugun = bugunIstanbul();
 			font-size: 12px;
 			cursor: pointer;
 			padding: 4px 8px;
+		}
+		.fon-listesi {
+			margin-top: 16px;
+			padding-top: 16px;
+			border-top: 1px solid var(--cizgi);
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+		.fon-satir {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			font-size: 13px;
+			padding: 6px 0;
 		}
 		.sonuc-dugmeleri {
 			display: flex;
