@@ -9,7 +9,8 @@ import Buton from '../components/Buton.astro';
 import Tablo from '../components/Tablo.astro';
 import { bugunIstanbul } from '../lib/tarih';
 import { getDb } from '../lib/db';
-import { tariheGoreOneriler, konsensusHesapla, tumOneriler, hedefRevizyonlariHesapla } from '../lib/oneriler';
+import { tariheGoreOneriler, konsensusHesapla, tumOneriler, hedefRevizyonlariHesapla, kurumKarneleriHesapla } from '../lib/oneriler';
+import { sonHaberler } from '../lib/haberler';
 
 const db = getDb();
 const bugun = bugunIstanbul();
@@ -32,6 +33,9 @@ const oneriSatirlari = bugunkuOneriler.map((o) => ({
 const konsensusListesi = konsensusHesapla(bugunkuOneriler);
 const enCokKurum = konsensusListesi[0]?.n || 1;
 
+const karneler = kurumKarneleriHesapla(tumKayitlar).slice(0, 5);
+const enYuksekIsabet = karneler[0]?.isabetOrani || 1;
+
 const kpiler = [
 	{ ad: 'Bugünkü öneri', deger: String(bugunkuOneriler.length), alt: 'kurumlardan derlenir' },
 	{ ad: 'Konsensüs hissesi', deger: String(konsensusListesi.length), alt: 'en az 2 kurumun önerdiği' },
@@ -39,17 +43,8 @@ const kpiler = [
 	{ ad: 'Hedefi düşen', deger: String(revizyonDusen), alt: 'bugün, önceki girişe göre' },
 ];
 
-const sirketHaberleri = [
-	'[Şirket] KAP bildirimi: [özet]',
-	'[Şirket] yönetim kurulu kararı: [özet]',
-	'[Şirket] finansal sonuç açıkladı: [özet]',
-];
-
-const piyasaHaberleri = [
-	'[Başlık]: genel piyasa gündemi özeti',
-	'[Başlık]: makro veri / merkez bankası özeti',
-	'[Başlık]: küresel piyasalardan özet',
-];
+const sirketHaberleriKayitlari = await sonHaberler(db, 'sirket');
+const piyasaHaberleriKayitlari = await sonHaberler(db, 'piyasa');
 
 const oneriKolonlari = [
 	{ anahtar: 'kurum', baslik: 'Kurum' },
@@ -74,29 +69,54 @@ const oneriKolonlari = [
 	<section class="haber-izgara" aria-label="Haberler">
 		<Kart baslik="Şirket haberleri" altBaslik="KAP özetleri · kaynak linkli" class="haber-kart">
 			<Fragment slot="sag"><a href="/oneriler">Tümü</a></Fragment>
-			<ul class="haber-listesi">
-				{
-					sirketHaberleri.map((h) => (
-						<li>
-							<span class="nokta" />
-							<span class="metin">{h}</span>
-						</li>
-					))
-				}
-			</ul>
+			{
+				sirketHaberleriKayitlari.length === 0 ? (
+					<p class="haber-bos">Henüz haber girilmedi.</p>
+				) : (
+					<ul class="haber-listesi">
+						{sirketHaberleriKayitlari.map((h) => (
+							<li>
+								<span class="nokta" />
+								{h.hisse && (
+									<a href={`/hisse/${h.hisse}`} class="haber-hisse">
+										{h.hisse}
+									</a>
+								)}
+								{h.kaynak_url ? (
+									<a href={h.kaynak_url} target="_blank" rel="noopener" class="metin">
+										{h.baslik}
+									</a>
+								) : (
+									<span class="metin">{h.baslik}</span>
+								)}
+							</li>
+						))}
+					</ul>
+				)
+			}
 		</Kart>
 		<Kart baslik="Piyasa haberleri" altBaslik="Genel gündem" class="haber-kart">
 			<Fragment slot="sag"><a href="/takvim">Tümü</a></Fragment>
-			<ul class="haber-listesi">
-				{
-					piyasaHaberleri.map((h) => (
-						<li>
-							<span class="nokta" />
-							<span class="metin">{h}</span>
-						</li>
-					))
-				}
-			</ul>
+			{
+				piyasaHaberleriKayitlari.length === 0 ? (
+					<p class="haber-bos">Henüz haber girilmedi.</p>
+				) : (
+					<ul class="haber-listesi">
+						{piyasaHaberleriKayitlari.map((h) => (
+							<li>
+								<span class="nokta" />
+								{h.kaynak_url ? (
+									<a href={h.kaynak_url} target="_blank" rel="noopener" class="metin">
+										{h.baslik}
+									</a>
+								) : (
+									<span class="metin">{h.baslik}</span>
+								)}
+							</li>
+						))}
+					</ul>
+				)
+			}
 		</Kart>
 	</section>
 
@@ -133,11 +153,30 @@ const oneriKolonlari = [
 				)
 			}
 		</Kart>
-		<Kart baslik="Öneri karnesi" etiket="YAKINDA" koyu class="dar">
-			<p class="koyu-metin">
-				Günlük önerilerin 5 işlem günü içinde hedefe ulaşma oranı. Yöntem sayfasında açıkça
-				anlatılacak.
-			</p>
+		<Kart baslik="Öneri karnesi" koyu class="dar">
+			<Fragment slot="sag"><a href="/oneri-karnesi" class="karne-link">Yöntem</a></Fragment>
+			{
+				karneler.length === 0 ? (
+					<p class="koyu-metin">
+						Henüz sonuçlanmış öneri yok. Sonuçlar panelden işaretlendikçe kurum sıralaması burada
+						görünecek.
+					</p>
+				) : (
+					<div class="karne-listesi">
+						{karneler.map((k, i) => (
+							<div class="karne-satir">
+								<span class="karne-sira">{i + 1}</span>
+								<span class="karne-kurum">{k.kurum}</span>
+								<span class="karne-cubuk">
+									<span class="karne-dolu" style={`width:${Math.round((k.isabetOrani / enYuksekIsabet) * 100)}%`} />
+								</span>
+								<span class="karne-yuzde">%{k.isabetOrani.toFixed(0)}</span>
+							</div>
+						))}
+					</div>
+				)
+			}
+			<a href="/oneri-karnesi" class="karne-tum-link">Tüm kurumların karnesi</a>
 		</Kart>
 	</section>
 
@@ -344,6 +383,18 @@ const oneriKolonlari = [
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
+	.haber-listesi .haber-hisse {
+		font-family: var(--font-mono);
+		font-weight: 600;
+		font-size: 12px;
+		flex-shrink: 0;
+	}
+	.haber-bos {
+		margin: 0;
+		font-size: 13px;
+		color: var(--metin-ikincil);
+		padding: 12px 0;
+	}
 	.kpi-izgara {
 		display: grid;
 		grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -398,6 +449,61 @@ const oneriKolonlari = [
 		font-size: 14px;
 		line-height: 1.5;
 		color: #aeb3bf;
+	}
+	.karne-link {
+		color: var(--kehribar);
+		font-size: 13px;
+		font-weight: 600;
+	}
+	.karne-listesi {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+	.karne-satir {
+		display: grid;
+		grid-template-columns: 20px minmax(0, 1fr) 70px 40px;
+		align-items: center;
+		gap: 10px;
+	}
+	.karne-sira {
+		font-family: var(--font-baslik);
+		font-size: 15px;
+		color: #7d8391;
+	}
+	.karne-kurum {
+		font-size: 13px;
+		font-weight: 500;
+		color: #fff;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.karne-cubuk {
+		height: 8px;
+		background: #252c3b;
+		border-radius: 4px;
+		overflow: hidden;
+		display: block;
+	}
+	.karne-dolu {
+		display: block;
+		height: 8px;
+		background: var(--kehribar);
+		border-radius: 4px;
+	}
+	.karne-yuzde {
+		font-size: 14px;
+		font-weight: 600;
+		color: #fff;
+		text-align: right;
+	}
+	.karne-tum-link {
+		margin-top: auto;
+		color: var(--kehribar);
+		font-weight: 600;
+		font-size: 13px;
+		align-self: flex-start;
 	}
 	.metin {
 		margin: 0;

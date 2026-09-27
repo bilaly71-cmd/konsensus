@@ -8,8 +8,8 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 1. [x] Teminat simülatörünü gerçek derinliğe getir (A/B/C grup, açığa satış, üç depo)
 2. [x] Grafik tamamlama oyunu — sentetik desen üretimi (OBO, TOBO, çift tepe/dip, üçgenler, bayrak)
 3. [x] Hisse önerileri veri girişi — akıllı ayrıştırma (serbest metinden otomatik alan çıkarma)
-4. [ ] Öneri Merkezi + hisse sayfalarını 3'teki veri yapısına tam bağla
-5. [~] Eksik/yüzeysel kalan her şeyi gözden geçir, derinleştir (sürüyor)
+4. [x] Öneri Merkezi + hisse sayfalarını 3'teki veri yapısına tam bağla
+5. [x] Eksik/yüzeysel kalan her şeyi gözden geçir, derinleştir
 6. [x] Bütçe kalırsa: Öneri Karnesi [x], Fon Akıllı Para [x], Takvim + Halka arz + SPK bülteni [x] — hepsi tamamlandı
 
 ## Kararlar ve gerekçeler
@@ -61,6 +61,12 @@ Başlangıç: 27.09.2026, Bilal'in "tamamen otonom çalış" talimatıyla.
 - `/takvim`: tüm etkinlikler (yaklaşan + geçmiş ayrı). `/halka-arz` ve `/spk-bulteni`: kendi türlerine filtrelenmiş görünüm.
 - `/panel`'e "5. Takvim etkinliği ekle" bölümü.
 - Canlı veriyle uçtan uca test edildi (ekle → `/takvim`'de gün kutusu doğru göründü → sil → temiz). Tüm site (19 yol + 4 API) son kez tarandı, hepsi 200.
+
+### 8. Görev 5'in son parçası: ana sayfa haber kutuları + öneri karnesi mini kartı (27.09.2026)
+- Ana sayfadaki "Şirket haberleri" ve "Piyasa haberleri" kutuları Adım 1'den beri statik köşeli-parantez örnek metindi ("[Şirket] KAP bildirimi: [özet]"). Aynı kürasyon desenini uyguladım: `migrations/0006_haberler.sql` → `haberler` tablosu (tür: şirket/piyasa, isteğe bağlı hisse, başlık, kaynak linki), `src/lib/haberler.ts`, `src/pages/api/haberler.ts`, `/panel`'e "6. Ana sayfa haberi ekle" bölümü. Ana sayfa artık gerçek veriyi çekiyor, boşsa "Henüz haber girilmedi" gösteriyor (uydurma placeholder yok).
+- Ayrıca fark ettim: ana sayfadaki koyu "Öneri karnesi" mini kartı hâlâ sabit "YAKINDA" etiketiyle duruyordu, oysa artık gerçek bir `/oneri-karnesi` sayfası ve gerçek karne verisi var. Bunu da bağladım: kart artık `kurumKarneleriHesapla`'dan gelen ilk 5 kurumu sıra/çubuk/yüzde ile gösteriyor, "Yöntem" ve "Tüm kurumların karnesi" linkleri `/oneri-karnesi`'ye gidiyor. Sonuçlanmış öneri yoksa nazik bir boş durum mesajı var.
+- Canlı veriyle uçtan uca test edildi (haber ekle → ana sayfada göründü → sil → temiz; karne kartı gerçek "garan · %100" verisini gösterdi).
+- Bu, Görev 5'i (eksik/yüzeysel kalanı derinleştir) tamamen kapatıyor — artık ana sayfada hiçbir statik/uydurma veri kalmadı, her kart ya gerçek D1 verisini ya da dürüst bir boş durumu gösteriyor.
 
 **Görev 6'nın tamamı bitti.** Bilal'in verdiği 6 maddelik listenin tamamı tamamlandı: Teminat simülatörü derinleştirme, Grafik oyunu, Panel akıllı ayrıştırma, Öneri Merkezi/hisse bağlantısı, gözden geçirme, ve bütçe kalırsa istenen üç ek modül (Öneri Karnesi, Fon Akıllı Para, Takvim ailesi) — hepsi canlıda, GitHub'da, test edilmiş durumda.
 

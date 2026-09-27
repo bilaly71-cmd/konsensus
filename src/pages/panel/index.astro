@@ -200,6 +200,35 @@ const bugun = bugunIstanbul();
 		<div id="takvimListesi" class="fon-listesi"></div>
 	</Kart>
 
+	<Kart baslik="6. Ana sayfa haberi ekle" altBaslik="Şirket haberleri / Piyasa haberleri kutuları için">
+		<div class="form-izgara">
+			<label>
+				<span>Tür</span>
+				<select id="haberTur">
+					<option value="sirket">Şirket haberi</option>
+					<option value="piyasa">Piyasa haberi</option>
+				</select>
+			</label>
+			<label>
+				<span>Hisse</span>
+				<input type="text" id="haberHisse" placeholder="isteğe bağlı, şirket haberinde" />
+			</label>
+			<label>
+				<span>Başlık *</span>
+				<input type="text" id="haberBaslik" placeholder="örn. THYAO 3. çeyrek finansallarını açıkladı" />
+			</label>
+			<label>
+				<span>Kaynak linki</span>
+				<input type="text" id="haberLink" placeholder="isteğe bağlı, KAP/haber linki" />
+			</label>
+		</div>
+		<p id="haberHata" class="durum-mesaji hata"></p>
+		<div class="dugmeler">
+			<Buton id="haberEkleDugme" tur="ikincil" type="button">Haber ekle</Buton>
+		</div>
+		<div id="haberListesi" class="fon-listesi"></div>
+	</Kart>
+
 	<script>
 		import { bulteniAyristir, type TaslakSatir } from '../../lib/ayristir';
 
@@ -649,6 +678,87 @@ const bugun = bugunIstanbul();
 				.join('')}`;
 		}
 		takvimListesiYukle();
+
+		// --- 6. Ana sayfa haberi ekle ---
+		const haberTurEl = document.getElementById('haberTur') as HTMLSelectElement;
+		const haberHisseEl = document.getElementById('haberHisse') as HTMLInputElement;
+		const haberBaslikEl = document.getElementById('haberBaslik') as HTMLInputElement;
+		const haberLinkEl = document.getElementById('haberLink') as HTMLInputElement;
+		const haberHataEl = document.getElementById('haberHata')!;
+		const haberEkleDugmeEl = document.getElementById('haberEkleDugme')!;
+		const haberListesiEl = document.getElementById('haberListesi')!;
+
+		async function haberEkle() {
+			const baslik = haberBaslikEl.value.trim();
+			if (!baslik) {
+				haberHataEl.textContent = 'Başlık zorunlu.';
+				return;
+			}
+			haberHataEl.textContent = '';
+			(haberEkleDugmeEl as HTMLButtonElement).disabled = true;
+			try {
+				const yanit = await fetch('/api/haberler', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						satirlar: [
+							{
+								tur: haberTurEl.value,
+								hisse: haberHisseEl.value.trim(),
+								baslik,
+								kaynak_url: haberLinkEl.value.trim(),
+							},
+						],
+					}),
+				});
+				if (!yanit.ok) throw new Error((await yanit.json()).hata || 'Kayıt başarısız.');
+				haberHisseEl.value = '';
+				haberBaslikEl.value = '';
+				haberLinkEl.value = '';
+				haberBaslikEl.focus();
+				haberListesiYukle();
+			} catch (e) {
+				haberHataEl.textContent = e instanceof Error ? e.message : 'Kayıt başarısız.';
+			} finally {
+				(haberEkleDugmeEl as HTMLButtonElement).disabled = false;
+			}
+		}
+		haberEkleDugmeEl.addEventListener('click', haberEkle);
+		[haberHisseEl, haberBaslikEl, haberLinkEl].forEach((el) => {
+			el.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					haberEkle();
+				}
+			});
+		});
+
+		async function haberSil(id: number) {
+			await fetch(`/api/haberler?id=${id}`, { method: 'DELETE' });
+			haberListesiYukle();
+		}
+		haberListesiEl.addEventListener('click', (e) => {
+			const buton = (e.target as HTMLElement).closest('.sil') as HTMLElement | null;
+			if (!buton) return;
+			haberSil(Number(buton.dataset.id));
+		});
+
+		async function haberListesiYukle() {
+			const yanit = await fetch('/api/haberler');
+			const veri = await yanit.json();
+			const satirlar = (veri.satirlar || []).slice(0, 10);
+			if (satirlar.length === 0) {
+				haberListesiEl.innerHTML = '<p class="bos">Henüz haber girilmedi.</p>';
+				return;
+			}
+			haberListesiEl.innerHTML = `<p class="ipucu">Son eklenenler:</p>${satirlar
+				.map(
+					(s: any) =>
+						`<div class="fon-satir"><span>${s.tur}${s.hisse ? ' · ' + s.hisse : ''} · ${s.baslik}</span><button type="button" class="sil" data-id="${s.id}">Sil</button></div>`,
+				)
+				.join('')}`;
+		}
+		haberListesiYukle();
 	</script>
 
 	<style>
