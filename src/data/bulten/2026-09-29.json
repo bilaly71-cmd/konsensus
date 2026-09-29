@@ -1,0 +1,772 @@
+{
+  "date": "2026-09-29",
+  "weekday": "Salı",
+  "asOf": "10:48",
+  "windowText": "28.09 18:00 → 29.09 10:48 (TSİ)",
+  "note": "Bülten sabah 07:30 yerine 10:48'de üretildi; açılış verileri dahil.",
+  "sources": [
+    {
+      "n": "KAP (Bloomberg HT, Para Ajansı, Borsamatik derlemeleri)",
+      "k": "Birincil / derleme"
+    },
+    {
+      "n": "Mynet, CNBC-e, Halk TV (BIST açılışı)",
+      "k": "Haber"
+    },
+    {
+      "n": "TheStreet, Axios, CBS News (ABD, İran)",
+      "k": "Haber"
+    },
+    {
+      "n": "Cumhuriyet, GZT (altın)",
+      "k": "Haber"
+    },
+    {
+      "n": "TradingEconomics (Brent)",
+      "k": "Veri"
+    },
+    {
+      "n": "CMC Markets (haftalık takvim)",
+      "k": "Kurum"
+    }
+  ],
+  "top5": [
+    {
+      "h": "BIST 100 açılışta da satılıyor: 12.504, 7 Eylül'den beri yaklaşık %11 aşağıda",
+      "p": "Endeks dün **%2,38** (306,59 puan) düşüp **12.592,76**'da kapandı, hacim **115,2 mlr TL**. Bu sabah **12.516** (-%0,61) açıldı, 10:25'te **12.504** (-%0,71). Haftalık **-%4,59**, aylık **-%13,99**. Teknik destek **12.500 / 12.400**, direnç **12.700 / 12.800** (CNBC-e).",
+      "chain": "Sebep: fon tasfiyesinin yarattığı nakit ihtiyacı → likit hisselerde satış → endeks. Açılışta banka endeksi **+%0,07**, holding **-%1,17**: yük bankada değil holdinglerde.",
+      "src": "Halk TV 10:25 · Mynet 10:20 · CNBC-e"
+    },
+    {
+      "h": "Fon krizi: Erdoğan \"sorun sınırlı, bulaşma riski yok\" dedi, ödeme takvimi hâlâ yok",
+      "p": "Erdoğan, sorunun fon piyasasının sınırlı bir bölümünde çıktığını ve finansal sisteme bulaşma riski olmadığını söyledi (29.09 sabahı). SPK mekanizmasına göre **131 fon** tasfiye ediliyor, tasfiye en fazla **3 ay** sürecek, ödemeler pay oranında ve yürütücü bankaların belirlediği dönemlerde yapılacak. [[ESKİ 18.09, Bloomberg HT]]",
+      "chain": "Güven mesajı geldi ama somut ödeme tarihi yok. Takvim haberi gelene kadar likit hisselerdeki nakit satışı sürer. Ödemeler yürütücü bankaların (İş Bankası, Ziraat) belirleyeceği dönemlerle gelecek.",
+      "src": "CNBC-e 29.09 · Bloomberg HT 18.09"
+    },
+    {
+      "h": "ABD 10 yıllık faiz %5,2 ile 19 yılın zirvesinde, Fed'in Ekim'de artırma olasılığı %70,3",
+      "p": "ABD endeksleri dün düştü: S&P 500 **-%0,77 (7.683,69)**, Nasdaq **-%0,92**, Dow **-%0,67**. Finansallar **-%1,14**, iletişim **-%1,56**. Piyasa Ekim artırımını **%70,3** olasılıkla fiyatlıyor.",
+      "chain": "Zincir: Brent yüksek → enflasyon endişesi → Fed artırım beklentisi → uzun faiz → hisse değerlemesi baskısı. Altın **7 haftalık dibe yakın** (**~4.125–4.132 $**), yani faiz kanalı jeopolitik kanaldan baskın.",
+      "src": "TheStreet 28.09 · Cumhuriyet 29.09 09:21 · GZT 07:33"
+    },
+    {
+      "h": "ABD–İran: Trump \"hiçbir şey teklif etmedim\" dedi, ABD'li yetkili yaptırım gevşetmeye açık diyor",
+      "p": "Trump Truth Social'da **\"I offered them NOTHING!\"** yazdı. Buna karşın bir ABD'li yetkili CBS'e, somut nükleer ilerleme olursa yaptırım gevşetmeye açık olduğunu söyledi. Dolaylı müzakere Katar arabuluculuğunda sürüyor. Arakçi: **\"Savaşın yeniden başlamasına tamamen hazırız\"**.",
+      "chain": "Taraflar zamanlama ve sıralamada ayrışıyor. Cuma gecesi Hürmüz'den savaş başından beri en büyük petrol hacmi (**>20 mn varil**) geçti ama Brent yine yükseldi. Ekran: barış haberinden çok reddedilen teklif fiyatlanıyor.",
+      "src": "CBS News 28.09 · Axios 27.09"
+    },
+    {
+      "h": "EKGYO: Kemerburgaz sözleşmesinde şirket payı 15,4 mlr TL, Bursa \"20 mlr TL\" iddiası yalanlandı",
+      "p": "Cevahir Yapı ile imzalanan işte satış geliri **36,66 mlr TL**, şirket payı **%42 = 15.397.620.000 TL**. Ayrı olarak Bursa Nilüfer'deki 100 bin m² arsa için basına yansıyan \"20 mlr TL'lik satın alma\" iddiası yalanlandı, gelir paylaşımı modeliyle nakit çıkışı yok. Aynı akşam **21:27**'de geri alım bildirimi de geldi.",
+      "chain": "İki farklı rakam karışmasın: 15,4 mlr TL gerçek gelir payı, 20 mlr TL yanlış iddia. Piyasa değerine oranı doğrulanamadı.",
+      "src": "KAP 28.09 21:27 · Borsamatik · kurum bülteni özeti"
+    }
+  ],
+  "story": "**Endeksi ezen:** yerel fon krizi. Aylık **-%13,99**, 7 Eylül'de 14.152 olan endeks **12.593**'e indi (**-%11,0**). Dış tarafta ABD 10Y **%5,2**, Brent **105 $** üstü ve Ekim'de faiz artırımı beklentisi baskıyı büyütüyor. **Endeksi tutan:** on kodda şirket geri alımı, banka endeksinin göreli direnci (**+%0,07** açılış) ve Erdoğan'ın güven mesajı. Tarihsel benzetme yapmıyorum: kur sakin (**USD/TRY 48,99–49,00**), 2018 ve 2021 gibi kur şoku yok. Bu kez kaynak faiz ya da kur değil, fon likiditesi.",
+  "strip": [
+    {
+      "l": "BIST 100",
+      "v": "12.504",
+      "c": "-%0,71",
+      "d": "d",
+      "n": "10:25 · Halk TV"
+    },
+    {
+      "l": "BIST 100 açılış",
+      "v": "12.516",
+      "c": "-%0,61",
+      "d": "d",
+      "n": "10:20 · Mynet"
+    },
+    {
+      "l": "BIST 30",
+      "v": "15.649",
+      "c": "",
+      "d": "n",
+      "n": "28.09 kapanış · CNBC-e"
+    },
+    {
+      "l": "VİOP Ekim",
+      "v": "15.910",
+      "c": "-%0,14",
+      "d": "d",
+      "n": "açılış · önceki kapanış 15.932 (-%2,19)"
+    },
+    {
+      "l": "USD/TRY",
+      "v": "48,9969",
+      "c": "+%0,06",
+      "d": "u",
+      "n": "açılış · CNBC-e"
+    },
+    {
+      "l": "Gram altın",
+      "v": "6.534,89",
+      "c": "+%0,85",
+      "d": "u",
+      "n": "10:20 · Mynet"
+    },
+    {
+      "l": "Ons altın",
+      "v": "4.132",
+      "c": "",
+      "d": "n",
+      "n": "09:21 · spot 4.124,57"
+    },
+    {
+      "l": "Brent ⚠",
+      "v": "105–108",
+      "c": "",
+      "d": "n",
+      "n": "çelişkili: 105,65 (TE 28.09), 108,50 (+%4,02 TheStreet)"
+    },
+    {
+      "l": "ABD 10Y",
+      "v": "%5,2",
+      "c": "",
+      "d": "n",
+      "n": "19 yılın zirvesi · TheStreet"
+    },
+    {
+      "l": "Fed Ekim artırım",
+      "v": "%70,3",
+      "c": "",
+      "d": "n",
+      "n": "09:21 · Cumhuriyet"
+    },
+    {
+      "l": "S&P 500",
+      "v": "7.683,69",
+      "c": "-%0,77",
+      "d": "d",
+      "n": "28.09 kapanış"
+    },
+    {
+      "l": "Nasdaq",
+      "v": "26.820,38",
+      "c": "-%0,92",
+      "d": "d",
+      "n": "28.09 kapanış"
+    },
+    {
+      "l": "Dow Jones",
+      "v": "51.481,51",
+      "c": "-%0,67",
+      "d": "d",
+      "n": "28.09 kapanış"
+    },
+    {
+      "l": "Bitcoin",
+      "v": "83.984",
+      "c": "+%1,28",
+      "d": "u",
+      "n": "10:20 · Mynet"
+    },
+    {
+      "l": "DXY",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı)"
+    },
+    {
+      "l": "CDS 5Y",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı)"
+    }
+  ],
+  "stripNote": "Brent'te üç rakam var ve birbirini tutmuyor: TradingEconomics **105,65 $** (+%1,27, 28.09), TheStreet **108,50 $** (+%4,02, ABD kapanışı), bir kurum bülteninin sabah verisi **~99,5 $**. Hangisi güncel, doğrulayamadım. Bu yüzden Brent'e bağlı yorumlarda \"yüksek\" diyorum, tam rakam vermiyorum.",
+  "dom": [
+    "BIST 100 dün **12.592,76**'da kapandı, bugün **12.516** açıldı. Endeks **1 Ekim'de yürürlüğe girecek endeks değişiklikleri** ve **çeyrek sonu** öncesi zaten baskılı. [[ESKİ 28.09 kurum notu]]",
+    "VİOP Ekim kontratı **15.910** açıldı (-%0,14), önceki kapanış **15.932** (-%2,19). BIST 30 spot kapanış **15.648,91**.",
+    "USD/TRY **48,9969**, dünkü kapanış **48,9759**. Kur tarafında olağan dışı hareket yok.",
+    "Bugün 10:00'da eylül ekonomik güven endeksi açıklanıyor. TCMB Başkanı Karahan **6 Ekim**'de TBMM sunumu yapacak.",
+    "Açılışta en zayıf sektör **finansal kiralama ve faktoring (-%8,14)**, en güçlüsü menkul kıymet yatırım ortaklıkları (**+%1,29**)."
+  ],
+  "glob": [
+    "ABD dün zayıf kapandı: **S&P 500 7.683,69 (-%0,77)**, **Nasdaq 26.820,38 (-%0,92)**, **Dow 51.481,51 (-%0,67)**, **Russell 2000 2.817,91 (-%0,69)**.",
+    "Sektörler: sağlık **+%0,29**, temel tüketim **+%0,22**, enerji **+%0,11**; iletişim **-%1,56**, isteğe bağlı tüketim **-%1,43**, finansallar **-%1,14**.",
+    "Hisse: **Nvidia +%2,64** (150 mlr $ geri alım artırımı), **MongoDB -%18,43** (CEO'nun Meta'ya geçmesi), **Boeing -%6,2** (737 MAX 10 sertifikasyon gecikmesi).",
+    "**Ons altın 4.132 $** (spot 4.124,57), yedi haftadan uzun sürenin en düşüğüne yakın. Gram altın **6.516–6.535 TL**.",
+    "Bu hafta: **30.09** ağustos PCE (manşet aylık **+%0,4**, çekirdek **+%0,3**, yıllık çekirdek **%3,4** beklentisi), **02.10** tarım dışı istihdam (**+100 bin**, işsizlik **%4,2**). [[CMC Markets 25.09]]"
+  ],
+  "regime": [
+    [
+      "Altın ↔ jeopolitik gerilim",
+      "Gerilim ve petrol yükselirken altın **7 haftalık dibe** yakın, Fed Ekim artırım olasılığı **%70,3** (GZT 07:33, Cumhuriyet 09:21).",
+      "Gerilim artınca altını yukarı yorumlama. Altın faiz ve dolar kanalıyla işliyor."
+    ],
+    [
+      "Brent ↔ jeopolitik gerilim",
+      "Trump'ın İran teklifini reddi sonrası Brent **+%4,02** (28.09). Aylık **+%16,75** (TradingEconomics). Hürmüz'den rekor geçişe rağmen düşmedi.",
+      "Red haberi Brent'i hızlı yukarı, barış haberi yavaş aşağı çekiyor. Asimetrik."
+    ],
+    [
+      "BIST ↔ Brent",
+      "Brent yüksekken BIST aylık **-%13,99**. Dün ABD **-%0,77** iken BIST **-%2,38**.",
+      "Brent yükselişi BIST'e ek baskı ama asıl sürücü yerel fon krizi. Seri kısa, rejim kısmen belirsiz."
+    ],
+    [
+      "BIST ↔ USDTRY ve CDS",
+      "USD/TRY **48,9759 → 48,9969**, sakin. CDS bugün için doğrulanamadı.",
+      "Satış kur kaynaklı değil. 2018 tipi hikâye yazılmaz."
+    ],
+    [
+      "Bankalar ↔ tahvil faizi",
+      "Açılışta banka endeksi **+%0,07**, holding **-%1,17**, XU100 **-%0,61**. Faiz bugün için doğrulanamadı.",
+      "Bankalar defansif duruyor. Banka bazlı pozitif ve holding negatif ayrışması bugünkü yönün çerçevesi."
+    ],
+    [
+      "BIST ↔ EEM ve DXY",
+      "Veri bulunamadı.",
+      "Rejim belirsiz, yorum yapmıyorum."
+    ],
+    [
+      "ABD endeks ↔ ABD 10Y",
+      "10Y **%5,2** (19 yıl zirvesi) ve S&P **-%0,77**, finansallar **-%1,14**.",
+      "Faiz zirve yaparken endeks satılıyor. Bugün 17:00 JOLTS ve tüketici güveni faizi oynatabilir."
+    ]
+  ],
+  "regimeNote": "Elimde 5–10 günlük tam seri yok, dayanaklar tek tek günlerin haberlerinden geliyor. Otomasyonda bu tablo gerçek kapanış serisinden çıkarılmalı.",
+  "usiran": {
+    "timeline": [
+      [
+        "26.09",
+        "Trump, İran'ın 7 günlük planını reddetti: Hürmüz'ü açma ve nükleer görüşmeleri yeniden başlatma karşılığında deniz ablukasının kalkması, petrol yaptırımlarının kalkması ve bölgesel ateşkes. \"Bir yıl önce belki kabul ederdik, elini fazla zorladılar.\" (WaPo, NPR, Al Jazeera)"
+      ],
+      [
+        "27.09",
+        "Trump Axios'a: bu hafta yeni görüşmeler bekliyor. Hafta sonu savaş başından beri en büyük petrol hacmi Hürmüz'den geçti (Cuma gecesi **>20 mn varil**, ABD savunma yetkilisi doğruladı). Saldırıları yeniden başlatmayı sorulunca: \"Hep düşünüyorum.\" (Axios)"
+      ],
+      [
+        "28.09",
+        "Dolaylı görüşmeler Katar arabuluculuğunda yeniden başladı. Trump: \"Hiçbir şey teklif etmedim.\" ABD'li yetkili CBS'e: somut nükleer ilerlemede yaptırım gevşetmeye açık. Arakçi: savaşa hazırız, karar Trump'ın. Taraflar sıralama ve zamanlamada ayrışıyor. (CBS News)"
+      ],
+      [
+        "28.09",
+        "ABD kapanışında Brent **+%4,02 (108,50 $)**, S&P **-%0,77**. Suudi Arabistan Doğu-Batı boru hattıyla ihracatı yeniden başlattı. (TheStreet, TradingEconomics)"
+      ]
+    ],
+    "verdict": "YOK",
+    "why": "Görüşmeler sürüyor ama hiçbir taraf pozisyon değiştirmedi. Rekor tanker geçişi fiziksel iyileşme, ama diplomatik ilerleme yok.",
+    "peace": [
+      "Dolaylı görüşmelerin Katar üzerinden sürmesi",
+      "Hürmüz'den >20 mn varillik geçiş",
+      "Suudi Doğu-Batı hattı ihracatı yeniden açtı"
+    ],
+    "esc": [
+      "Trump'ın teklifi reddi ve \"hep düşünüyorum\" çıkışı",
+      "Arakçi: \"savaşa tamamen hazırız\"",
+      "Suudi koalisyonunun Husi füze ve İHA'larını engellemesi"
+    ],
+    "impact": "Rejim panosuna göre: **altın** gerilimde düşüyor (faiz kanalı), **Brent** red haberinde sert, barışta yavaş; **BIST**'te asıl sürücü yerel. **Savunma** (ASELS açılışta **-%2,11**) ve **havayolu** (THYAO **+%0,78**) bugün jeopolitikten çok yerel akışla hareket ediyor."
+  },
+  "news": [
+    {
+      "h": "Erdoğan: \"Sorun fon piyasasının sınırlı bir bölümünde, bulaşma riski yok\"",
+      "ts": "29.09 sabah",
+      "src": "CNBC-e / Mynet",
+      "chain": "Güven mesajı → ama ödeme takvimi yok → nakit ihtiyacı devam → likit hisselerde satış.",
+      "who": "Holdingler (açılış **-%1,17**), fon bağlantılı küçük hisseler (dünkü taban listesi: HEDEF, MARTI, MAGEN, BIGTK, USAK).",
+      "priced": "Kısmen: endeks **-%0,61** açıldı, dünkü kayıp henüz geri alınmadı."
+    },
+    {
+      "h": "Piyasa Fed'in Ekim'de faiz artırımını %70,3 fiyatlıyor",
+      "ts": "29.09 09:21",
+      "src": "Cumhuriyet",
+      "chain": "Petrol ve enflasyon → Fed sıkılaşma → dolar ve faiz yukarı → altın ve riskli varlık aşağı.",
+      "who": "Altın (7 haftalık dip), gelişen piyasa hisseleri, BIST'te yabancı payı yüksek hisseler.",
+      "priced": "Büyük ölçüde fiyatlanmış: ons **4.132 $**, dip bölgesinde."
+    },
+    {
+      "h": "Hürmüz'den rekor tanker geçişi, buna rağmen Brent yukarı",
+      "ts": "27–28.09",
+      "src": "Axios, TheStreet",
+      "chain": "Arz iyileşmesi → Brent baskısı beklenirdi. Ekranda Trump'ın teklifi reddi baskın → Brent **+%4,02**.",
+      "who": "Rafineri, havayolu ve sanayi maliyeti. TUPRS açılışta **-%0,19**, THYAO **+%0,78**.",
+      "priced": "Havayolu henüz Brent'i fiyatlamamış görünüyor, ama seans içi veri yok."
+    },
+    {
+      "h": "Nvidia'dan 150 mlr $ geri alım artırımı, MongoDB -%18,43, Boeing -%6,2",
+      "ts": "28.09",
+      "src": "TheStreet",
+      "chain": "ABD'de hisse bazlı hareket: çip ve yazılımda ayrışma. BIST'e doğrudan kanal yok.",
+      "who": "Teknoloji endeksi dolaylı. Bugün ABD verisi ve Micron (30.09) belirleyici.",
+      "priced": "Nvidia haberi kapanışta fiyatlandı."
+    },
+    {
+      "h": "DMRGD'de kredili işlem ve açığa satış yasağı (28.09 – 27.10)",
+      "ts": "28.09",
+      "src": "KAP / Borsamatik",
+      "chain": "VBTS tedbiri → kaldıraç ve açığa satış kapanır → likidite düşer.",
+      "who": "DMRGD.",
+      "priced": "Tek hisse etkisi, endekse etkisi yok."
+    }
+  ],
+  "kap": [
+    {
+      "t": "EKGYO",
+      "c": "soz",
+      "w": "Çok yüksek",
+      "s": "KAP 28.09 21:27",
+      "h": "Kemerburgaz 3. Etap sözleşmesi, şirket payı 15,4 mlr TL",
+      "b": "Cevahir Yapı ile imzalandı. Satış geliri 36,661 mlr TL, şirket payı %42 = 15.397.620.000 TL. Aynı gün 2. etap ihalesi iptal edildi. Ayrı olarak Bursa Nilüfer arsası için \"20 mlr TL\" iddiası yalanlandı, gelir paylaşımı modeliyle nakit çıkışı yok. Geri alım bildirimi de var.",
+      "y": "Yeni gelir akışı büyük, ama piyasa değerine oranı doğrulanamadı. Açılış fiyat tepkisi verisi yok."
+    },
+    {
+      "t": "MARMR",
+      "c": "devir",
+      "w": "Yüksek",
+      "s": "KAP 28.09 21:48",
+      "h": "Polisan Kansai payının satışına Rekabet Kurulu izni",
+      "b": "%50 pay, 93 mn $ peşin bedel. Sözleşme 29.07'de imzalanmıştı, izin 28.09'da bildirildi.",
+      "y": "Belirsizlik kalktı. Bedel dolar cinsinden peşin."
+    },
+    {
+      "t": "KRDMA / B / D",
+      "c": "pay",
+      "w": "Yüksek",
+      "s": "KAP 28.09",
+      "h": "750 mn TL'lik geri alım programı",
+      "b": "En fazla 11,4 mn adet (sermayenin %1'i), 4 ay süreli.",
+      "y": "Düşen piyasada şirket alıcı. Program tavanı 750 mn TL, gerçekleşme günlük bildirilecek."
+    },
+    {
+      "t": "ARDYZ",
+      "c": "soz",
+      "w": "Orta",
+      "s": "KAP 28.09",
+      "h": "Tokat Erbaa Belediyesi atık yönetimi ihalesi, 430,3 mn TL, 10 yıl",
+      "b": "Sözleşme imzalandı.",
+      "y": "10 yıllık gelir kalemi. Yıllık etkisi ciroya göre doğrulanamadı."
+    },
+    {
+      "t": "FONET",
+      "c": "soz",
+      "w": "Küçük",
+      "s": "KAP 28.09",
+      "h": "Denizli İl Sağlık Müdürlüğü ihalesi 153,99 mn TL, 36 ay",
+      "b": "Ayrıca Batman İl Sağlık Müdürlüğü'nden 137,7 mn TL'lik ayrı bir ihale haberi dolaşıyor (kurum bülteni).",
+      "y": "İki farklı ihale, karıştırılmamalı. İtiraz süresi sonrası sözleşme."
+    },
+    {
+      "t": "OZATD",
+      "c": "fon",
+      "w": "Yüksek",
+      "s": "KAP 25.09 09:53",
+      "h": "[[ESKİ 25.09]] Yönetim kurulu başkanı ve başkan vekili hakkında tutuklama kararı",
+      "b": "Özdemir Ataseven ve Gökhan Ataseven hakkında sulh ceza hâkimliği tutuklama kararı verdi. Şirket, üretimin kesintisiz sürdüğünü belirtti. 28.09'da ana ortağın pay satış planından vazgeçtiği de bildirildi.",
+      "y": "Yeni haber değil ama hâlâ fiyat üstünde baskı. Yönetim krizi ve satış planının iptali birlikte okunmalı."
+    },
+    {
+      "t": "PEKGY",
+      "c": "pay",
+      "w": "Orta",
+      "s": "KAP 28.09",
+      "h": "Tera Yatırım Holding zorunlu pay alım teklifi sürecini sonlandırdı",
+      "b": "Teklif süreci sona erdi.",
+      "y": "Tera Portföy fonları tasfiye kapsamında (Bloomberg HT), PEKGY teklifinin bununla ilişkisi doğrulanamadı."
+    },
+    {
+      "t": "ASTOR / ATLAS / PASEU",
+      "c": "fon",
+      "w": "Yüksek",
+      "s": "KAP 28.09",
+      "h": "Fon soruşturması açıklamaları",
+      "b": "ASTOR: savcılık tedbirleri kalktı, faaliyet sürüyor. ATLAS: fon soruşturmasıyla bağlantısı yok, basındaki haber isim benzerliğinden. PASEU: ortak payları nisanda Pusula Portföy PHB fonuna devredilmişti, fon için tasfiye başvurusu yapıldı.",
+      "y": "Her açıklama ayrı okunmalı. İsim benzerliği yüzünden satılan hisseler tepki verebilir."
+    },
+    {
+      "t": "DMRGD",
+      "c": "fon",
+      "w": "Küçük",
+      "s": "KAP 28.09",
+      "h": "VBTS: kredili işlem ve açığa satış yasağı, 28.09 – 27.10",
+      "b": "Tedbir 27 Ekim seans sonuna kadar.",
+      "y": "Likidite düşer."
+    },
+    {
+      "t": "AEFES",
+      "c": "sermaye",
+      "w": "Orta",
+      "s": "KAP 28.09",
+      "h": "15 mlr TL'ye kadar borçlanma aracı ihracı için SPK başvurusu",
+      "b": "Halka arz edilmeden, tahsisli veya nitelikli yatırımcıya.",
+      "y": "Finansman kaynağı, kullanım amacı bildirimde yok."
+    },
+    {
+      "t": "VESTL / VESBE",
+      "c": "not",
+      "w": "Orta",
+      "s": "KAP 28.09",
+      "h": "JCR: uzun vadeli ulusal not BB+ (tr), durağan",
+      "b": "VESTL notu BBB- seviyesinden BB+ olarak bildirildi (kaynaklar önceki notu farklı yazıyor: BBB- ve BBB).",
+      "y": "İndirim yönlü. Önceki notu doğrulanamadı."
+    },
+    {
+      "t": "Notlar",
+      "c": "not",
+      "w": "Küçük",
+      "s": "KAP 28.09",
+      "h": "ZOREN (Fitch, 19:32), PETKM CCC teyit, ESCAR B- negatif, ERCB BBB- teyit, DARDL BBB-, PRKAB A(tr)",
+      "b": "ERCB'de görünüm negatiften durağana revize edildi.",
+      "y": "ESCAR ve PETKM zayıf tarafta."
+    },
+    {
+      "t": "Birleşme",
+      "c": "devir",
+      "w": "Küçük",
+      "s": "KAP 28.09",
+      "h": "YATAS (Vivense), PSDTC (İdeacore) birleşmeden vazgeçti. ISSEN iştirak birleşmesi için SPK başvurusu",
+      "b": "KTLEV'de Katılımevim, Birevim ve İktisat Katılım paylarının Emlak Katılım'a devri için Hazine, SPK ve BDDK başvuruları yapıldı. ALVES'te TMSF atanmış yönetim kurulu üyeleri göreve başladı.",
+      "y": "Tek başına küçük, KTLEV ve ALVES yönetim değişikliği izlenmeli."
+    },
+    {
+      "t": "TRALT / TRENJ / TRMET",
+      "c": "devir",
+      "w": "Küçük",
+      "s": "KAP 28.09",
+      "h": "TR Tedarik paylarının Türk Altın Holding'e devri",
+      "b": "TRALT %44 (6,6 mn adet), TRENJ ve TRMET %28 (4,2 mn adet), her biri 6,16 mn TL. Grup sadeleşmesi.",
+      "y": "İlişkili taraf işlemi, tutar küçük."
+    },
+    {
+      "t": "LKMNH",
+      "c": "temettu",
+      "w": "Küçük",
+      "s": "KAP 28.09",
+      "h": "Brüt 0,23 TL temettü, verim yaklaşık %1,9",
+      "b": "TUPRS temettüsü 30.09'da (kurum bülteni, brüt 6,7470 TL).",
+      "y": "Ay sonu temettü etkisi."
+    },
+    {
+      "t": "ALKA",
+      "c": "temettu",
+      "w": "Küçük",
+      "s": "KAP 28.09",
+      "h": "Bedelli sermaye artırımı: 735 mn TL → 1 mlr TL (%37,5)",
+      "b": "Ayrıcalıklı sermaye artırımından vazgeçildi.",
+      "y": "Bedelli, seyreltme etkisi var."
+    }
+  ],
+  "buybacks": [
+    [
+      "KRDMA/B/D",
+      "750 mn TL, 11,4 mn adet",
+      "4 ay",
+      "Yeni program",
+      "KAP 28.09"
+    ],
+    [
+      "MAVI",
+      "200.000 adet @ 37,41 TL",
+      "—",
+      "Kümülatif %1,93",
+      "KAP 28.09"
+    ],
+    [
+      "ULUFA",
+      "3 mn adet @ 1,47 TL",
+      "25.09",
+      "Kümülatif %1,07",
+      "KAP 28.09"
+    ],
+    [
+      "GEDIK",
+      "345.000 adet @ 4,97–5,10 TL",
+      "25.09",
+      "Toplam %3,85",
+      "KAP 28.09"
+    ],
+    [
+      "TTKOM",
+      "365.000 adet",
+      "25.09",
+      "Toplam 1,24 mn adet, %0,04",
+      "KAP 28.09"
+    ],
+    [
+      "LKMNH",
+      "4.000 adet @ 11,89–11,90 TL",
+      "25.09",
+      "Oran %5,94",
+      "KAP 28.09"
+    ],
+    [
+      "PCILT",
+      "50.000 lot @ 30,858 TL",
+      "25.09",
+      "",
+      "KAP 28.09"
+    ],
+    [
+      "EKGYO",
+      "Bildirim var, tutar yok",
+      "—",
+      "21:27 bildirimi",
+      "KAP 28.09"
+    ],
+    [
+      "BIOEN (hakim ortak)",
+      "1 mlr TL'ye kadar",
+      "—",
+      "Şirket değil, ortak alımı",
+      "kurum bülteni"
+    ],
+    [
+      "DERHL / DOFRB / GIPTA / TKNKA",
+      "100 / 50 / 350 / 750 mn TL",
+      "1 yıl / 3 ay / 1 yıl / 1 yıl",
+      "GIPTA: Tera bağı yok",
+      "kurum bülteni 29.09"
+    ]
+  ],
+  "earnings": "BIST'te bugün öne çıkan bilanço açıklaması bulunamadı. ABD'de bugün piyasa öncesi bilanço tarayamadım (doğrulanamadı). Haftalık takvim (CMC Markets, 25.09): **Micron 30.09 Çarşamba**, beklenti hisse başı kâr **31,45 $**, gelir **50,8 mlr $**; **Nike ve McCormick 01.10**. Konsensüs rakamlarını tek kaynaktan aldım, çapraz doğrulayamadım.",
+  "rumors": [
+    {
+      "st": "Şirket yalanladı",
+      "sc": "s-no",
+      "h": "EKGYO: \"20 mlr TL'lik Bursa arsa alımı\"",
+      "b": "Basında dolaşan iddia. Şirket KAP'ta, gelir paylaşımı protokolü imzalandığını ve nakit çıkışı olmadığını bildirdi.",
+      "s": "Medya haberi, KAP 28.09"
+    },
+    {
+      "st": "Çelişkili",
+      "sc": "s-wait",
+      "h": "Trump: \"Yaptırım gevşetmeyi teklif etmedim\" / ABD'li yetkili: \"Açığız\"",
+      "b": "Axios ve CBS, isimsiz yetkililere dayandırdı. Trump Truth Social'da yalanladı.",
+      "s": "Axios 27.09, CBS 28.09"
+    },
+    {
+      "st": "Şirket reddetti",
+      "sc": "s-no",
+      "h": "Fon soruşturmasıyla ilişkilendirilen hisseler",
+      "b": "ATLAS \"isim benzerliği\" dedi, PASEU ve YYLGD ilişkiyi reddetti, ASTOR tedbirlerin kalktığını bildirdi.",
+      "s": "KAP 28.09, kurum bülteni"
+    },
+    {
+      "st": "Teyitsiz",
+      "sc": "s-idle",
+      "h": "X, Reddit, Investing ve borsa forumları",
+      "b": "Bu kaynaklara erişemedim. Erişim olmadan söylenti yazmıyorum.",
+      "s": "tarama yapılamadı"
+    }
+  ],
+  "sectors": [
+    [
+      "Banka",
+      "Açılışta banka endeksi **+%0,07**, yük holdingde. Dünkü satışta göreli dirençli.",
+      "Fon satışı bankaya yayılırsa, faiz yükselirse.",
+      "Nötr"
+    ],
+    [
+      "Sınai",
+      "Belirgin katalizör yok. ARDYZ, FONET gibi ihale haberleri küçük.",
+      "Brent yüksek, dün sınai endeksi **-%4,12** (kurum bülteni), TÜSİAD rekabet gücü zayıf.",
+      "Hafif negatif"
+    ],
+    [
+      "Holding",
+      "Açılışta **-%1,17**. Ödeme takvimi gelirse tepki yükselişi mümkün.",
+      "Fon bağlantılı kalemler, takvim gelmezse satış.",
+      "Hafif negatif"
+    ],
+    [
+      "Ulaştırma",
+      "THYAO açılışta **+%0,78**, Hürmüz'den tanker geçişi artıyor.",
+      "Brent **105 $** üstü yakıt maliyetini yukarı çeker.",
+      "Nötr"
+    ],
+    [
+      "Teknoloji",
+      "Nasdaq **-%0,92**. Nvidia geri alım haberi çip tarafını destekledi.",
+      "ABD faizi %5,2, Micron 30.09.",
+      "Hafif negatif"
+    ],
+    [
+      "Savunma",
+      "ABD–İran gerilimi sürüyor.",
+      "ASELS açılışta **-%2,11**. Gerilim haberi fiyatlanmış görünüyor.",
+      "Hafif negatif"
+    ],
+    [
+      "GYO",
+      "EKGYO'da 15,4 mlr TL sözleşme.",
+      "Piyasa değerine oranı doğrulanamadı, endeks zayıf.",
+      "Hafif pozitif"
+    ],
+    [
+      "Finansal kiralama ve faktoring",
+      "Açılışta **-%8,14** ile en zayıf sektör.",
+      "Nedeni bulamadım (doğrulanamadı).",
+      "Negatif"
+    ]
+  ],
+  "hidden3": [
+    {
+      "h": "Vadeli iskontolu: baz ~%1,8",
+      "b": "VİOP Ekim kapanışı **15.932**, BIST 30 spot kapanışı **15.648,91**. Baz **+283 puan (%1,81)**. Ekim vadesine yaklaşık 1 ay var, yıllık TL faiz %37 civarındayken taşıma maliyeti ayda ~%3. Yani vadeli, olması gerekenden **~%1,3 ucuz** (temettü etkisi hariç). Vadeli piyasa spotun altını fiyatlıyor olabilir. Yorum bana ait, güven orta; TLREF verisini kurum bülteninden aldım."
+    },
+    {
+      "h": "7 Eylül'den beri BIST %11 aşağıda, dolar bazında biraz daha fazla",
+      "b": "Akbank Yatırım'ın 8 Eylül bülteninde BIST 100 **14.152**, USD/TRY **48,43**. Dün kapanış **12.592,76**, USD/TRY **48,9759**. TL bazında **-%11,0**, dolar bazında yaklaşık **-%12,0**. Aylık %13,99 kaybın büyük kısmı son üç haftada."
+    },
+    {
+      "h": "On kodda geri alım: alıcı şirketin kendisi",
+      "b": "28.09 KAP akışında MAVI, KRDMA, KRDMB, KRDMD, ULUFA, GEDIK, TTKOM, LKMNH, PCILT ve EKGYO için geri alım bildirimi var. En büyük program KRDM üçlüsünde **750 mn TL**. Aylık %14 düşüşte şirketler kendi hissesini topluyor, fon satışının karşı tarafında bu da var."
+    }
+  ],
+  "sniperNote": "**BIST setup: 0 / 5.** Doğrulanmış güncel hisse fiyatım yok, seviyeler ve giriş koşulu yazmıyorum. **Yurtdışı trade fikri: 0 / 5.** ABD premarket fiyatı doğrulanamadı. Aşağıdaki liste yalnızca katalizörlü izleme listesi. Fiyatı Matriks'ten alıp defterine ekleyebilirsin.",
+  "watch": [
+    {
+      "t": "EKGYO",
+      "conf": "Orta",
+      "why": "Şirket payı 15,4 mlr TL olan Kemerburgaz sözleşmesi imzalandı, Türksat İnkılap 2. Etap ihalesinin 2. oturumu 02.10'da.",
+      "bad": "Endeks 12.400 altına sarkarsa yeni iş haberi gölgede kalır. Bursa \"20 mlr TL\" iddiası yalanlandı, o beklentiyi fiyatlama."
+    },
+    {
+      "t": "MARMR",
+      "conf": "Orta",
+      "why": "93 mn $ peşin bedelli Polisan Kansai satışına Rekabet Kurulu izni geldi.",
+      "bad": "İzin var, kapanış (devir) ayrı. Gecikme veya şart çıkarsa bozulur."
+    },
+    {
+      "t": "KRDMD",
+      "conf": "Orta",
+      "why": "750 mn TL'lik, 11,4 mn adetlik 4 aylık geri alım programı başladı. Düşen piyasada şirket alıcı.",
+      "bad": "Günlük geri alım bildirimleri zayıf kalırsa program etkisiz."
+    },
+    {
+      "t": "ARDYZ",
+      "conf": "Düşük",
+      "why": "Tokat Erbaa Belediyesi'nden 430,3 mn TL, 10 yıllık atık yönetimi sözleşmesi.",
+      "bad": "Ciroya oranı doğrulanamadı, küçük olabilir. Fon başlığı hisseyi ezerse haber kaybolur."
+    },
+    {
+      "t": "FONET",
+      "conf": "Düşük",
+      "why": "Denizli İl Sağlık Müdürlüğü'nden 153,99 mn TL, 36 aylık ihale.",
+      "bad": "Ölçek küçük. İtiraz gelirse iptal olur."
+    }
+  ],
+  "strat": {
+    "glob": "Küresel fiyatlamanın ana değişkeni ABD uzun faizi. 10 yıllık **%5,2** ile 19 yılın zirvesinde, Fed'in Ekim artırımı **%70,3** olasılıkla fiyatlanıyor. Zincir: Brent yüksek (**105–108 $**), enflasyon endişesi, Fed artırım beklentisi, uzun faiz, hisse değerlemesi baskısı. Dün S&P 500 **-%0,77**, Nasdaq **-%0,92** kapattı. Altın bu tabloda güvenli liman gibi davranmıyor: **7 haftalık dibe** yakın, çünkü faiz ve dolar yükseliyor. ABD–İran görüşmeleri sürüyor ama taraflar sıralamada ayrışıyor, Trump \"hiçbir şey teklif etmedim\" diyor. Hürmüz'den rekor tanker geçişi fiziksel iyileşme, ama Brent'e yansımadı. Bugün **17:00** JOLTS ve tüketici güveni, **30.09** PCE, **02.10** istihdam raporu faizi belirleyecek.",
+    "globExp": "Faiz %5,2 üstünde kaldıkça küresel risk iştahı zayıf. Brent'te kalıcı düşüş olmadan rahatlama beklemiyorum.",
+    "dom": "Yerel hikâye faiz değil, likidite. Fon tasfiyesi nakit ihtiyacı yaratıyor, likit hisselerde satış sürüyor. BIST 100 dün **12.592,76**'ya indi, açılışta **12.516**. Aylık kayıp **%13,99**. Erdoğan \"bulaşma riski yok\" dedi ama ödeme takvimi yok; 131 fonun tasfiyesi en fazla 3 ay sürecek, ödemeler yürütücü bankaların belirlediği dönemlerde. USD/TRY **48,99–49,00**, kur sakin. Şirketler geri alımla karşı tarafta: on kodda bildirim var. Çeyrek sonu ve **1 Ekim** endeks değişikliği mekanik akış ekleyecek.",
+    "domExp": "Ödeme takvimi gelirse tepki yükselişi, gelmezse satış baskısı. Endeks 12.500 desteğinin altında kalırsa 12.400 test edilir.",
+    "scen": [
+      {
+        "k": "up-h",
+        "h": "Yukarı senaryo",
+        "d": "Fon takvimi netleşir, ABD verisi faizi düşürür.",
+        "lv": "12.700 üstü kapanış<br>→ 12.800"
+      },
+      {
+        "k": "bz-h",
+        "h": "Baz senaryo",
+        "d": "Yeni haber yok, ABD verisine kadar bekleme.",
+        "lv": "12.400 – 12.700 bandı"
+      },
+      {
+        "k": "dn-h",
+        "h": "Aşağı senaryo",
+        "d": "Takvim gelmez, faiz yeni zirve yapar.",
+        "lv": "12.500 altı kalıcı<br>→ 12.400"
+      }
+    ],
+    "levelNote": "Seviyeler CNBC-e'nin teknik notundan (destek 12.500 ve 12.400, direnç 12.700 ve 12.800).",
+    "avoid": "**Dikkatli ol:** OZATD (yönetim tutuklu, JCR notu düşük), ESCAR (B-, negatif), PETKM (CCC). Fon soruşturmasıyla anılan hisselerde her KAP açıklamasını tek tek oku."
+  },
+  "reads": [
+    {
+      "who": "Axios",
+      "date": "27.09",
+      "url": "https://www.axios.com/2026/09/27/trump-iran-war-hormuz-blockade-negotiations",
+      "txt": "Trump, Iran'ın teklifini reddettikten sonra bu hafta yeni görüşme bekliyor. Hürmüz'den savaş başından beri en büyük petrol hacmi geçti."
+    },
+    {
+      "who": "CBS News (canlı)",
+      "date": "28.09",
+      "url": "https://www.cbsnews.com/live-updates/iran-war-us-trump-talks-strait-of-hormuz/",
+      "txt": "Dolaylı görüşmeler yeniden başladı. Trump yaptırım gevşetmeyi yalanladı, ABD'li yetkili somut ilerlemede açık olduğunu söylüyor."
+    },
+    {
+      "who": "TheStreet",
+      "date": "28.09",
+      "url": "https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-sept-28-2026",
+      "txt": "ABD endeksleri Trump'ın İran teklifini reddi ve %5,2'ye çıkan 10Y faiziyle düştü. Brent +%4,02."
+    },
+    {
+      "who": "Bloomberg HT",
+      "date": "18.09 [[ESKİ]]",
+      "url": "https://www.bloomberght.com/fonlarin-odeme-ve-tasfiye-surecini-belirlendi-3788720",
+      "txt": "131 fonun tasfiye mekanizması: 3 ay süre, ödeme pay oranında, yürütücü bankalar İş Bankası ve Ziraat."
+    },
+    {
+      "who": "CMC Markets",
+      "date": "25.09 [[ESKİ]]",
+      "url": "https://www.cmcmarkets.com/en-ie/news-and-analysis/the-week-ahead-us-pce-jobs-report-micron-earnings",
+      "txt": "Haftalık takvim: PCE, istihdam raporu, Micron ve Nike bilançoları ve beklentiler."
+    }
+  ],
+  "opening": {
+    "band": 1,
+    "bandText": "Hafif negatif (gerçekleşti)",
+    "basis": [
+      "Gerçekleşen: XU100 **12.516** (-%0,61) açıldı, 10:25'te **12.504** (-%0,71). Banka **+%0,07**, holding **-%1,17**.",
+      "VİOP Ekim **15.910** (-%0,14) açıldı, spot BIST 30 dünkü kapanışı **15.648,91**.",
+      "Dayanak olabilecek ama doğrulayamadıklarım: VİOP gece seansı, TUR/ADR, CDS, Asya kapanışları ve ABD vadelileri."
+    ],
+    "pos": [
+      "ETYAT **+%8,41**",
+      "CMENT **+%8,37**",
+      "DIRIT **+%7,42**"
+    ],
+    "neg": [
+      "HEDEF, MARTI, MAGEN, BIGTK, USAK: **-%10,00** (taban)",
+      "NETGL **-%7,21**",
+      "ASELS **-%2,11**"
+    ]
+  },
+  "calendar": [
+    [
+      "10:00",
+      "Türkiye eylül ekonomik güven endeksi"
+    ],
+    [
+      "12:00",
+      "Euro Bölgesi: sanayi güveni, tüketici güveni, tüketici enflasyon beklentisi"
+    ],
+    [
+      "14:00",
+      "ECB Başkanı Lagarde konuşması"
+    ],
+    [
+      "17:00",
+      "ABD Conference Board tüketici güveni (beklenti 90,10, önceki 89,40)"
+    ],
+    [
+      "17:00",
+      "ABD JOLTS açık iş sayısı (beklenti 7,23 mn, önceki 7,27 mn)"
+    ],
+    [
+      "23:30",
+      "API ham petrol stokları"
+    ],
+    [
+      "30.09",
+      "ABD ağustos PCE, Micron bilançosu, TUPRS temettüsü, ay ve çeyrek sonu"
+    ],
+    [
+      "01.10",
+      "BIST endeks değişiklikleri yürürlükte, İSO imalat PMI, Nike bilançosu"
+    ],
+    [
+      "02.10",
+      "ABD tarım dışı istihdam (beklenti +100 bin, işsizlik %4,2), EKGYO Türksat ihalesi 2. oturum"
+    ]
+  ],
+  "blind": "Bülten 10:48'de üretildi, sabah 07:30 verisi değil. **Brent**'te üç kaynak birbirini tutmuyor (105,65 / 108,50 / ~99,5), hangisi güncel doğrulanamadı. **DXY, CDS, TR tahvil faizi, ABD vadelileri, Asya, VİOP gece seansı ve TUR/ADR** bulunamadı. **X, Reddit, Investing ve borsa forumlarına** erişemedim, resmi olmayan haber bölümü yalnızca KAP yalanlamaları ve haber ajansı çelişkilerinden oluştu. **KAP**'a doğrudan girmedim, Bloomberg HT, Para Ajansı ve Borsamatik derlemelerini kullandım. EKGYO Kemerburgaz rakamları, bazı geri alım programları ve takvim saatleri bugünkü kurum bültenlerinden geliyor, ikinci kaynakla doğrulanmadı. Sınai endeksi %4,12 düşüşü de aynı kaynaktan. **Fintables bağlantısı hata verdi**, canlı fiyat ve takas yok. **Kurum hedef fiyat ve tavsiye değişiklikleri** taranamadı. Piyasa değerine göre KAP sıralaması yapamadım. **Tarihsel benzetme** yok, zorlama olurdu. Rejim panosu birkaç günlük veriye dayanıyor."
+}

@@ -1,0 +1,264 @@
+---
+export const prerender = false;
+
+import AnaLayout from '../layouts/AnaLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import Rozet from '../components/Rozet.astro';
+
+// Günlük bülten dosyaları: src/data/bulten/YYYY-MM-DD.json (bkz. bulten/SEMA.md)
+const dosyalar = import.meta.glob('../data/bulten/*.json', { eager: true, import: 'default' }) as Record<string, any>;
+const gunler: Record<string, any> = {};
+for (const [yol, veri] of Object.entries(dosyalar)) {
+	const tarih = yol.split('/').pop()!.replace('.json', '');
+	gunler[tarih] = veri;
+}
+const tarihler = Object.keys(gunler).sort().reverse();
+const istenen = Astro.url.searchParams.get('tarih');
+const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
+---
+
+<AnaLayout baslik="Sabah bülteni" aciklama="Her sabah hazırlanan konsolide piyasa bülteni: güne başlamadan 5 haber, rejim panosu, KAP, geri alımlar, resmi olmayan haberler.">
+	<SayfaBasligi baslik="Sabah bülteni" ust="PİYASA" aciklama="Doğrulanamayan veri uydurulmaz, “doğrulanamadı” olarak işaretlenir.">
+		{secili && <Rozet>{secili.split('-').reverse().join('.')}</Rozet>}
+	</SayfaBasligi>
+
+	{
+		!secili ? (
+			<div class="bos">Henüz bülten yayımlanmadı.</div>
+		) : (
+			<div class="bulten">
+				<div class="ustbar">
+					<div class="when" id="when"></div>
+					<label class="arsiv">
+						Arşiv:
+						<select id="daysel">
+							{tarihler.map((t) => <option value={t} selected={t === secili}>{t.split('-').reverse().join('.')}</option>)}
+						</select>
+					</label>
+				</div>
+				<nav class="nav" id="nav" aria-label="Bölümler"></nav>
+				<div class="draft" id="bnote-wrap"><b>Not:</b> <span id="bnote"></span></div>
+				<div class="srcbar" id="srcbar"></div>
+				<main id="bulten"></main>
+				<p class="yasal">Burada yer alan bilgiler yatırım danışmanlığı kapsamında değildir. Fiyatlar 15 dakika gecikmelidir. Kaynağı ve saati olmayan veri “doğrulanamadı” olarak işaretlenmiştir.</p>
+			</div>
+		)
+	}
+</AnaLayout>
+
+<script is:inline define:vars={{ gunler, secili }}>
+	var $ = function (s) { return document.querySelector(s); };
+	function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+	function md(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[\[(.+?)\]\]/g, '<span class="tag old">$1</span>').replace(/&lt;br&gt;/g, '<br>'); }
+	function src(s) { return s ? '<span class="srcnote">' + esc(s) + '</span>' : ''; }
+	function url(u) { return /^https?:\/\//.test(u) ? esc(u) : '#'; }
+	var CUR = null, curKapCat = 'all';
+	var CATS = [['all', 'Hepsi'], ['soz', 'Sözleşme ve ihale'], ['pay', 'Geri alım ve ortak alımı'], ['devir', 'Devir ve birleşme'], ['not', 'Kredi notu'], ['fon', 'Fon ve tedbir'], ['temettu', 'Temettü ve sermaye']];
+	var WCLS = { 'Çok yüksek': 'hi', 'Yüksek': 'hi', 'Orta': '', 'Küçük': '' };
+	function list(a) { return (a || []); }
+
+	var SECTIONS = [
+		['s-top', 'Güne başlamadan', 'ilk 5 haber · sebep → sonuç', function (b) {
+			return '<ol class="top5">' + list(b.top5).map(function (t, i) { return '<li><span class="rank">' + (i + 1) + '</span><h3>' + md(t.h) + '</h3><div><p>' + md(t.p) + '</p><div class="chain">' + md(t.chain) + '</div><div class="meta">' + src(t.src) + '</div></div></li>'; }).join('') + '</ol>';
+		}],
+		['s-nabiz', 'Sokağın nabzı', 'ana hikâye', function (b) { return '<div class="card prose"><p>' + md(b.story) + '</p></div>'; }],
+		['s-piyasa', 'Piyasa şeridi', '', function (b) {
+			return '<div class="strip">' + list(b.strip).map(function (t) { var cls = t.d === 'u' ? 'up' : t.d === 'd' ? 'down' : ''; var ok = t.d === 'u' ? '▲ ' : t.d === 'd' ? '▼ ' : ''; return '<div class="tile"><div class="l">' + esc(t.l) + '</div><div class="v">' + esc(t.v) + '</div><div class="c ' + cls + '">' + (t.c ? ok + esc(t.c) : '&nbsp;') + '</div><div class="n">' + esc(t.n) + '</div></div>'; }).join('') + '</div><p class="small" style="margin-top:8px">' + md(b.stripNote) + '</p>';
+		}],
+		['s-yurt', 'Yurtiçi ve yurtdışı', '', function (b) {
+			return '<div class="grid2"><div class="card"><div class="colh"><h3>Yurtiçi</h3></div><ul class="bl">' + list(b.dom).map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ul></div><div class="card"><div class="colh"><h3>Yurtdışı</h3></div><ul class="bl">' + list(b.glob).map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ul></div></div>';
+		}],
+		['s-rejim', 'Rejim panosu', 'bültendeki tüm yorumların referansı', function (b) {
+			return '<div class="tw"><table><thead><tr><th>İlişki</th><th>Ekranda ne oldu</th><th>Bugünkü yoruma etkisi</th></tr></thead><tbody>' + list(b.regime).map(function (r) { return '<tr><td class="nw"><b>' + esc(r[0]) + '</b></td><td>' + md(r[1]) + '</td><td>' + md(r[2]) + '</td></tr>'; }).join('') + '</tbody></table></div><p class="small" style="margin-top:8px">' + md(b.regimeNote) + '</p>';
+		}],
+		['s-iran', 'ABD–İran hattı', 'saat damgalı zaman çizgisi', function (b) {
+			var u = b.usiran || { timeline: [], peace: [], esc: [] };
+			return '<div class="grid2"><div class="card"><ol class="cal">' + list(u.timeline).map(function (t) { return '<li><span class="tm">' + esc(t[0]) + '</span><div>' + md(t[1]) + '</div></li>'; }).join('') + '</ol></div>'
+				+ '<div class="card"><div class="colh"><h3>Seyri değiştiren gelişme</h3><span class="tag ' + (u.verdict === 'VAR' ? 'hi' : '') + '">' + esc(u.verdict) + '</span></div><p style="margin:0 0 10px">' + md(u.why) + '</p>'
+				+ '<h4 class="mh">Barış sinyali</h4><ul class="bl">' + list(u.peace).map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ul><h4 class="mh" style="margin-top:12px">Tırmanma sinyali</h4><ul class="bl">' + list(u.esc).map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ul></div></div>'
+				+ '<div class="expect" style="margin-top:12px">' + md(u.impact) + '</div>';
+		}],
+		['s-news', 'Masadaki haberler', 'haber → sebep-sonuç → hisse → fiyatlanma', function (b) {
+			return '<div class="kap">' + list(b.news).map(function (n) { return '<div class="card"><h3 style="font-size:16px">' + md(n.h) + '</h3><div class="small" style="margin-top:2px">' + esc(n.ts) + ' · ' + esc(n.src) + '</div><p class="ln"><b>Zincir:</b> ' + md(n.chain) + '</p><p class="ln"><b>Etkilenen:</b> ' + md(n.who) + '</p><p class="ln"><b>Fiyatlanma:</b> ' + md(n.priced) + '</p></div>'; }).join('') + '</div>';
+		}],
+		['s-kap', 'KAP ve şirket haberleri', 'büyüklüğe göre', function () {
+			return '<div class="chips" id="chips" role="group" aria-label="Kategori filtresi">' + CATS.map(function (c) { return '<button class="chip" type="button" data-c="' + c[0] + '" aria-pressed="' + (c[0] === curKapCat) + '">' + c[1] + '</button>'; }).join('') + '</div><div class="kap" id="kap"></div>';
+		}],
+		['s-geri', 'Pay geri alımı ve ortak alımı', '', function (b) {
+			return '<div class="tw"><table><thead><tr><th>Hisse</th><th>Tutar</th><th>Süre</th><th>Not</th><th>Kaynak</th></tr></thead><tbody>' + list(b.buybacks).map(function (g) { return '<tr><td class="tk">' + esc(g[0]) + '</td><td>' + esc(g[1]) + '</td><td class="nw">' + esc(g[2]) + '</td><td>' + esc(g[3]) + '</td><td class="small">' + esc(g[4]) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+		}],
+		['s-bilanco', 'Bilançolar', 'gerçekleşen vs konsensüs', function (b) { return '<div class="card prose"><p>' + md(b.earnings) + '</p></div>'; }],
+		['s-resmi', 'Resmi olmayan haberler', '🔸SÖYLENTİ · kaynak + teyit', function (b) {
+			return '<div class="grid2">' + list(b.rumors).map(function (r) { return '<div class="rumor"><div class="top"><span class="rtag">🔸SÖYLENTİ</span><span class="status ' + esc(r.sc) + '">' + esc(r.st) + '</span></div><b>' + md(r.h) + '</b><p class="ln">' + md(r.b) + '</p><div class="small" style="margin-top:6px">Kaynak: ' + esc(r.s) + '</div></div>'; }).join('') + '</div>';
+		}],
+		['s-sektor', 'Sektör röntgeni', 'katalizör · risk · bugünkü yön', function (b) {
+			return '<div class="tw"><table><thead><tr><th>Sektör</th><th>Katalizör</th><th>Risk</th><th>Yön</th></tr></thead><tbody>' + list(b.sectors).map(function (r) { return '<tr><td class="nw"><b>' + esc(r[0]) + '</b></td><td>' + md(r[1]) + '</td><td>' + md(r[2]) + '</td><td class="nw"><span class="tag">' + esc(r[3]) + '</span></td></tr>'; }).join('') + '</tbody></table></div>';
+		}],
+		['s-detay', 'Kimsenin görmediği 3 detay', 'veriye dayalı', function (b) {
+			return '<div class="grid2">' + list(b.hidden3).map(function (d) { return '<div class="card"><h3 style="font-size:16px;margin-bottom:6px">' + md(d.h) + '</h3><p style="margin:0;font-size:13.5px">' + md(d.b) + '</p></div>'; }).join('') + '</div>';
+		}],
+		['s-strateji', 'Yatırım stratejisi', 'senaryolar ve hisse fikirleri', function (b) {
+			var s = b.strat; if (!s) return '<div class="empty">Bugün yok.</div>';
+			return '<div class="grid2"><div class="card prose"><div class="colh"><h3>Yurtdışı</h3></div><p>' + md(s.glob) + '</p><div class="expect"><b>Beklenti:</b> ' + md(s.globExp) + '</div></div><div class="card prose"><div class="colh"><h3>Yurtiçi</h3></div><p>' + md(s.dom) + '</p><div class="expect"><b>Beklenti:</b> ' + md(s.domExp) + '</div></div></div>'
+				+ '<div class="scen">' + list(s.scen).map(function (c) { return '<div class="' + esc(c.k) + '"><h4>' + esc(c.h) + '</h4><div class="small">' + esc(c.d) + '</div><div class="lv">' + md(c.lv) + '</div></div>'; }).join('') + '</div><p class="small" style="margin-top:6px">' + md(s.levelNote) + '</p>'
+				+ '<h3 style="font-size:17px;margin:22px 0 4px">Hisse fikirleri ve gerekçeleri</h3><p class="small" style="margin:0 0 10px">' + md(b.sniperNote) + '</p>'
+				+ '<div class="tw"><table><thead><tr><th>Hisse</th><th>Neden</th><th>Ne bozar</th><th>Güven</th></tr></thead><tbody>' + list(b.watch).map(function (f) { return '<tr><td class="tk"><a href="/hisse/' + encodeURIComponent(String(f.t).split(' ')[0]) + '">' + esc(f.t) + '</a></td><td>' + md(f.why) + '</td><td>' + md(f.bad) + '</td><td class="nw"><span class="tag">' + esc(f.conf) + '</span></td></tr>'; }).join('') + '</tbody></table></div>'
+				+ '<p class="small" style="margin-top:8px">' + md(s.avoid) + '</p>';
+		}],
+		['s-okur', 'Mürekkep yalamışlar ne diyor?', 'yazar, tarih, link', function (b) {
+			return '<div class="tw"><table><thead><tr><th>Kaynak</th><th>Tarih</th><th>Ana fikir</th></tr></thead><tbody>' + list(b.reads).map(function (r) { return '<tr><td class="nw"><a href="' + url(r.url) + '" target="_blank" rel="noopener">' + esc(r.who) + '</a></td><td class="nw">' + md(r.date) + '</td><td>' + md(r.txt) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+		}],
+		['s-acilis', 'Açılış', 'bantlar promptundaki gibi', function (b) {
+			var o = b.opening; if (!o) return '<div class="empty">Bugün yok.</div>';
+			var bands = ['Negatif', 'Hafif negatif', 'Nötr', 'Hafif pozitif', 'Pozitif'], lab = ['≤ -%1', '-%1 / -%0,30', '±%0,30', '+%0,30 / +%1', '≥ +%1'];
+			return '<div class="card"><b>XU100: ' + esc(o.bandText) + '</b><div class="gauge">' + bands.map(function (x, i) { return '<div' + (i === o.band ? ' class="on"' : '') + '>' + x + '</div>'; }).join('') + '</div><div class="gaugel">' + lab.map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div>'
+				+ '<ul class="bl" style="margin-top:14px">' + list(o.basis).map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '<li><b>Öne çıkan yükselenler:</b> ' + list(o.pos).map(md).join(', ') + '</li><li><b>Öne çıkan düşenler:</b> ' + list(o.neg).map(md).join(', ') + '</li></ul></div>';
+		}],
+		['s-takvim', 'Bugünün takvimi', 'saatler TSİ', function (b) {
+			return '<div class="card"><ol class="cal">' + list(b.calendar).map(function (c) { return '<li><span class="tm">' + esc(c[0]) + '</span><div>' + md(c[1]) + '</div></li>'; }).join('') + '</ol></div>';
+		}],
+		['s-kor', 'Kör noktalar', '', function (b) { return '<div class="blind">' + md(b.blind) + '</div>'; }]
+	];
+
+	function renderKap() {
+		if (!CUR || !$('#kap')) return;
+		$('#kap').innerHTML = list(CUR.kap).filter(function (k) { return curKapCat === 'all' || k.c === curKapCat; }).map(function (k) {
+			var catName = (CATS.filter(function (c) { return c[0] === k.c; })[0] || [0, ''])[1];
+			return '<div class="kitem"><div class="tkr">' + esc(k.t) + '<small>' + esc(catName) + '</small></div><div><h3>' + md(k.h) + '</h3><p>' + md(k.b) + '</p><div class="why"><b>Tahtaya etkisi:</b> ' + md(k.y) + '</div><div class="row">' + src(k.s) + '<span class="tag ' + (WCLS[k.w] || '') + '">Önem: ' + esc(k.w) + '</span></div></div></div>';
+		}).join('') || '<div class="empty">Bu kategoride haber yok.</div>';
+	}
+	function renderBulten(b) {
+		CUR = b; curKapCat = 'all';
+		$('#when').textContent = b.weekday + ' ' + b.date.split('-').reverse().join('.') + ' · veri saati ' + b.asOf + ' · pencere ' + b.windowText;
+		$('#nav').innerHTML = SECTIONS.map(function (s) { return '<a href="#' + s[0] + '">' + esc(s[1]) + '</a>'; }).join('');
+		$('#srcbar').innerHTML = list(b.sources).map(function (s) { return '<div class="srcchip"><span>' + esc(s.n) + ' <small>' + esc(s.k) + '</small></span></div>'; }).join('');
+		$('#bnote').textContent = b.note || 'Bülten yapay zekâ ile web taramasından hazırlanır; kaynağı doğrulanamayan veri işaretlenir.';
+		$('#bulten').innerHTML = SECTIONS.map(function (s) {
+			return '<section id="' + s[0] + '"><div class="sh"><h2>' + esc(s[1]) + '</h2>' + (s[2] ? '<span class="idea">' + esc(s[2]) + '</span>' : '') + '</div>' + s[3](b) + '</section>';
+		}).join('');
+		renderKap();
+	}
+	document.addEventListener('click', function (e) {
+		var c = e.target.closest('#chips .chip');
+		if (c) { curKapCat = c.getAttribute('data-c'); document.querySelectorAll('#chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c); }); renderKap(); }
+	});
+	if (secili && gunler[secili]) {
+		renderBulten(gunler[secili]);
+		$('#daysel').addEventListener('change', function (e) {
+			var v = e.target.value; renderBulten(gunler[v]); history.replaceState(null, '', '?tarih=' + v);
+		});
+	}
+</script>
+
+<style is:global>
+	.bulten {
+		--b-yaz: #5b5f68;
+		--b-yuz2: #faf8f3;
+		--b-up-soft: #dcf3ea;
+		--b-down-soft: #fbe4e2;
+		--b-warn-soft: #fbf0d9;
+		--b-acc-soft: #e8e9fa;
+		margin-top: 20px;
+		font-size: 14px;
+		line-height: 1.55;
+	}
+	.bulten *, .bulten h1, .bulten h2, .bulten h3, .bulten h4 { box-sizing: border-box; }
+	.bulten .ustbar { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; }
+	.bulten .when { font-family: var(--font-mono); font-size: 12px; color: var(--metin-ikincil); }
+	.bulten .arsiv { font-size: 13px; color: var(--metin-ikincil); display: flex; gap: 6px; align-items: center; }
+	.bulten .arsiv select { font: inherit; padding: 8px 10px; min-height: 44px; border: 1px solid var(--kenarlik); border-radius: 10px; background: var(--kart); color: var(--metin); }
+	.bulten .nav { display: flex; gap: 4px; overflow-x: auto; padding: 8px 0; margin-top: 8px; scrollbar-width: thin; position: sticky; top: 0; z-index: 5; background: var(--zemin); border-bottom: 1px solid var(--kenarlik); }
+	.bulten .nav a { white-space: nowrap; font-size: 12.5px; font-weight: 500; color: var(--metin-ikincil); padding: 8px 12px; border-radius: 8px; }
+	.bulten .nav a:hover { background: var(--b-acc-soft); color: var(--marka); }
+	.bulten .draft { margin-top: 14px; padding: 10px 14px; background: var(--b-warn-soft); border: 1px solid var(--kehribar); border-radius: 10px; font-size: 13px; }
+	.bulten .draft b { color: var(--etiket-metin); }
+	.bulten .srcbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+	.bulten .srcchip { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 8px; padding: 6px 10px; font-size: 12.5px; }
+	.bulten .srcchip small, .bulten .small, .bulten .srcnote { color: var(--metin-ikincil); }
+	.bulten .small { font-size: 12px; }
+	.bulten .srcchip small { font-size: 11.5px; }
+	.bulten .srcnote { font-family: var(--font-mono); font-size: 11.5px; }
+	.bulten section { margin-top: 32px; scroll-margin-top: 70px; }
+	.bulten .sh { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; border-bottom: 2px solid var(--metin); padding-bottom: 6px; margin-bottom: 14px; }
+	.bulten .sh h2 { font-size: 24px; letter-spacing: -0.3px; }
+	.bulten .idea { font-size: 11.5px; color: var(--metin-ikincil); font-family: var(--font-mono); }
+	.bulten .card { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 14px; padding: 16px 18px; }
+	.bulten .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+	.bulten .grid2 > * { min-width: 0; }
+	@media (max-width: 760px) { .bulten .grid2 { grid-template-columns: 1fr; } }
+	.bulten .colh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+	.bulten .colh h3 { font-size: 18px; }
+	.bulten .ln { margin: 6px 0 0; font-size: 13.5px; }
+	.bulten b { font-weight: 600; }
+	.bulten .up { color: var(--yukselis); }
+	.bulten .down { color: var(--dusus); }
+	.bulten .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 6px; background: var(--b-acc-soft); color: var(--marka); }
+	.bulten .tag.old { background: var(--b-warn-soft); color: var(--etiket-metin); }
+	.bulten .tag.hi { background: var(--b-down-soft); color: var(--dusus); }
+	.bulten .top5 { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+	.bulten .top5 li { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 14px; padding: 14px 16px; }
+	.bulten .top5 .rank { grid-row: span 2; font-family: var(--font-baslik); font-size: 34px; line-height: 1; color: var(--kehribar); width: 28px; text-align: center; }
+	.bulten .top5 h3 { font-size: 18px; line-height: 1.25; }
+	.bulten .top5 p { margin: 4px 0 0; font-size: 13.5px; }
+	.bulten .chain { color: var(--metin-ikincil); font-size: 12.5px; margin-top: 4px; }
+	.bulten .meta { margin-top: 6px; }
+	.bulten .strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+	.bulten .tile { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+	.bulten .tile .l { font-size: 11px; color: var(--metin-ikincil); text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
+	.bulten .tile .v { font-family: var(--font-mono); font-size: 18px; font-weight: 600; margin-top: 2px; }
+	.bulten .tile .c { font-family: var(--font-mono); font-size: 12px; }
+	.bulten .tile .n { font-size: 10.5px; color: var(--metin-ikincil); margin-top: 2px; }
+	.bulten .bl { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+	.bulten .bl li { padding-left: 14px; position: relative; font-size: 13.5px; }
+	.bulten .bl li::before { content: ''; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 1px; background: var(--kehribar); }
+	.bulten .mh { margin: 0 0 8px; font-family: var(--font-baslik); font-size: 15px; }
+	.bulten .tw { overflow-x: auto; border: 1px solid var(--kenarlik); border-radius: 14px; background: var(--kart); }
+	.bulten table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 560px; }
+	.bulten th, .bulten td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--cizgi); }
+	.bulten th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); font-weight: 600; background: var(--b-yuz2); white-space: nowrap; }
+	.bulten tr:last-child td { border-bottom: 0; }
+	.bulten .nw { white-space: nowrap; }
+	.bulten .tk { font-family: var(--font-mono); font-weight: 600; }
+	.bulten .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+	.bulten .chip { font: inherit; font-size: 12.5px; font-weight: 500; padding: 10px 14px; min-height: 44px; border-radius: 999px; border: 1px solid var(--kenarlik); background: var(--kart); color: var(--metin); cursor: pointer; }
+	.bulten .chip[aria-pressed='true'] { background: var(--koyu); color: #fff; border-color: var(--koyu); }
+	.bulten .kap { display: grid; gap: 8px; }
+	.bulten .kitem { display: grid; grid-template-columns: 90px 1fr; gap: 4px 14px; background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 14px; padding: 12px 16px; }
+	.bulten .kitem .tkr { font-family: var(--font-mono); font-weight: 600; font-size: 15px; }
+	.bulten .kitem .tkr small { display: block; font-family: var(--font-govde); font-weight: 400; font-size: 11px; color: var(--metin-ikincil); }
+	.bulten .kitem h3 { font-size: 16px; line-height: 1.3; }
+	.bulten .kitem p { margin: 3px 0 0; font-size: 13px; }
+	.bulten .kitem .why { margin-top: 5px; font-size: 12.5px; color: var(--metin-ikincil); }
+	.bulten .kitem .why b { color: var(--metin); }
+	.bulten .kitem .row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-top: 6px; }
+	@media (max-width: 520px) { .bulten .kitem { grid-template-columns: 1fr; } }
+	.bulten .rumor { border: 1px dashed var(--kehribar); background: var(--kart); border-radius: 14px; padding: 12px 14px; }
+	.bulten .rumor .top { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 6px; }
+	.bulten .rtag { font-size: 11px; font-weight: 700; color: var(--etiket-metin); background: var(--b-warn-soft); padding: 2px 8px; border-radius: 6px; }
+	.bulten .status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+	.bulten .s-no { background: var(--b-down-soft); color: var(--dusus); }
+	.bulten .s-wait { background: var(--b-warn-soft); color: var(--etiket-metin); }
+	.bulten .s-idle { background: var(--b-yuz2); color: var(--metin-ikincil); border: 1px solid var(--kenarlik); }
+	.bulten .cal { list-style: none; margin: 0; padding: 0; }
+	.bulten .cal li { display: grid; grid-template-columns: 52px 1fr; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--cizgi); }
+	.bulten .cal li:last-child { border-bottom: 0; }
+	.bulten .cal .tm { font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--marka); }
+	.bulten .prose p { margin: 0 0 10px; font-size: 14px; line-height: 1.65; }
+	.bulten .prose p:last-child { margin-bottom: 0; }
+	.bulten .expect { margin-top: 12px; padding: 9px 12px; background: var(--b-acc-soft); border-radius: 10px; font-size: 13px; }
+	.bulten .scen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+	@media (max-width: 760px) { .bulten .scen { grid-template-columns: 1fr; } }
+	.bulten .scen > div { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+	.bulten .scen h4 { margin: 0 0 4px; font-family: var(--font-baslik); font-size: 15px; }
+	.bulten .scen .lv { font-family: var(--font-mono); font-size: 12.5px; color: var(--metin-ikincil); margin-top: 6px; }
+	.bulten .scen .up-h { border-top: 3px solid var(--yukselis); }
+	.bulten .scen .dn-h { border-top: 3px solid var(--dusus); }
+	.bulten .scen .bz-h { border-top: 3px solid var(--metin-ikincil); }
+	.bulten .gauge { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin: 14px 0 4px; }
+	.bulten .gauge div { min-height: 36px; display: grid; place-items: center; font-size: 11px; font-weight: 600; text-align: center; padding: 0 3px; border-radius: 6px; background: var(--b-yuz2); color: var(--metin-ikincil); border: 1px solid var(--kenarlik); }
+	.bulten .gauge div.on { background: var(--koyu); color: #fff; border-color: var(--koyu); }
+	.bulten .gaugel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; font-family: var(--font-mono); font-size: 10.5px; color: var(--metin-ikincil); text-align: center; }
+	.bulten .blind { border-left: 4px solid var(--kehribar); background: var(--kart); border-radius: 0 12px 12px 0; padding: 12px 16px; font-size: 13.5px; }
+	.bulten .empty, .bos { text-align: center; padding: 26px 16px; border: 1.5px dashed var(--kenarlik); border-radius: 14px; color: var(--metin-ikincil); }
+	.bulten .yasal { margin-top: 32px; font-size: 11.5px; color: var(--metin-ikincil); border-top: 1px solid var(--kenarlik); padding-top: 12px; }
+</style>

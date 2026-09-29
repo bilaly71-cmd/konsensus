@@ -14,6 +14,7 @@ export const menuGruplari: MenuGrup[] = [
 		baslik: 'PİYASA',
 		ogeler: [
 			{ t: 'Gösterge paneli', href: '/' },
+			{ t: 'Sabah bülteni', href: '/bulten' },
 			{ t: 'Öneriler', href: '/oneriler' },
 			{ t: 'Hedef fiyatlar', href: '/hedef-fiyatlar' },
 			{ t: 'Öneri karnesi', href: '/oneri-karnesi' },
