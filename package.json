@@ -1,29 +1,30 @@
 {
-  "name": "konsensus",
-  "type": "module",
-  "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "deploy": "astro build && wrangler deploy -c dist/server/wrangler.json"
-  },
-  "dependencies": {
-    "@astrojs/cloudflare": "^14.3.3",
-    "astro": "^7.3.5",
-    "lightweight-charts": "^5.2.1"
-  },
-  "allowScripts": {
-    "esbuild": true,
-    "workerd@1.20260925.1": true,
-    "wrangler@4.141.0": true
-  },
-  "devDependencies": {
-    "@types/node": "^26.6.3",
-    "wrangler": "^4.141.0"
-  }
+	"name": "konsensus",
+	"type": "module",
+	"version": "0.0.1",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"deploy": "astro build && wrangler deploy -c dist/server/wrangler.json",
+		"tek-dosya": "node scripts/ozkaynak-tek-dosya.mjs"
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "^14.3.3",
+		"astro": "^7.3.5",
+		"lightweight-charts": "^5.2.1"
+	},
+	"allowScripts": {
+		"esbuild": true,
+		"workerd@1.20260925.1": true,
+		"wrangler@4.141.0": true
+	},
+	"devDependencies": {
+		"@types/node": "^26.6.3",
+		"wrangler": "^4.141.0"
+	}
 }

@@ -1,0 +1,1120 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Özkaynak planlayıcı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Konsensüs tasarım sistemi — "gazete + terminal" */
+:root {
+	--zemin: #f4f2ec;
+	--kart: #ffffff;
+	--kenarlik: #e2ded3;
+	--metin: #15171c;
+	--metin-ikincil: #5b5f68;
+	--koyu: #11151f;
+	--koyu-vurgu: #1f2636;
+	--marka: #3438c9;
+	--marka-koyu: #23268f;
+	--kehribar: #e9a23b;
+	--etiket-metin: #a15c07;
+	--yukselis: #0f7a4b;
+	--dusus: #b83227;
+	--cizgi: #eeebe3;
+
+	--font-baslik: 'Fraunces', Georgia, serif;
+	--font-govde: 'IBM Plex Sans', system-ui, sans-serif;
+	--font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	background: var(--zemin);
+}
+
+body {
+	color: var(--metin);
+	font-family: var(--font-govde);
+	font-variant-numeric: tabular-nums;
+	-webkit-font-smoothing: antialiased;
+}
+
+a {
+	color: var(--marka);
+	text-decoration: none;
+}
+
+a:hover {
+	color: var(--marka-koyu);
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--font-baslik);
+	font-weight: 500;
+	margin: 0;
+}
+
+button {
+	font-family: inherit;
+}
+
+.tek-ust { max-width: 1180px; margin: 0 auto; padding: 20px 16px 0; }
+.tek-ust h1 { font-size: 30px; letter-spacing: -0.4px; margin: 0 0 4px; }
+.tek-ust p { margin: 0; color: var(--metin-ikincil); font-size: 13px; }
+.tek-kap { max-width: 1180px; margin: 0 auto; padding: 0 16px 48px; }
+
+	.oz { margin-top: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; font-size: 14px; }
+	.oz > * { min-width: 0; }
+	.oz h2 { font-size: 22px; } .oz h3 { font-size: 18px; }
+	.oz .kart { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 16px; padding: 18px; }
+	.oz .param { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 12px; align-items: end; }
+	@media (max-width: 900px) { .oz .param { grid-template-columns: 1fr 1fr; } }
+	.oz .f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+	.oz .f > label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); font-weight: 600; }
+	.oz input, .oz select, .oz .ekle input { font: inherit; font-size: 14px; color: var(--metin); background: #faf8f3; border: 1px solid var(--kenarlik); border-radius: 10px; padding: 10px; min-height: 44px; width: 100%; min-width: 0; }
+	.oz input.n, .oz .n { font-family: var(--font-mono); }
+	.oz .btn, #dlg .btn { font: inherit; font-size: 13px; font-weight: 600; padding: 10px 16px; min-height: 44px; border-radius: 12px; border: 1px solid var(--marka); background: var(--marka); color: #fff; cursor: pointer; }
+	.oz .btn.ghost, #dlg .btn.ghost { background: transparent; color: var(--marka); }
+	.oz .kucuk-b { min-height: 36px; padding: 6px 10px; font-size: 12px; }
+	.oz .aksiyon, #dlg .aksiyon { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+	.oz .baslik-satir { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+	.oz .kucuk, #dlg .kucuk { font-size: 12px; color: var(--metin-ikincil); }
+	.oz .satir { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-top: 8px; }
+	@media (max-width: 700px) { .oz .satir { grid-template-columns: 1fr 1fr; } }
+	.oz .metrikler { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+	@media (max-width: 900px) { .oz .metrikler { grid-template-columns: 1fr 1fr; } }
+	.oz .metrikler .ana { grid-column: span 2; background: var(--koyu); color: #fff; border-radius: 16px; padding: 16px 18px; }
+	@media (max-width: 900px) { .oz .metrikler .ana { grid-column: span 2; } }
+	.oz .metrikler .geniş { grid-column: span 2; }
+	.oz .metrikler .l { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .75; }
+	.oz .metrikler .ana .v { font-family: var(--font-mono); font-size: 44px; font-weight: 600; line-height: 1.1; margin-top: 2px; }
+	.oz .metrikler .ana.iyi .v { color: #6fe0a8; } .oz .metrikler .ana.uyari .v { color: var(--kehribar); } .oz .metrikler .ana.kotu .v { color: #ff8f85; }
+	.oz .durum { font-weight: 600; font-size: 13px; } .oz .alt { font-size: 12px; opacity: .8; margin-top: 2px; }
+	.oz .bar { position: relative; height: 10px; border-radius: 6px; background: #2a3247; margin-top: 12px; }
+	.oz .bar .dolu { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--kehribar); } .oz .bar .dolu.iyi { background: #3cc98c; } .oz .bar .dolu.kotu { background: #e8574c; }
+	.oz .bar .isaret { position: absolute; top: -4px; width: 2px; height: 18px; background: #fff; opacity: .7; } .oz .bar .isaret.h { background: var(--kehribar); opacity: 1; }
+	.oz .skala { display: flex; justify-content: space-between; font-size: 10.5px; font-family: var(--font-mono); opacity: .7; margin-top: 4px; }
+	.oz .metrikler .t { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 14px; padding: 12px 14px; min-width: 0; }
+	.oz .metrikler .t .l { color: var(--metin-ikincil); opacity: 1; }
+	.oz .metrikler .t .v { font-family: var(--font-mono); font-size: 22px; font-weight: 600; margin-top: 2px; }
+	.oz .metrikler .t .v.k { font-family: var(--font-govde); font-size: 15px; }
+	.oz .metrikler .t .n { font-size: 11px; color: var(--metin-ikincil); margin-top: 2px; }
+	.oz .dusus { color: var(--dusus); } .oz .yuk { color: var(--yukselis); }
+	.oz .depolar { display: grid; grid-template-columns: 1fr; gap: 12px; }
+	.oz .depo { background: var(--kart); border: 1.5px solid var(--kenarlik); border-radius: 16px; padding: 14px; min-width: 0; transition: border-color .15s, background .15s; }
+	.oz .depo.hedef { border-color: var(--marka); background: #f3f3fd; }
+	.oz .dh { display: grid; gap: 2px; margin-bottom: 10px; } .oz .dh .dt { font-family: var(--font-mono); font-size: 20px; font-weight: 600; }
+	.oz .dg { display: grid; gap: 8px; }
+	.oz .satir-h { border: 1px solid var(--kenarlik); border-radius: 12px; padding: 8px 12px; background: #faf8f3; cursor: grab; display: grid; grid-template-columns: 170px minmax(180px, 1.3fr) 104px 130px minmax(120px, 1fr) auto; gap: 6px 12px; align-items: center; }
+	@media (max-width: 900px) { .oz .satir-h { grid-template-columns: 1fr 1fr; } .oz .satir-h .h1, .oz .satir-h .h2, .oz .satir-h .ip, .oz .satir-h .h4 { grid-column: 1 / -1; } }
+	.oz .satir-h.surukle { opacity: .4; }
+	.oz .satir-h .h1 { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; } .oz .tk { font-family: var(--font-mono); font-weight: 600; } .oz .tutac { color: var(--metin-ikincil); letter-spacing: -2px; user-select: none; }
+	.oz .satir-h .h2 { font-size: 13px; } .oz .fy { width: 100% !important; min-height: 36px !important; padding: 6px 8px !important; }
+	.oz .deger { font-family: var(--font-mono); font-weight: 600; text-align: right; display: block; } .oz .ip { font-size: 12px; color: var(--marka); font-weight: 600; }
+	.oz .ice summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; } .oz .ice textarea { width: 100%; font: 12px var(--font-mono); padding: 10px; border: 1px solid var(--kenarlik); border-radius: 10px; background: #faf8f3; margin: 8px 0; }
+	.oz .rozet { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 6px; background: #e8e9fa; color: var(--marka); } .oz .rozet.kotu { background: #fbe4e2; color: var(--dusus); } .oz .rozet.uyari { background: #fbf0d9; color: var(--etiket-metin); }
+	.oz .bosdepo { border: 1.5px dashed var(--kenarlik); border-radius: 12px; padding: 18px 12px; text-align: center; color: var(--metin-ikincil); font-size: 13px; }
+	.oz .ekle { display: grid; grid-template-columns: 1.2fr 1fr 1fr auto; gap: 6px; margin-top: 10px; } .oz .ekle .btn { padding: 8px 12px; }
+	@media (max-width: 520px) { .oz .ekle { grid-template-columns: 1fr 1fr; } }
+	.oz .oz-ozet { margin: 0 0 10px; font-size: 14px; line-height: 1.6; }
+	.oz .tw { overflow-x: auto; border: 1px solid var(--kenarlik); border-radius: 12px; } .oz table { border-collapse: collapse; width: 100%; font-size: 13px; }
+	.oz th, .oz td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--cizgi); } .oz th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); background: #faf8f3; } .oz .r { text-align: right; }
+	.oz .adimlar { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 13px; }
+	.oz .sticky { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; background: var(--koyu); color: #fff; border-radius: 14px; padding: 8px 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, .18); }
+	.oz .sk { display: flex; flex-direction: column; line-height: 1.15; } .oz .sk-l { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; opacity: .7; } .oz .sk b { font-family: var(--font-mono); font-size: 17px; }
+	.oz .sk-v.iyi { color: #6fe0a8; } .oz .sk-v.uyari { color: var(--kehribar); } .oz .sk-v.kotu { color: #ff8f85; }
+	.oz .sk-b { margin-left: auto; display: flex; gap: 8px; } .oz .sk-b .btn { min-height: 38px; padding: 6px 12px; background: var(--kehribar); border-color: var(--kehribar); color: var(--koyu); } .oz .sk-b .btn.ghost { background: transparent; color: #fff; border-color: #ffffff66; }
+	@media (max-width: 700px) { .oz .hide-m { display: none; } }
+	.oz .komut-l { font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; } .oz .komut input { font-family: var(--font-mono); font-size: 14px; }
+	.oz .komut-liste { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+	.oz .hedef-cipler { grid-column: 1 / -1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+	.oz .chip { font: inherit; font-size: 12.5px; font-weight: 600; padding: 8px 14px; min-height: 40px; border-radius: 999px; border: 1px solid var(--kenarlik); background: var(--kart); cursor: pointer; } .oz .chip[aria-pressed='true'] { background: var(--koyu); color: #fff; border-color: var(--koyu); }
+	.oz .nk-in { width: 130px; text-align: right; min-height: 36px !important; padding: 6px 8px !important; } .oz td.r, .oz th.r { text-align: right; }
+	.oz .nk-cumle { margin: 12px 0 0; padding: 10px 12px; background: #f3f3fd; border-radius: 12px; font-size: 14px; }
+	.oz .kayd { display: grid; gap: 4px; margin: 10px 0; } .oz .kayd input[type='range'] { width: 100%; padding: 0; min-height: 32px; accent-color: var(--marka); }
+	.oz .uy { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; } .oz .uy li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border-radius: 10px; background: #faf8f3; font-size: 13.5px; }
+	.oz .uy li span { font-weight: 700; width: 18px; text-align: center; } .oz .uy li.kotu { background: #fbe4e2; color: var(--dusus); } .oz .uy li.uyari { background: #fbf0d9; color: #7a4705; } .oz .uy-ok { color: var(--yukselis); font-weight: 600; }
+	.oz .ozet-metin { white-space: pre-wrap; background: #faf8f3; border: 1px solid var(--kenarlik); border-radius: 12px; padding: 12px; font: 13px/1.5 var(--font-mono); margin: 8px 0 0; }
+	.oz .sn-liste { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; } .oz .sn-liste li { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 12px; background: #faf8f3; border: 1px solid var(--kenarlik); border-radius: 12px; }
+	.oz .dosya-btn { display: inline-flex; align-items: center; cursor: pointer; }
+	.oz .arac-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; } @media (max-width: 800px) { .oz .arac-grid { grid-template-columns: 1fr; } }
+	.oz .arac-grid textarea { width: 100%; font: 12.5px var(--font-mono); padding: 10px; border: 1px solid var(--kenarlik); border-radius: 10px; background: #faf8f3; margin: 6px 0; }
+	.oz details.kart > summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+	.oz .panel { display: grid; gap: 16px; min-width: 0; } .oz .panel[hidden] { display: none; }
+	.oz .sticky { display: block; padding: 8px 10px 0; } .oz .sk-row { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; padding: 0 4px 6px; }
+	.oz .tabs { display: flex; gap: 2px; overflow-x: auto; border-top: 1px solid #ffffff22; scrollbar-width: none; } .oz .tabs::-webkit-scrollbar { display: none; }
+	.oz .tabs button { flex: 1 0 auto; font: inherit; font-size: 13px; font-weight: 600; color: #ffffffb0; background: transparent; border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; min-height: 44px; cursor: pointer; }
+	.oz .tabs button[aria-selected='true'] { color: #fff; border-bottom-color: var(--kehribar); }
+	.oz .tab-rozet[hidden] { display: none; }
+	.oz .tab-rozet { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--kehribar); color: var(--koyu); font-size: 11px; line-height: 18px; text-align: center; } .oz .tab-rozet.kotu { background: #e8574c; color: #fff; }
+	.oz .komut input { font-family: var(--font-mono); font-size: 14px; }
+	.oz details.girdi > summary, .oz details.kart > summary { list-style: none; } .oz details.girdi > summary::-webkit-details-marker, .oz details.kart > summary::-webkit-details-marker { display: none; }
+	.oz details.girdi > summary::before, .oz details.kart > summary::before { content: '▸ '; color: var(--marka); } .oz details[open] > summary::before { content: '▾ '; }
+	.oz .girdi .param { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; } @media (max-width: 800px) { .oz .girdi .param { grid-template-columns: 1fr 1fr; } }
+	.oz .girdi .ice { margin-top: 12px; } .oz .girdi .ice textarea { width: 100%; font: 12px var(--font-mono); padding: 10px; border: 1px solid var(--kenarlik); border-radius: 10px; background: #faf8f3; margin: 6px 0; }
+	.oz .girdi-alt { margin-top: 12px; }
+	.oz .atl-satir { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; align-items: end; } @media (max-width: 700px) { .oz .atl-satir { grid-template-columns: 1fr; } }
+	.oz .atl-sec { display: flex; gap: 8px; align-items: center; min-height: 44px; flex-wrap: wrap; } .oz .atl-sec input { width: 22px; min-height: 22px; height: 22px; }
+	.oz .islem-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; } @media (max-width: 800px) { .oz .islem-grid { grid-template-columns: 1fr; } }
+	.oz .fy-satir { grid-column: 1 / -1; } .oz .link { font: inherit; background: none; border: 0; color: var(--marka); cursor: pointer; text-decoration: underline; padding: 6px 4px; min-height: 32px; }
+	.oz .metrikler .ana .alt { font-size: 13px; margin-top: 4px; opacity: 1; } .oz .metrikler .ana .alt .yuk { color: #6fe0a8; } .oz .metrikler .ana .alt .dusus { color: #ff8f85; }
+	.oz .metrikler { grid-template-columns: 2fr repeat(3, 1fr); } .oz .metrikler .ana { grid-column: auto; } @media (max-width: 900px) { .oz .metrikler { grid-template-columns: 1fr 1fr; } .oz .metrikler .ana { grid-column: span 2; } }
+	.oz .satir-h { cursor: pointer; padding: 6px 12px; } .oz .kucuk-b { min-width: 44px; }
+	.oz .komut-liste { margin: 6px 0 0; }
+	.oz .yasal { font-size: 11.5px; color: var(--metin-ikincil); border-top: 1px solid var(--kenarlik); padding-top: 12px; }
+	.oz .kap-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin-top: 10px; }
+	@media (max-width: 800px) { .oz .kap-grid { grid-template-columns: 1fr; } }
+	.oz .kap-ana { background: var(--koyu); color: #fff; border-radius: 14px; padding: 14px 18px; } .oz .kap-ana .l { font-size: 12px; opacity: .8; } .oz .kap-ana .v { font-family: var(--font-mono); font-size: 34px; font-weight: 600; color: #6fe0a8; margin-top: 2px; } .oz .kap-ana .n { font-size: 12px; opacity: .8; }
+	.oz .kap-yan { display: grid; gap: 8px; } .oz .kap-yan .t { background: #faf8f3; border: 1px solid var(--kenarlik); border-radius: 12px; padding: 8px 12px; } .oz .kap-yan .l { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); } .oz .kap-yan .vv { font-family: var(--font-mono); font-size: 18px; font-weight: 600; }
+	.oz .kap-f { max-width: 260px; margin-top: 10px; } .oz .kap-cumle { margin: 12px 0 0; padding: 10px 12px; background: #f3f3fd; border-radius: 12px; font-size: 14px; }
+	#dlg .ode-sec { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; background: #f3f3fd; border-radius: 10px; padding: 10px 12px; }
+	#dlg { border: 1px solid var(--kenarlik); border-radius: 16px; padding: 20px; width: min(440px, 92vw); font-family: var(--font-govde); }
+	#dlg::backdrop { background: rgba(5, 10, 16, .55); }
+	#dlg form { display: grid; gap: 12px; } #dlg h3 { font-size: 18px; margin: 0; }
+	#dlg .secim { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; } #dlg .secim label { display: flex; gap: 6px; align-items: center; min-height: 44px; }
+	#dlg .f { display: flex; flex-direction: column; gap: 4px; } #dlg .f label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); font-weight: 600; }
+	#dlg input[type='text'], #dlg input:not([type]), #dlg select { font: inherit; padding: 10px; min-height: 44px; border: 1px solid var(--kenarlik); border-radius: 10px; background: #faf8f3; width: 100%; }
+	#dlg .n { font-family: var(--font-mono); }
+	#dlg .onizleme { background: #f3f3fd; border-radius: 12px; padding: 12px; font-size: 14px; } #dlg .iyi { color: var(--yukselis); } #dlg .kotu { color: var(--dusus); } #dlg .uyari { color: var(--etiket-metin); }
+	.toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); background: var(--koyu); color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 13px; max-width: 92vw; z-index: 200; }
+	.toast[hidden] { display: none; }
+
+</style>
+</head>
+<body>
+<header class="tek-ust"><h1>Özkaynak planlayıcı</h1><p>Simülasyon aracı · sürüm 29.09.2026 · veriler yalnızca bu tarayıcıda kalır, hiçbir yere gönderilmez · yatırım danışmanlığı değildir.</p></header>
+<div class="tek-kap">
+	<div class="oz">
+		<div class="sticky" id="sticky">
+			<div class="sk-row" id="sk-row" aria-live="polite"></div>
+			<nav class="tabs" id="tabs" role="tablist" aria-label="Bölümler">
+				<button type="button" role="tab" data-tab="hesap" aria-selected="true">Hesap <span class="tab-rozet" id="tab-uy" hidden></span></button>
+				<button type="button" role="tab" data-tab="alim" aria-selected="false">Alım</button>
+				<button type="button" role="tab" data-tab="nakit" aria-selected="false">Nakit</button>
+				<button type="button" role="tab" data-tab="risk" aria-selected="false">Risk</button>
+				<button type="button" role="tab" data-tab="ozet" aria-selected="false">Özet</button>
+			</nav>
+		</div>
+
+		<!-- ============ HESAP ============ -->
+		<div class="panel" data-panel="hesap">
+			<section class="komut">
+				<input id="cmd" autocomplete="off" aria-label="Hızlı komut" placeholder="Komut yaz ve Enter’a bas:  KCHOL 5000 sat · EREGL 10000 çek · öde 500k · al THYAO 2m 312,5 · atl 5m · hedef 40 · plan · geri   ( / tuşu buraya odaklar )" />
+				<div class="kucuk" id="cmd-sonuc"></div>
+				<details class="kucuk"><summary>Komut listesi</summary>
+					<ul class="komut-liste">
+						<li><b>KOD 5000 sat</b> — 5.000 adet sat (tutar için <b>KOD 2m tl sat</b>; <b>hepsi</b> = tümü). Serbestteyse satış parasıyla kredi ödenir (T+2).</li>
+						<li><b>KOD 5000 çek</b> — serbest → teminat · <b>KOD 5000 serbest</b> — teminat → serbest</li>
+						<li><b>öde 500k</b> — nakitle kredi öde · <b>al KOD 2m 312,5</b> — 2 mio TL kredili alım</li>
+						<li><b>atl 5m</b> — ATL var, tutar 5 mio · <b>atl yok</b> · <b>hedef 40</b> · <b>fiyat KOD 12,5</b> · <b>fiyatlar</b> (Yahoo) · <b>plan</b> · <b>geri</b> · <b>başa</b></li>
+						<li>Sayılar: <b>500k</b> = 500 bin, <b>2m</b> = 2 milyon, <b>1.250.000</b></li>
+					</ul>
+				</details>
+			</section>
+
+			<details class="kart girdi" id="girdi" open>
+				<summary>Hesap girdileri <span class="kucuk" id="girdi-ozet"></span></summary>
+				<div class="param">
+					<div class="f"><label for="p-kredi">Kredi borcu (TL)</label><input id="p-kredi" class="n" inputmode="decimal" placeholder="0" /></div>
+					<div class="f"><label for="p-faiz">Birikmiş faiz + BSMV (TL)</label><input id="p-faiz" class="n" inputmode="decimal" placeholder="0" /></div>
+					<div class="f"><label for="p-hedef">Hedef özkaynak (%)</label><input id="p-hedef" class="n" inputmode="decimal" /></div>
+					<div class="f"><label for="p-min">Alt sınır / çağrı (%)</label><input id="p-min" class="n" inputmode="decimal" /></div>
+				</div>
+				<div class="hedef-cipler" id="hedef-cipler" role="group" aria-label="Hedef özkaynak"></div>
+				<div class="ice" id="ice">
+					<label for="ice-metin" class="kucuk"><b>Hesap ekranından içe aktar</b> — tabloyu (Kredili işlem tutarı, Nakit, Yurtiçi hisse senetleri; “Serbest / Kredi / Teminat Depo” satırlarıyla) kopyalayıp yapıştır. Adet olarak T+2 esas alınır, küsurat atılır.</label>
+					<textarea id="ice-metin" rows="4" placeholder="Ekrandan kopyaladığın tabloyu buraya yapıştır"></textarea>
+					<div class="aksiyon"><button class="btn" type="button" id="ice-btn">İçe aktar</button><span class="kucuk" id="ice-sonuc"></span></div>
+				</div>
+				<div class="aksiyon girdi-alt">
+					<button class="btn ghost" type="button" id="b-ornek">Örnek yükle</button>
+					<button class="btn ghost" type="button" id="b-basa">Başlangıca dön</button>
+					<button class="btn ghost" type="button" id="b-sifirla">Sıfırla</button>
+				</div>
+			</details>
+
+			<section class="metrikler" id="metrik" aria-live="polite"></section>
+
+			<section class="depolar" id="depolar"></section>
+
+			<section class="kart" id="oneri"></section>
+
+			<details class="kart" id="uyari-d"><summary>Kontrol <span id="uyari-ozet" class="kucuk"></span></summary><div id="uyari"></div></details>
+
+			<details class="kart" id="gecmis-kart" hidden>
+				<summary>Plan adımları <span class="kucuk">(geri alınabilir)</span></summary>
+				<div class="aksiyon"><button class="btn ghost" type="button" id="b-geri">Son adımı geri al</button></div>
+				<ol class="adimlar" id="gecmis"></ol>
+			</details>
+		</div>
+
+		<!-- ============ ALIM ============ -->
+		<div class="panel" data-panel="alim" hidden>
+			<section class="kart atl-kutu" id="atl-kutu">
+				<h2>Alım limiti</h2>
+				<div class="atl-satir">
+					<label class="atl-sec"><input type="checkbox" id="atl-var" /> <b>ATL var</b> <span class="kucuk">(hesaba tanımlı açık takas limiti; işaretliysa alım limiti bu olur)</span></label>
+					<div class="f"><label for="atl-tutar">ATL tutarı (TL)</label><input id="atl-tutar" class="n" inputmode="decimal" placeholder="örn. 5.000.000" /></div>
+				</div>
+				<p class="kucuk" id="atl-not"></p>
+			</section>
+			<section class="kart" id="kapasite" aria-live="polite"></section>
+			<section class="kart" id="islem">
+				<h2>İşlemler</h2>
+				<div class="islem-grid">
+					<div>
+						<h3>Kredili alım</h3>
+						<p class="kucuk">Hisse kredi depoya %100 girer, borç artar.</p>
+						<div class="satir">
+							<div class="f"><label for="k-kod">Hisse</label><input id="k-kod" list="hisseler" placeholder="THYAO" style="text-transform:uppercase" /></div>
+							<div class="f"><label for="k-tutar">Tutar (TL)</label><input id="k-tutar" class="n" inputmode="decimal" placeholder="4.000.000" /></div>
+							<div class="f"><label for="k-fiyat">Fiyat (TL)</label><input id="k-fiyat" class="n" inputmode="decimal" placeholder="0,00" /></div>
+							<button class="btn" type="button" id="k-uygula">Kredili al</button>
+						</div>
+					</div>
+					<div>
+						<h3>Kredi öde</h3>
+						<p class="kucuk">Nakitle öde; kredi depoda boşa düşen hisseler serbeste geçer.</p>
+						<div class="satir">
+							<div class="f"><label for="o-tutar">Tutar (TL)</label><input id="o-tutar" class="n" inputmode="decimal" placeholder="0" /></div>
+							<button class="btn" type="button" id="o-uygula">Kredi öde</button>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+
+		<!-- ============ NAKİT ============ -->
+		<div class="panel" data-panel="nakit" hidden>
+			<section class="kart" id="nakit"></section>
+		</div>
+
+		<!-- ============ RİSK ============ -->
+		<div class="panel" data-panel="risk" hidden>
+			<section class="kart" id="stres"></section>
+		</div>
+
+		<!-- ============ ÖZET ============ -->
+		<div class="panel" data-panel="ozet" hidden>
+			<section class="kart" id="ozet"></section>
+			<section class="kart" id="senaryo"></section>
+			<details class="kart" id="araclar">
+				<summary>Araçlar: fiyat güncelle, oran listesi</summary>
+				<div class="arac-grid">
+					<div>
+						<h3>Fiyatlar</h3>
+						<div class="aksiyon fy-canli"><button class="btn" type="button" id="fy-cek">Yahoo’dan güncelle</button><span class="kucuk" id="fy-durum"></span></div>
+						<p class="kucuk">Yahoo Finance’tan gecikmeli, yakın fiyat (resmi olmayan kaynak; kontrol et). Ya da elle: her satıra “KOD fiyat”.</p>
+						<textarea id="tf-metin" rows="4" placeholder="THYAO 312,5&#10;EREGL 25,4"></textarea>
+						<div class="aksiyon"><button class="btn ghost" type="button" id="tf-btn">Yapıştırdığım fiyatları uygula</button><span class="kucuk" id="tf-sonuc"></span></div>
+					</div>
+					<div>
+						<h3>Oran listesi</h3>
+						<p class="kucuk" id="oran-durum"></p>
+						<p class="kucuk">Kurumun Excel dosyasını (“Hisse Kodu” ve “Özkaynak Değerleme Oranı” sütunlu) seç; oranlar bu tarayıcıda saklanır.</p>
+						<div class="aksiyon"><input type="file" id="oran-dosya" accept=".xlsx" /><button class="btn ghost" type="button" id="oran-sifirla">Varsayılana dön</button></div>
+						<span class="kucuk" id="oran-sonuc"></span>
+					</div>
+				</div>
+			</details>
+		</div>
+
+		<p class="yasal">Hesap: özkaynak = (kredi depo değeri + teminat depo değeri − kredi borcu − faiz/BSMV) ÷ (kredi depo değeri + teminat depo değeri). Kredi depo %100, teminat depo hisse başına özkaynak değerleme oranı ile değerlenir; serbest depo hesaba girmez. Alım limiti: ATL varsa ATL tutarı, yoksa serbest depo teminatı × 5. Oranlar yüklenen Excel dosyasındandır ve kurumun güncel listesiyle karşılaştırılmalıdır. Bu araç bilgi amaçlıdır, yatırım danışmanlığı değildir.</p>
+	</div>
+
+	<datalist id="hisseler"></datalist>
+
+	<dialog id="dlg">
+		<form method="dialog" id="dlg-form">
+			<h3 id="dlg-baslik"></h3>
+			<div class="secim" id="dlg-eylem"></div>
+			<div class="f" id="dlg-hedef-wrap"><label for="dlg-hedef">Hedef depo</label><select id="dlg-hedef"></select></div>
+			<div class="f"><label for="dlg-adet">Adet</label><input id="dlg-adet" class="n" inputmode="numeric" /></div>
+			<label class="ode-sec" id="dlg-ode-wrap"><input type="checkbox" id="dlg-ode" checked /> Serbestten satışın parasıyla krediyi öde, boşa düşen hisseleri teminata al (T+2 özkaynağı)</label>
+			<div class="aksiyon" id="dlg-hizli"></div>
+			<div class="onizleme" id="dlg-onizleme"></div>
+			<div class="aksiyon">
+				<button class="btn" type="button" id="dlg-tamam">Uygula</button>
+				<button class="btn ghost" type="button" id="dlg-iptal">Vazgeç</button>
+			</div>
+		</form>
+	</dialog>
+	<div class="toast" id="toast" role="status" hidden></div>
+
+</div>
+<script>window.OZ_FIYAT_API = null; window.OZ_ORANLAR = [{"k":"A1CAP","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"A1YEN","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*1 ile Alış Yapılabilir."},{"k":"AAGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ACSEL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ADEL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ADESE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ADGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AEFES","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AFYON","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"AGESA","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AGHOL","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AGROT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AGYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"AHGAZ","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AHSGY","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.7,"y":0.7,"a":"16.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*2 ile Alış Yapılabilir."},{"k":"AK3","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"AKBNK","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AKCNS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AKE","g":"-","e":"-","p":"-","o":0.9,"y":0.9,"a":""},{"k":"AKENR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"AKFGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AKFIS","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"30.09.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"AKFYE","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.8,"y":0.8,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AKGRT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AKHAN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"AKMGY","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"AKSA","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AKSEN","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AKSGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AKSUE","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"AKYHO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ALARK","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ALBRK","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ALBTN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ALCAR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ALCTL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ALFAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ALGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ALKA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ALKIM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ALKLC","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ALTIN.S1","g":"-","e":"-","p":"-","o":0.9,"y":0.9,"a":""},{"k":"ALTNY","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ALVES","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış Yapılabilir."},{"k":"ANELE","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. 12.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"ANGEN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ANHYT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.8,"y":0.8,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ANSGR","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ARASE","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ARCLK","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ARDYZ","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ARENA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ARFYE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ARMGD","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"12.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"ARSAN","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"ARTMS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ARZUM","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"ASELS","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ASGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ASTOR","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.8,"y":0.8,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ASUZU","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ATAGY","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ATAKP","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ATATP","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ATATR","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ATEKS","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ATLAS","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ATSYH","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"AVGYO","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"AVHOL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"AVOD","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"AVPGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AVTUR","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"AYCES","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"AYDEM","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AYEN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"AYES","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"AYGAZ","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"AZTEK","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"BAGFS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BAHKM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BAKAB","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BALAT","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BALSU","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BANVT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BARMA","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"BASCM","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BASGZ","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BAYRK","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BEGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BERA","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BESLR","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BESTE","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BETAE","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BEYAZ","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BFREN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BIENY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BIGCH","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BIGEN","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. 08.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"BIGTK","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"BIMAS","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BINBN","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BINHO","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.15,"y":0.15,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BIO","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"BIOEN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BIZIM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BJKAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BKRGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BLCYT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BLUME","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BMSCH","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"BMSTL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BNTAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BOBET","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BORLS","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"BORSK","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BOSSA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir.."},{"k":"BRISA","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BRKO","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BRKSN","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BRKVY","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BRLSM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BRMEN","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BRSAN","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BRYAT","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BSOKE","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BTCIM","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BUCIM","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.8,"y":0.8,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"BULGS","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"BURCE","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BURVA","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"BVSAN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"BYDNR","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"CAD","g":"-","e":"-","p":"-","o":1,"y":1,"a":""},{"k":"CANTE","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"CASA","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"CATES","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.7,"y":0.7,"a":"15.10.2026 Tarihine Kadar Tedbir GelmiştirNet Varlık*2 ile Alış Yapılabilir."},{"k":"CCOLA","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"CELHA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"CEMAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"CEMTS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"CEMZY","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"CEOEM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"23.10.2026 Tarihine Kadar Tedbir Gelmiştir Net Varlık*2 ile Alış Yapılabilir."},{"k":"CGCAM","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"CHF","g":"-","e":"-","p":"-","o":1,"y":1,"a":""},{"k":"CIMSA","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"CITAS","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. 15.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"CLEBI","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"CMBTN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.15,"y":0.15,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"CMENT","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"CONSE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"COSMO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"CRDFA","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"CRFSA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.45,"y":0.45,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"CUSAN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"CVKMD","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"CWENE","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"DAGI","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*2 ile Alış Yapılabilir."},{"k":"DAPGM","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.45,"y":0.45,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"DARDL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DCTTR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DENGE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DERHL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DERIM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DESA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DESPC","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DEVA","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"DGATE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DGGYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"DGNMO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"12.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*2 ile Alış Yapılabilir."},{"k":"DIRIT","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"DITAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DMRGD","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"27.10.2026 Tarihine Kadar Tedbir Gelmiştir. Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"DMSAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DNISI","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DOAS","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.8,"y":0.8,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"DOCO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DOFER","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DOFRB","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"DOGUB","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"DOHOL","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"DOKTA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"DSTKF","g":"B","e":"BIST 30","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. 02.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"DUNYH","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"DURDO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DURKN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DYOBY","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"DZGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EBEBK","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ECILC","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ECOGR","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ECZYT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EDATA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EDIP","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EFOR","g":"B","e":"BIST 50","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"EGEEN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EGEGY","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EGEPO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EGGUB","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EGPRO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EGSER","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EKDMR","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EKGYO","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EKIM","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EKIZ","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"EKOS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.15,"y":0.15,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EKSUN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ELITE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EMKEL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EMNIS","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"EMPAE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ENDAE","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ENERY","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ENJSA","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ENKAI","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ENPRA","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ENSRI","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ENTRA","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EPLAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ERBOS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ERCB","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"EREGL","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ERSU","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ESCAR","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"ESCOM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ESEN","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ETILR","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"ETYAT","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"12.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"EUHOL","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"EUKYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"EUPWR","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EUR","g":"-","e":"-","p":"-","o":1,"y":1,"a":""},{"k":"EUREN","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"EUYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"EYGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"FADE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"FENER","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"FLAP","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"FMIZP","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.15,"y":0.15,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"FONET","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"FORMT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"FORTE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"FRIGO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"FRMPL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"FROTO","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"FZLGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GARAN","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GARFA","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"GATEG","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"GBH","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"GBP","g":"-","e":"-","p":"-","o":1,"y":1,"a":""},{"k":"GEDIK","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"GEDZA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"GENIL","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.45,"y":0.45,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GENKM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"GENTS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GEREL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"GESAN","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GIPTA","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"GLBMD","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"GLCVY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GLDTRF","g":"-","e":"-","p":"-","o":0.7,"y":0.7,"a":""},{"k":"GLRMK","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GLRYH","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"GLYHO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GMSTRF","g":"-","e":"-","p":"-","o":0.7,"y":0.7,"a":""},{"k":"GMTAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GOKNR","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"GOLDA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"GOLTS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GOODY","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"GOZDE","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GRNYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"GRSEL","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GRTHO","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"GSDDE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"GSDHO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.75,"y":0.7,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"GSRAY","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GUBRF","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.8,"y":0.8,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GUNDG","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"GWIND","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"GZNMI","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"HALKB","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"HATEK","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"HATSN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"01.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"HDFGS","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış Yapılabilir."},{"k":"HEDEF","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"HEKTS","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"HKR","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"HKTM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"HLGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"HOROZ","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"HRKET","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"HTTBT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"HUBVC","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"HUNER","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"HURGZ","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ICBCT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ICUGS","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"IDGYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"IDH","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"IDO","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"IEYHO","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"IHAAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"IHEVA","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"IHGZT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"IHK","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"IHLAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.15,"y":0.15,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"IHLGM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"IHYAY","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"IJT","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"ILH","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"IMASM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"INDES","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"INFO","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış Yapılabilir."},{"k":"INGRM","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"INR","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"INTEK","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"INTEM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"INTET","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"INVEO","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"INVES","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"IOG","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"IPV","g":"-","e":"-","p":"-","o":0.9,"y":0.9,"a":""},{"k":"ISATR","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ISBIR","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ISBTR","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ISCTR","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ISDMR","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ISFIN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ISGSY","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ISGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ISKPL","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"ISKUR","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ISMEN","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ISSEN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"IST","g":"-","e":"-","p":"-","o":0.9,"y":0.9,"a":""},{"k":"ISVEA","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"ISYAT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"IUF","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"IZENR","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"IZFAS","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"IZINV","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"IZMDC","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"JANTS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KAPLM","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"KARCL","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"KAREL","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KARSN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"12.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KARTN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KATMR","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KAYSE","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KBORU","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KCAER","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KCHOL","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KENT","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KERVN","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KFEIN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KGYO","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"KIMMR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KLGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KLKIM","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KLMSN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KLNMA","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KLRHO","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.15,"y":0.15,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KLSER","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KLSYN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KLYPV","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KMPUR","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KNFRT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KOCMT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KONKA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KONTR","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KONYA","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KOPOL","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KORDS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KOTON","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KPEKS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KRDMA","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KRDMB","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KRDMD","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KRGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KRONT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KRPLS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KRSTL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KRTEK","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KRVGD","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KSTUR","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KTLEV","g":"B","e":"BIST 50","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"KTSKR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KUTPO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"KUVVA","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KUYAS","g":"B","e":"BIST 50","p":"YILDIZ PAZAR","o":0.15,"y":0.15,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"KZBGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"KZGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"16.10.2026 Tarihine Kadar Tedbir Gelmiştir.  Net Varlık*2 ile Alış Yapılabilir."},{"k":"LIDER","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"LIDFA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"LILAK","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"LINK","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"LKMNH","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"LMKDC","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"LOGO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"LRSHO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"LUKSK","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"LXGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"LYDHO","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"LYDYE","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"MAALT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MACKO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MAGEN","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"MAKIM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MAKTK","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MANAS","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"MARBL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MARMR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MARTI","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*2 ile Alış Yapılabilir."},{"k":"MASFN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MAVI","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MCARD","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MEDTR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MEGAP","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"MEGMT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MEKAG","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MEPET","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"MERCN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MERIT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MERKO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"METEN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"METRO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MEYSU","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MGROS","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MHRGY","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MIATK","g":"B","e":"BIST 50","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"MMCAS","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"MNDRS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MNDTR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MOBTL","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MOGAN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MOPAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MPARK","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"MRGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"14.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*2 ile Alış Yapılabilir."},{"k":"MRSHL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MSGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MTRKS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"MTRYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"MZHLD","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"NATEN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"NETAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"NETCD","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"NETGL","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"NIBAS","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"NOK","g":"-","e":"-","p":"-","o":1,"y":1,"a":""},{"k":"NTGAZ","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"NTHOL","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"NUGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"NUHCM","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"OBAMS","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"OBASE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ODAS","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.55,"y":0.55,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ODINE","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. 05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"OFSYM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ONCSM","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ONRYT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ONS","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"ORCAY","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ORGE","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ORMA","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ORZAX","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"OSMEN","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"OSTIM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"OTKAR","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"OTTO","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"OYAKC","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"OYAYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"OYLUM","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"OYYAT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"OZATD","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. 05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"OZGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"OZKGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"OZRDN","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"OZSUB","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"OZYSR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PAGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"PAHOL","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"PAL","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"PAMEL","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.15,"y":0.15,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PAPIL","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"PARSN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"PASEU","g":"B","e":"BIST 50","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. 05.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"PATEK","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"PCILT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PEKGY","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. 02.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"PENGD","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PENTA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PETKM","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"PETUN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PGSUS","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"PINSU","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PKART","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"PKENT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PLTUR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PNLSN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PNSUT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"POLHO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"POLTK","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"PPJ","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"PRDGS","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış Yapılabilir."},{"k":"PRKAB","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PRKME","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"PRZMA","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"30.09.2026 Tarihine Kadar Tedbir Gelmiştir. Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"PSDTC","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"PSGYO","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"QNBFB","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"QNBFK","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"QUAGR","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"QUICK","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"RALYH","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"RAYSG","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"REEDR","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"RGYAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"RNPOL","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"RODRG","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"RTALB","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*1 ile Alış Yapılabilir."},{"k":"RUBNS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"RUZYE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"RYGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"RYSAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SAFKR","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SAHOL","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SAMAT","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SANEL","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SANFM","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SANKO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SARAE","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SARKY","g":"B","e":"BIST 100","p":"YILDIZ PAZAR","o":0.75,"y":0.5,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SASA","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SAYAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SDTTR","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SEGMN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SEGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SEKFK","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SEKUR","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SELEC","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"15.10.2026 Tarihine Kadar Tedbir GelmiştirNet Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SELVA","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"SERNT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SEYKM","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SILVR","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SISE","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SKBNK","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SKTAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SKYLP","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SKYMD","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SMART","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SMRTG","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.3,"y":0.3,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SMRVA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SNGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SNICA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SNPAM","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SODSN","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SOHOE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SOKE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"SOKM","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SONME","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SRVGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SSAAT","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SUMAS","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"SUNTK","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SURGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SUWEN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"SVGYO","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"TABGD","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TARKM","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TATEN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TATGD","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"TAVHL","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TBORG","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"TCELL","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TCKRC","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TDGYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"TEHOL","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"TEKTU","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"TERA","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"TEZOL","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TGSAS","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"THYAO","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TI1","g":"-","e":"-","p":"-","o":0.9,"y":0.9,"a":""},{"k":"TI2","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"TI3","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"TIV","g":"-","e":"-","p":"-","o":0.9,"y":0.9,"a":""},{"k":"TKFEN","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TKNKA","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"30.09.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış Yapılabilir."},{"k":"TKNSA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"TL","g":"-","e":"-","p":"-","o":1,"y":1,"a":""},{"k":"TLMAN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"TMPOL","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış yapılabilir."},{"k":"TMSN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TNZTP","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TOASO","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TRALT","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.8,"y":0.8,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TRCAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TRENJ","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TRGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TRHOL","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"TRILC","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"TRMET","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TSGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"TSKB","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TSPOR","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TTA","g":"-","e":"-","p":"-","o":0.9,"y":0.9,"a":""},{"k":"TTKOM","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TTRAK","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TUCLK","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"TUKAS","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TUPRS","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"TUREX","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"TURGG","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"TURSG","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.9,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"UCAYM","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"UFUK","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"ULAS","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"ULKER","g":"A","e":"BIST 50","p":"YILDIZ PAZAR","o":0.8,"y":0.8,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ULUFA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ULUSE","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ULUUN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"UMPAS","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"UNLU","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"USAK","g":"B","e":"BIST TUM","p":"YILDIZ PAZAR","o":0,"y":0,"a":"26.10.2026 Tarihine Kadar Tedbir GelmiştirŞirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"USD","g":"-","e":"-","p":"-","o":1,"y":1,"a":""},{"k":"USHOL","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"VAKBN","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":0.9,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"VAKFA","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"VAKFN","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"VAKKO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"VANGD","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"VBTYZ","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.2,"y":0.2,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"VERTU","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"VERUS","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"07.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*1 ile Alış yapılabilir."},{"k":"VESBE","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"VESTL","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.35,"y":0.35,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"VEYAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.65,"y":0.65,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"VKFYO","g":"C","e":"BIST TUM","p":"ALT PAZAR","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"VKGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.75,"y":0.75,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"VKING","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"VRGYO","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir. Net Varlık*1 ile Alış Yapılabilir."},{"k":"VSNMD","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"YAPRK","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0.05,"y":0.05,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"YATAS","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"YAYLA","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"YBTAS","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"YEOTK","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"YESIL","g":"B","e":"BIST TUM","p":"ANA PAZAR","o":0,"y":0,"a":"Şirket kararı gereği krediye konu edilmemektedir.Net Varlık*1 ile Alış yapılabilir."},{"k":"YGGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.4,"y":0.4,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"YIGIT","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"YKBNK","g":"A","e":"BIST 30","p":"YILDIZ PAZAR","o":0.9,"y":1,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"YKSLN","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.35,"y":0.35,"a":"14.10.2026 Tarihine Kadar Tedbir Gelmiştir. Net Varlık*2 ile Alış Yapılabilir."},{"k":"YONGA","g":"C","e":"BIST TUM","p":"PÖİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"YUNSA","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.25,"y":0.25,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"YYAPI","g":"C","e":"BIST TUM","p":"YİP","o":0,"y":0,"a":"Net Varlık*1 ile Alış yapılabilir."},{"k":"YYLGD","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.6,"y":0.6,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ZEDUR","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.1,"y":0.1,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ZERGY","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ZGYO","g":"A","e":"BIST TUM","p":"ANA PAZAR","o":0.7,"y":0.7,"a":"Net Varlık*2 ile Alış Yapılabilir."},{"k":"ZJB","g":"-","e":"-","p":"-","o":0.75,"y":0.75,"a":""},{"k":"ZOREN","g":"A","e":"BIST 100","p":"YILDIZ PAZAR","o":0.45,"y":0.45,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."},{"k":"ZRGYO","g":"A","e":"BIST TUM","p":"YILDIZ PAZAR","o":0.5,"y":0.5,"a":"Net Varlık*5 ve ATL ile Alış Yapılabilir."}];</script>
+<script>
+
+	var $ = function (s) { return document.querySelector(s); };
+	function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+	function num(v) { if (v == null) return NaN; var s = String(v).trim().replace(/\s/g, ''); if (!s) return NaN; if (s.indexOf(',') > -1) s = s.replace(/\./g, '').replace(',', '.'); else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); return parseFloat(s); }
+	function tl(n) { return (n == null || isNaN(n)) ? '—' : Math.round(n).toLocaleString('tr-TR'); }
+	function tl2(n) { return (n == null || isNaN(n)) ? '—' : n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+	function pct(x) { return (x == null || isNaN(x)) ? '—' : '%' + (x * 100).toFixed(1).replace('.', ','); }
+	var DEPOLAR = [['serbest', 'Serbest depo', 'Alım limiti buradan verilir; özkaynağa girmez'], ['kredi', 'Kredi depo', 'Kredili alınan hisseler · %100 değer'], ['teminat', 'Teminat depo', 'Özkaynak değerleme oranıyla değerlenir']];
+	var KEY = 'ozkaynak-v1';
+	var ORAN = {};
+	var S = null, HIST = [], BASE = null;
+
+	function bos() { return { kredi: 0, faiz: 0, limit: 0, nakit: { t0: 0, t1: 0, t2: 0, t3: 0 }, atl: { var: false, tutar: 0 }, fiyatMeta: {}, kapanis: {}, hedef: 36, min: 35, fiyat: {}, depo: { serbest: [], kredi: [], teminat: [] } }; }
+	function hazirla(x) { if (!x.nakit) x.nakit = { t0: 0, t1: 0, t2: 0, t3: 0 }; if (!x.atl) x.atl = { var: false, tutar: 0 }; if (!x.fiyatMeta) x.fiyatMeta = {}; if (!x.kapanis) x.kapanis = {}; return x; }
+	function clone(o) { return JSON.parse(JSON.stringify(o)); }
+	function oran(kod) { return ORAN[kod] ? ORAN[kod].o : 0; }
+	function rate(kod, depo) { return depo === 'kredi' ? 1 : oran(kod); }
+	function px(s, kod) { return s.fiyat[kod] || 0; }
+	/* Serbest depoda eksi (-) adet, satışın teminat / kredi depodan düşeceği anlamına gelir (her depo ayrı değerlendirilir): önce kredi depo, sonra teminat depo */
+	function ef(s) {
+		if (!s.depo.serbest.some(function (r) { return r.adet < 0; })) return s;
+		var n = clone(s);
+		n.depo.serbest.forEach(function (r) {
+			if (r.adet >= 0) return; var a = -r.adet;
+			['kredi', 'teminat'].forEach(function (d) { var x = bul(n, d, r.kod); if (x && a > 0) { var al = Math.min(a, Math.max(0, x.adet)); x.adet -= al; a -= al; } });
+			r.adet = 0;
+		});
+		return n;
+	}
+	function depoDeger(s, d) { return ef(s).depo[d].reduce(function (t, r) { return t + Math.max(0, r.adet) * px(s, r.kod) * rate(r.kod, d); }, 0); }
+	function depoPiyasa(s, d) { return ef(s).depo[d].reduce(function (t, r) { return t + Math.max(0, r.adet) * px(s, r.kod); }, 0); }
+	function metr(s) {
+		var C = depoDeger(s, 'kredi') + depoDeger(s, 'teminat'), D = s.kredi + s.faiz;
+		return { C: C, D: D, e: C > 0 ? (C - D) / C : null, net: C - D };
+	}
+	function bul(s, d, kod) { return s.depo[d].filter(function (r) { return r.kod === kod; })[0]; }
+	/* adet = T+2 adedi (hesaplarda kullanılan), bugun = bugünkü (T0) adet; depo değiştirmede ikisi de değişir, satışta yalnız T+2 düşer */
+	function ekle(s, d, kod, adet, bugun) { var r = bul(s, d, kod); if (r) { r.adet += adet; if (r.bugun != null || bugun != null) r.bugun = (r.bugun == null ? r.adet - adet : r.bugun) + (bugun == null ? adet : bugun); } else s.depo[d].push({ kod: kod, adet: adet, bugun: bugun == null ? null : bugun }); }
+	function cikar(s, d, kod, adet, sadeceT2) { var r = bul(s, d, kod); if (!r) return; r.adet -= adet; if (r.bugun != null && !sadeceT2) r.bugun -= adet; if (r.adet <= 0 && !(r.bugun > 0)) s.depo[d] = s.depo[d].filter(function (x) { return x !== r; }); }
+
+	/* op: {t:'move',kod,from,to,adet} | {t:'sell',kod,adet} | {t:'pay',tutar} | {t:'buy',kod,adet,fiyat}
+	   Satış sırası (sistem kuralı): önce serbest depo (parası serbest nakde gelir, kredi kapanmaz), sonra kredi depo, sonra teminat depo
+	   (kredi/teminat depodan satışın parası krediyi otomatik kapatır). Kredi ödeme: nakitten öder, kredi depoda boşa düşen hisseler serbest depoya geçer. */
+	var DEPO_SIRA = ['serbest', 'kredi', 'teminat'];
+	function toplamAdet(s, kod) { return DEPO_SIRA.reduce(function (t, d) { var r = bul(s, d, kod); return t + (r && r.adet > 0 ? r.adet : 0); }, 0); }
+	function satSegmentleri(s, kod, q) { var seg = [], kal = q; DEPO_SIRA.forEach(function (d) { var r = bul(s, d, kod); if (!r || r.adet <= 0 || kal <= 0) return; var a = Math.min(kal, r.adet); seg.push({ d: d, q: a }); kal -= a; }); return seg; }
+	function uygula(s, op) {
+		var n = clone(s); if (!n.nakit) n.nakit = { t0: 0, t1: 0, t2: 0, t3: 0 };
+		if (op.t === 'move') { var rw = bul(n, op.from, op.kod), bg = rw && rw.bugun != null ? Math.min(op.adet, Math.max(0, rw.bugun)) : null; cikar(n, op.from, op.kod, op.adet); ekle(n, op.to, op.kod, op.adet, bg); }
+		else if (op.t === 'sell') {
+			var p = px(n, op.kod);
+			satSegmentleri(n, op.kod, op.adet).forEach(function (sg) {
+				cikar(n, sg.d, op.kod, sg.q, true); var gelir = sg.q * p;
+				if (sg.d === 'serbest') n.nakit.t0 += gelir;
+				else { var k = Math.min(n.kredi, gelir); n.kredi -= k; if (n.limit > 0) n.limit += k; gelir -= k; var f = Math.min(n.faiz, gelir); n.faiz -= f; gelir -= f; n.nakit.t0 += gelir; }
+			});
+		} else if (op.t === 'satOde') {
+			/* serbestten satış + o tutarda kredi öde (T+2 varsayımı) + boşa düşen hisseleri teminata al */
+			var sg0 = satSegmentleri(n, op.kod, op.adet).filter(function (g) { return g.d === 'serbest'; })[0], serbestGelir = sg0 ? sg0.q * px(n, op.kod) : 0;
+			n = uygula(n, { t: 'sell', kod: op.kod, adet: op.adet });
+			var Vo = Math.min(serbestGelir, n.kredi + n.faiz);
+			if (Vo >= 1) { var z = odeZinciri(n, Vo); n = z.s; }
+		} else if (op.t === 'pay') {
+			var V = Math.max(0, Math.min(op.tutar, n.kredi + n.faiz)); nakitDus(n, V);
+			var k2 = Math.min(n.kredi, V); n.kredi -= k2; if (n.limit > 0) n.limit += k2; n.faiz -= Math.min(n.faiz, V - k2);
+			var sirali = n.depo.kredi.slice().sort(function (a, b) { return oran(b.kod) - oran(a.kod); }), kalan = k2;
+			sirali.forEach(function (r) { var pp = px(n, r.kod); if (pp <= 0 || kalan <= 0 || r.adet <= 0) return; var q = Math.min(r.adet, Math.floor(kalan / pp)); if (q <= 0) return; n = uygula(n, { t: 'move', kod: r.kod, from: 'kredi', to: 'serbest', adet: q }); kalan -= q * pp; });
+		} else if (op.t === 'buy') { n.fiyat[op.kod] = op.fiyat; ekle(n, 'kredi', op.kod, op.adet, null); n.kredi += op.adet * op.fiyat; if (n.limit) n.limit = Math.max(0, n.limit - op.adet * op.fiyat); }
+		return n;
+	}
+	function cumNakit(s, k) { var n = s.nakit || {}, a = [n.t0 || 0, n.t1 || 0, n.t2 || 0, n.t3 || 0], t = 0; for (var i = 0; i <= k; i++) t += a[i]; return t; }
+	/* nakitten V düş: önce bugünkü (t0) artı bakiyeden, sonra t1, t2, t3; yetmezse t0 eksiye gider */
+	function nakitDus(n, V) { ['t0', 't1', 't2', 't3'].forEach(function (k) { var v = n.nakit[k] || 0; if (V > 0 && v > 0) { var al = Math.min(v, V); n.nakit[k] = v - al; V -= al; } }); if (V > 0) n.nakit.t0 = (n.nakit.t0 || 0) - V; }
+	function serbestFark(a, b) { var out = []; b.depo.serbest.forEach(function (r) { var x = bul(a, 'serbest', r.kod), d = r.adet - (x ? x.adet : 0); if (d > 0) out.push({ kod: r.kod, adet: d }); }); return out; }
+	function opYazi(op) {
+		var l = { serbest: 'serbest depo', kredi: 'kredi depo', teminat: 'teminat depo' };
+		if (op.t === 'move') return op.kod + ': ' + tl(op.adet) + ' adet ' + l[op.from] + ' → ' + l[op.to];
+		if (op.t === 'sell') return op.kod + ': ' + tl(op.adet) + ' adet sat (' + satSegmentleri(S, op.kod, op.adet).map(function (g) { return l[g.d].replace(' depo', '') + ' ' + tl(g.q); }).join(', ') + ')';
+		if (op.t === 'satOde') return op.kod + ': ' + tl(op.adet) + ' adet sat (' + satSegmentleri(S, op.kod, op.adet).map(function (g) { return l[g.d].replace(' depo', '') + ' ' + tl(g.q); }).join(', ') + ') · serbest satışın parasıyla kredi ödenir, boşa düşenler teminata alınır';
+		if (op.t === 'pay') { var fr = serbestFark(S, uygula(S, op)); return 'Kredi öde: ' + tl(op.tutar) + ' TL' + (fr.length ? ' · boşa düşen: ' + fr.map(function (x) { return x.kod + ' ' + tl(x.adet); }).join(', ') : ''); }
+		return op.kod + ': ' + tl(op.adet) + ' adet kredili alım (' + tl(op.adet * op.fiyat) + ' TL)';
+	}
+
+	/* ---- hedef planı ---- */
+	function gerek(s, e) { var m = metr(s); return m.D / (1 - e) - m.C; } /* + : teminat değeri lazım, − : fazla */
+	function esik(s, e) { var m = metr(s); return m.C > 0 ? (m.C - m.D) / m.C >= e - 1e-9 : m.D <= 0; }
+	function enAz(maxq, f) { maxq = Math.floor(maxq); if (maxq < 1) return 0; if (!f(maxq)) return maxq; var lo = 1, hi = maxq; while (lo < hi) { var mid = Math.floor((lo + hi) / 2); if (f(mid)) hi = mid; else lo = mid + 1; } return lo; }
+	/* kredi öde + boşa düşen (oranı olan) hisseleri teminata çek */
+	function odeZinciri(s, tutar) {
+		var op = { t: 'pay', tutar: tutar }, n = uygula(s, op), ops = [op];
+		serbestFark(s, n).forEach(function (x) { if (oran(x.kod) > 0) { var m = { t: 'move', kod: x.kod, from: 'serbest', to: 'teminat', adet: x.adet }; n = uygula(n, m); ops.push(m); } });
+		return { s: n, ops: ops };
+	}
+	/* serbest hisseyi sat → nakitle krediyi öde → boşa düşenleri teminata çek */
+	function satZinciri(s, kod, q) {
+		var op = { t: 'sell', kod: kod, adet: q }, n = uygula(s, op), ops = [op], V = Math.max(0, Math.min(cumNakit(n, 2), n.kredi));
+		if (V >= 1) { var z = odeZinciri(n, Math.floor(V)); n = z.s; ops = ops.concat(z.ops); }
+		return { s: n, ops: ops };
+	}
+	function planla(s0, hedefPct) {
+		var e = hedefPct / 100, s = clone(s0), steps = [], m0 = metr(s), durum;
+		if (m0.D <= 0 && m0.C <= 0) return { durum: 'bos', steps: [], son: s, kalan: 0 };
+		function uy(ops) { ops.forEach(function (o) { s = uygula(s, o); steps.push(o); }); }
+		if (!esik(s, e)) {
+			/* 1) serbest depodan teminata çek: oranı yüksek olan önce */
+			s.depo.serbest.filter(function (x) { return x.adet > 0 && oran(x.kod) > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(b.kod) - oran(a.kod); }).forEach(function (r0) {
+				if (esik(s, e)) return; var r = bul(s, 'serbest', r0.kod); if (!r) return;
+				var q = enAz(r.adet, function (q) { return esik(uygula(s, { t: 'move', kod: r.kod, from: 'serbest', to: 'teminat', adet: q }), e); });
+				if (q > 0) uy([{ t: 'move', kod: r.kod, from: 'serbest', to: 'teminat', adet: q }]);
+			});
+			/* 2) serbest nakitle krediyi öde, kredi depoda boşa düşen hisseleri teminata al */
+			if (!esik(s, e) && cumNakit(s, 2) >= 1 && s.kredi >= 1) {
+				var maxV = Math.floor(Math.min(cumNakit(s, 2), s.kredi)), V = enAz(maxV, function (q) { return esik(odeZinciri(s, q).s, e); });
+				if (V >= 1) uy(odeZinciri(s, V).ops);
+			}
+			/* 3) serbestte kalan hisseleri sat → nakit → öde → teminata çek (oranı düşük olan önce) */
+			s.depo.serbest.filter(function (x) { return x.adet > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(a.kod) - oran(b.kod); }).forEach(function (r0) {
+				if (esik(s, e) || s.kredi < 1) return; var r = bul(s, 'serbest', r0.kod); if (!r) return;
+				var q = enAz(r.adet, function (q) { return esik(satZinciri(s, r.kod, q).s, e); });
+				if (q > 0) uy(satZinciri(s, r.kod, q).ops);
+			});
+			/* 4) kredi / teminat depodaki hisseyi sat (serbestte yoksa): parası krediyi otomatik kapatır; kredi depo önce düşer */
+			var adaylar = {}; ['kredi', 'teminat'].forEach(function (d) { s.depo[d].forEach(function (r) { if (r.adet > 0 && px(s, r.kod) > 0 && !(bul(s, 'serbest', r.kod) && bul(s, 'serbest', r.kod).adet > 0)) adaylar[r.kod] = 1; }); });
+			Object.keys(adaylar).sort(function (a, b) { var ra = bul(s, 'kredi', a) ? 1 : oran(a), rb = bul(s, 'kredi', b) ? 1 : oran(b); return ra - rb; }).forEach(function (kod) {
+				if (esik(s, e)) return; var mx = toplamAdet(s, kod); if (mx < 1) return;
+				var q = enAz(mx, function (q) { return esik(uygula(s, { t: 'sell', kod: kod, adet: q }), e); });
+				if (q > 0) uy([{ t: 'sell', kod: kod, adet: q }]);
+			});
+			durum = esik(s, e) ? (steps.length ? 'acik' : 'ok') : 'yetmez';
+			return { durum: durum, steps: steps, son: s, kalan: Math.max(0, gerek(s, e)) };
+		}
+		var need = gerek(s, e);
+		if (need < -1) {
+			/* fazla teminat → serbest depoya: oranı düşük olan önce (aynı teminat gevşemesiyle daha çok piyasa değeri serbest kalır) */
+			var rel = -need, tm = s.depo.teminat.filter(function (x) { return x.adet > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(a.kod) - oran(b.kod); });
+			for (var k = 0; k < tm.length && rel > 1; k++) {
+				var u = oran(tm[k].kod) * px(s, tm[k].kod), qm = u <= 0 ? tm[k].adet : Math.min(tm[k].adet, Math.floor(rel / u)); if (qm <= 0) continue;
+				uy([{ t: 'move', kod: tm[k].kod, from: 'teminat', to: 'serbest', adet: qm }]); rel = -gerek(s, e);
+			}
+			return { durum: 'fazla', steps: steps, son: s, kalan: 0 };
+		}
+		return { durum: 'ok', steps: [], son: s, kalan: 0 };
+	}
+
+	/* ---- kayıt ---- */
+	function kaydet() { try { localStorage.setItem(KEY, JSON.stringify({ S: S, BASE: BASE })); } catch (e) {} }
+	function yukle() { try { var j = JSON.parse(localStorage.getItem(KEY)); if (j && j.S && j.S.depo) { S = hazirla(j.S); BASE = hazirla(j.BASE || clone(S)); return true; } } catch (e) {} return false; }
+	function toast(t) { var el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 3500); }
+	function adim(op, yeni) { HIST.push({ s: clone(S), yazi: opYazi(op) }); S = yeni; kaydet(); render(); }
+
+	/* ---- çizim ---- */
+	function ok(e) { return e == null ? '' : e >= S.hedef / 100 ? 'iyi' : e >= S.min / 100 ? 'uyari' : 'kotu'; }
+	function renderMetrik() {
+		var m = metr(S), b = metr(BASE), e = m.e, h = S.hedef / 100, mn = S.min / 100, cls = ok(e);
+		var durum = e == null ? 'Veri gir' : e >= h ? '▲ Hedefin üstünde' : e >= mn ? '▼ Hedefin altında' : '▼ Çağrı bölgesinde';
+		var pos = e == null ? 0 : Math.max(0, Math.min(1, e / 0.8));
+		var fark = e != null && b.e != null && Math.abs(e - b.e) > 0.0005 ? '<div class="alt">Başlangıç ' + pct(b.e) + ' → şimdi ' + pct(e) + '</div>' : '';
+		var need = gerek(S, h), sb = depoPiyasa(S, 'serbest'), sbd = depoDeger(S, 'serbest');
+		var ihtiyac = e == null ? '—' : need > 1 ? '<span class="dusus">▼ ' + tl(need) + ' TL teminat değeri eksik</span>' : need < -1 ? '<span class="yuk">▲ ' + tl(-need) + ' TL teminat değeri serbest bırakılabilir</span>' : 'Hedefte';
+		$('#metrik').innerHTML =
+			'<div class="ana ' + cls + '"><div class="l">Özkaynak oranı</div><div class="v">' + pct(e) + '</div><div class="durum">' + durum + '</div><div class="alt">' + ihtiyac + '</div>' + fark
+			+ '<div class="bar"><i class="dolu ' + cls + '" style="width:' + (pos * 100) + '%"></i><b class="isaret" style="left:' + (mn / 0.8 * 100) + '%" title="Alt sınır"></b><b class="isaret h" style="left:' + (h / 0.8 * 100) + '%" title="Hedef"></b></div><div class="skala"><span>0</span><span>Alt %' + S.min + '</span><span>Hedef %' + S.hedef + '</span><span>%80</span></div></div>'
+			+ '<div class="t"><div class="l">Toplam teminat</div><div class="v">' + tl(m.C) + '</div><div class="n">kredi depo ' + tl(depoDeger(S, 'kredi')) + ' + teminat depo ' + tl(depoDeger(S, 'teminat')) + '</div></div>'
+			+ '<div class="t"><div class="l">Borç (kredi + faiz)</div><div class="v">' + tl(m.D) + '</div><div class="n">net teminat ' + tl(m.net) + '</div></div>'
+			+ '<div class="t"><div class="l">Serbest depo</div><div class="v">' + tl(sb) + '</div><div class="n">piyasa değeri · alım limiti (' + (atlAktif(S) ? 'ATL' : 'teminat × ' + LIMIT_CARPANI) + '): ' + tl(alimLimiti(S)) + '</div></div>'
+			+ ((S.limit > 0 || (S.nakit && (S.nakit.t0 || S.nakit.t1 || S.nakit.t2 || S.nakit.t3))) ? '<div class="t"><div class="l">Kullanılabilir kredi limiti</div><div class="v">' + tl(S.limit) + '</div><div class="n">TL nakit: bugün ' + tl2(S.nakit.t0) + ' · T+1 ' + tl2(S.nakit.t1) + ' · T+2 ' + tl2(S.nakit.t2) + '</div></div>' : '')
+			+ fiyatSatiri();
+	}
+	/* Alım limiti = serbest depodaki hisselerin teminat değeri (piyasa değeri × oran) × 5 */
+	var LIMIT_CARPANI = 5;
+	function alimLimitiSerbest(s) { return depoDeger(s, 'serbest') * LIMIT_CARPANI; }
+	function atlAktif(s) { return !!(s.atl && s.atl.var && s.atl.tutar > 0); }
+	function alimLimiti(s) { return atlAktif(s) ? s.atl.tutar : alimLimitiSerbest(s); }
+	function limitEtiket(s) { return atlAktif(s) ? 'ATL' : 'serbest depo teminatı × ' + LIMIT_CARPANI; }
+	/* Yeni kredili alım kapasitesi: kredi depoya X girerse borç da X artar → (C − D) / (C + X) ≥ e  →  X ≤ (C − D)/e − C */
+	function maxAlim(s, e) { var m = metr(s), net = m.C - m.D; return net > 0 ? Math.max(0, net / e - m.C) : 0; }
+	function renderKapasite() {
+		var el = $('#kapasite'), e = S.hedef / 100, m = metr(S);
+		if (!(m.C > 0)) { el.innerHTML = '<h2>Ne kadarlık hisse alabilir?</h2><p class="kucuk">Depoları doldurunca müşterinin alım kapasitesi burada çıkar.</p>'; return; }
+		var x = maxAlim(S, e), lim = S.limit > 0 ? S.limit : null, al = alimLimiti(S), alinabilir = Math.min(x, al, lim != null ? lim : Infinity);
+		var sinir = alinabilir === x ? 'özkaynak' : (alinabilir === al ? 'alım limiti (' + limitEtiket(S) + ')' : 'kredi limiti');
+		var fy = num($('#kap-fiyat') ? $('#kap-fiyat').value : ''), adetYazi = fy > 0 ? ' ≈ ' + tl(Math.floor(alinabilir / fy)) + ' adet (fiyat ' + tl2(fy) + ')' : '';
+		var alt = m.e < e ? 'Özkaynak hedefin (%' + S.hedef + ') altında, önce teminat gerekiyor: aşağıdaki “Hedefe ulaşmak için” planına bak.' : '';
+		el.innerHTML = '<h2>Ne kadarlık hisse alabilir?</h2><p class="kucuk">Yeni alım kredili yapılırsa kredi depoya %100 girer, borç aynı tutarda artar. Özkaynak hedefin (%' + S.hedef + ') altına düşmeyecek en yüksek tutar hesaplanır (T+2 durumu).</p>'
+			+ '<div class="kap-grid"><div class="kap-ana"><div class="l">Mevcut özkaynak ' + pct(m.e) + '</div><div class="v">' + tl(alinabilir) + ' TL</div><div class="n">en fazla yeni alım · sınırlayan: ' + sinir + '</div></div>'
+			+ '<div class="kap-yan"><div class="t"><div class="l">Özkaynağa göre üst sınır</div><div class="vv">' + tl(x) + ' TL</div></div>'
+			+ '<div class="t"><div class="l">Alım limiti (' + limitEtiket(S) + ')</div><div class="vv">' + tl(al) + ' TL</div></div>' + (atlAktif(S) ? '<div class="t"><div class="l">Serbest depo teminatı × ' + LIMIT_CARPANI + ' (kullanılmıyor)</div><div class="vv">' + tl(alimLimitiSerbest(S)) + ' TL</div></div>' : '')
+			+ (lim != null ? '<div class="t"><div class="l">Kullanılabilir kredi limiti</div><div class="vv">' + tl(lim) + ' TL</div></div>' : '') + '</div></div>'
+			+ '<div class="f kap-f"><label for="kap-fiyat">Hisse fiyatı (adet için, isteğe bağlı)</label><input id="kap-fiyat" class="n" inputmode="decimal" placeholder="0,00" value="' + (fy > 0 ? String(fy).replace('.', ',') : '') + '" /></div>'
+			+ '<p class="kap-cumle">Özkaynak ' + pct(m.e) + '; %' + S.hedef + ' hedefe göre <b>en fazla ' + tl(alinabilir) + ' TL</b> kredili alım yapılabilir' + adetYazi + '.</p>' + (alt ? '<p class="kucuk dusus">' + alt + '</p>' : '') + '<p class="kucuk">' + (atlAktif(S) ? 'Alım limiti ATL’den geldiği için hisse taşımak limiti değiştirmez.' : 'Hisseyi serbest depodan teminat depoya çekmek özkaynağı yükseltir ama alım limitini düşürür: dengeyi buradan izle.') + '</p>';
+	}
+	function ipucu(d, r, need) {
+		var p = px(S, r.kod), o = rate(r.kod, d), unit = o * p, h = S.hedef / 100;
+		if (r.adet <= 0) return '';
+		if (p <= 0) return '<span class="kucuk">fiyat gir</span>';
+		if (need > 1) {
+			if (d === 'serbest') {
+				if (unit > 0) { var q = Math.ceil(need / unit); if (q <= r.adet) return 'Tek başına ' + tl(q) + ' adet teminata çek'; }
+				var qz = enAz(r.adet, function (q) { return esik(satZinciri(S, r.kod, q).s, h); });
+				return esik(satZinciri(S, r.kod, qz).s, h) ? 'Sat ' + tl(qz) + ' adet → nakitle kredi öde' : '<span class="kucuk">tamamı yetmez</span>';
+			}
+			var mx = toplamAdet(S, r.kod), qs = enAz(mx, function (q) { return esik(uygula(S, { t: 'sell', kod: r.kod, adet: q }), h); });
+			return esik(uygula(S, { t: 'sell', kod: r.kod, adet: qs }), h) ? 'Tek başına ' + tl(qs) + ' adet sat' : '<span class="kucuk">tamamı yetmez</span>';
+		}
+		if (need < -1 && d === 'teminat') { if (unit <= 0) return 'Tamamı serbest kalabilir'; var qm = Math.min(r.adet, Math.floor(-need / unit)); return qm > 0 ? 'En çok ' + tl(qm) + ' adet serbeste al' : ''; }
+		return '';
+	}
+	function adetBilgi(d, r) {
+		var t2 = r.adet, bg = r.bugun;
+		if (t2 < 0) return '<span class="rozet kotu" title="Serbest depoda eksi adet: satış teminat / kredi depodan düşer">' + tl(t2) + ' (açık)</span> <span class="kucuk">teminat/kredi depodan düşer</span>';
+		var s = '<b>' + tl(t2) + '</b> <span class="kucuk">T+2</span>';
+		if (bg != null && Math.abs(bg - t2) > 1e-9) s += ' <span class="kucuk">· bugün ' + tl(bg) + '</span> ' + (t2 < bg ? '<span class="rozet uyari" title="T+2 bugünkü adetten az: satılmış">satılmış ' + tl(bg - t2) + '</span>' : '<span class="rozet" title="T+2 bugünkü adetten fazla: alım bekliyor">alım ' + tl(t2 - bg) + '</span>');
+		return s;
+	}
+	function renderDepolar() {
+		var need = gerek(S, S.hedef / 100);
+		$('#depolar').innerHTML = DEPOLAR.map(function (dp) {
+			var d = dp[0], rows = S.depo[d];
+			var govde = rows.length ? rows.map(function (r) {
+				var o = ORAN[r.kod], rr = rate(r.kod, d), p = px(S, r.kod), deger = Math.max(0, r.adet) * p * (d === 'serbest' ? 1 : rr);
+				var uyar = !o && d !== 'kredi' ? '<span class="rozet kotu" title="Listede yok, oran 0 sayıldı">liste dışı</span>' : (o && o.a && /tedbir/i.test(o.a) ? '<span class="rozet uyari" title="' + esc(o.a) + '">tedbir</span>' : '');
+				return '<div class="satir-h" draggable="true" data-d="' + d + '" data-kod="' + esc(r.kod) + '"><div class="h1"><span class="tutac" aria-hidden="true">⋮⋮</span><b class="tk">' + esc(r.kod) + '</b>' + (d !== 'kredi' ? '<span class="rozet">%' + Math.round(rr * 100) + '</span>' : '') + uyar + '</div>'
+					+ '<div class="h2">' + adetBilgi(d, r) + '</div>'
+					+ '<div class="h5"><input class="n fy" data-fy="' + esc(r.kod) + '" inputmode="decimal" value="' + (p ? String(p).replace('.', ',') : '') + '" placeholder="fiyat" aria-label="' + esc(r.kod) + ' fiyatı"></div>'
+					+ '<div class="h3"><span class="deger">' + tl(deger) + ' TL</span></div>'
+					+ '<div class="ip">' + ipucu(d, r, need) + '</div>'
+					+ '<div class="h4"><button class="btn ghost kucuk-b" data-tasi="' + d + '|' + esc(r.kod) + '" aria-label="' + esc(r.kod) + ' taşı veya sat" title="Taşı / Sat">⇄</button></div></div>';
+			}).join('') : '<div class="bosdepo">Boş. Hisse ekle, içe aktar ya da başka depodan sürükle.</div>';
+			return '<div class="depo" data-drop="' + d + '"><div class="dh"><h3>' + dp[1] + '</h3><span class="kucuk">' + dp[2] + '</span><div class="dt">' + tl(d === 'serbest' ? depoPiyasa(S, d) : depoDeger(S, d)) + ' TL' + (d !== 'serbest' ? ' <span class="kucuk">(piyasa ' + tl(depoPiyasa(S, d)) + ')</span>' : '') + '</div></div><div class="dg">' + govde + '</div>'
+				+ '<form class="ekle" data-ekle="' + d + '"><input list="hisseler" name="kod" placeholder="Hisse" style="text-transform:uppercase" aria-label="Hisse kodu"><input class="n" name="adet" inputmode="numeric" placeholder="Adet" aria-label="Adet"><input class="n" name="fiyat" inputmode="decimal" placeholder="Fiyat" aria-label="Fiyat"><button class="btn" type="submit">Ekle</button></form></div>';
+		}).join('');
+	}
+	function renderOneri() {
+		var h = S.hedef, pl = planla(S, h), m = metr(S), e = m.e, el = $('#oneri');
+		if (pl.durum === 'bos') { el.innerHTML = '<h2>Hedefe ulaşmak için</h2><p class="kucuk">Depolara hisse ekleyip kredi borcunu girince öneri burada çıkar.</p>'; return; }
+		var son = metr(pl.son), bas;
+		if (pl.durum === 'fazla') bas = 'Özkaynak hedefin (%' + h + ') üstünde. Aşağıdaki hisseleri serbest depoya alırsan özkaynak ' + pct(e) + ' → ' + pct(son.e) + ' olur, serbest depo değeri ' + tl(depoPiyasa(S, 'serbest')) + ' → ' + tl(depoPiyasa(pl.son, 'serbest')) + ' TL.';
+		else if (pl.durum === 'ok' || (pl.steps.length === 0 && pl.durum !== 'yetmez')) bas = 'Özkaynak hedefte (' + pct(e) + '), yapılacak bir şey yok.';
+		else if (pl.durum === 'acik') bas = 'Özkaynak ' + pct(e) + ' → hedef %' + h + '. Sıra: serbest depodan teminata çek → serbest nakitle krediyi öde (boşa düşen hisseler teminata) → serbest hisse sat → en son kredi/teminat depodan sat. Plan sonrası (T+2) özkaynak ' + pct(son.e) + '.';
+		else bas = 'Eldeki hisselerle hedefe ulaşılamıyor. Plan sonrası özkaynak ' + pct(son.e) + ', hâlâ ' + tl(pl.kalan) + ' TL teminat değeri eksik. Fiyatları ve depoları kontrol et.';
+		var limitSatir = pl.steps.length ? '<p class="kucuk">Plan sonrası alım limiti (' + limitEtiket(S) + '): ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(pl.son)) + ' TL</p>' : '';
+		var satir = pl.steps.map(function (op, i) {
+			if (op.t === 'pay') return '<tr><td>' + (i + 1) + '</td><td class="tk">—</td><td>Nakitle kredi öde <span class="kucuk">(kredi depoda boşa düşen hisseler serbeste geçer)</span></td><td class="r">—</td><td class="r">' + tl(op.tutar) + ' TL</td></tr>';
+			var aciklama = op.t === 'move' ? (op.to === 'teminat' ? 'Serbest → teminat' : 'Teminat → serbest') : 'SAT <span class="kucuk">(' + satSegmentleri(pl.steps.slice(0, i).reduce(function (t, o) { return uygula(t, o); }, S), op.kod, op.adet).map(function (g) { return g.d + ' ' + tl(g.q); }).join(', ') + ')</span>';
+			var tutar = op.adet * px(S, op.kod);
+			return '<tr><td>' + (i + 1) + '</td><td class="tk">' + esc(op.kod) + '</td><td>' + aciklama + '</td><td class="r">' + tl(op.adet) + '</td><td class="r">' + tl(tutar) + ' TL</td></tr>';
+		}).join('');
+		el.innerHTML = '<div class="baslik-satir"><h2>Hedefe ulaşmak için</h2>' + (pl.steps.length ? '<button class="btn" type="button" id="b-plan">Planı uygula</button>' : '') + '</div><p class="oz-ozet">' + bas + '</p>'
+			+ (pl.steps.length ? '<div class="tw"><table><thead><tr><th>#</th><th>Hisse</th><th>İşlem</th><th class="r">Adet</th><th class="r">Tutar</th></tr></thead><tbody>' + satir + '</tbody></table></div>' : '')
+			+ (pl.steps.some(function (o) { return o.t === 'sell'; }) ? '<p class="kucuk">Satışta önce serbest depo, sonra kredi depo, sonra teminat depo düşer. Serbestten satışın parası nakde gelir (kredi ödemek senin elinde); kredi/teminat depodan satışın parası krediyi otomatik kapatır. Plan T+2 durumunu gösterir.</p>' : '')
+			+ limitSatir + (pl.durum === 'fazla' && pl.steps.length ? '<p class="kucuk">Serbest depoya alınacak hisse seçiminde varsayım: oranı düşük olan önce (aynı teminat gevşemesiyle daha çok piyasa değeri serbest kalır). Farklı sıra istersen hisseyi elle sürükle.</p>' : '');
+	}
+	function renderGecmis() {
+		$('#gecmis-kart').hidden = !HIST.length;
+		$('#gecmis').innerHTML = HIST.map(function (h) { return '<li>' + esc(h.yazi) + '</li>'; }).join('');
+	}
+	function render() {
+		$('#p-kredi').value = S.kredi ? String(Math.round(S.kredi)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+		$('#p-faiz').value = S.faiz ? String(Math.round(S.faiz)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+		$('#p-hedef').value = String(S.hedef).replace('.', ','); $('#p-min').value = String(S.min).replace('.', ',');
+		$('#atl-var').checked = !!S.atl.var; $('#atl-tutar').value = S.atl.tutar ? String(Math.round(S.atl.tutar)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+		renderHepsi();
+	}
+	function renderHepsi() {
+		renderMetrik(); renderKapasite(); renderNakit(); renderUyari(); renderDepolar(); renderOneri(); renderStres(); renderOzet(); renderSenaryo(); renderGecmis(); renderSticky(); renderCipler(); renderOranDurum(); renderAtlNot(); renderGirdiOzet();
+	}
+
+	/* ---- diyalog ---- */
+	var DLG = null;
+	function dlgAc(from, kod, to) {
+		var row = bul(S, from, kod); if (!row) return;
+		if (row.adet <= 0) { toast(kod + ': T+2 adedi ' + tl(row.adet) + ', taşınacak adet yok.'); return; }
+		DLG = { from: from, kod: kod, eylem: to ? 'move' : (from === 'kredi' ? 'sell' : 'move'), to: to || null };
+		$('#dlg-baslik').textContent = kod + ' · ' + DEPOLAR.filter(function (x) { return x[0] === from; })[0][1] + ' · ' + tl(row.adet) + ' adet (T+2)';
+		var moveOk = from !== 'kredi';
+		$('#dlg-eylem').innerHTML = (moveOk ? '<label><input type="radio" name="ey" value="move"> Depo değiştir</label>' : '') + '<label><input type="radio" name="ey" value="sell"> Sat</label>';
+		var hedefler = from === 'serbest' ? [['teminat', 'Teminat depo']] : from === 'teminat' ? [['serbest', 'Serbest depo']] : [];
+		$('#dlg-hedef').innerHTML = hedefler.map(function (x) { return '<option value="' + x[0] + '">' + x[1] + '</option>'; }).join('');
+		if (!moveOk) DLG.eylem = 'sell'; else if (!DLG.to) DLG.to = hedefler[0][0];
+		if (DLG.to) $('#dlg-hedef').value = DLG.to;
+		document.querySelectorAll('[name=ey]').forEach(function (x) { x.checked = x.value === DLG.eylem; });
+		$('#dlg-adet').value = String(row.adet);
+		var need = gerek(S, S.hedef / 100), p = px(S, kod), o = rate(kod, from), h = S.hedef / 100, hz = [['Tümü', row.adet]];
+		if (p > 0 && need > 1) {
+			if (from === 'serbest' && oran(kod) > 0) hz.push(['Hedef için çek', Math.ceil(need / (oran(kod) * p))]);
+			var mx = toplamAdet(S, kod), qs = enAz(mx, function (q) { return esik(uygula(S, satOp(kod, q)), h); });
+			if (qs > 0 && esik(uygula(S, satOp(kod, qs)), h)) hz.push(['Hedef için sat', qs]);
+		} else if (p > 0 && need < -1 && from === 'teminat') { var u = o * p; hz.push(['Hedefe kadar serbeste al', u > 0 ? Math.min(row.adet, Math.floor(-need / u)) : row.adet]); }
+		DLG.hizli = hz.filter(function (x) { return x[1] != null && x[1] > 0; });
+		$('#dlg-hizli').innerHTML = DLG.hizli.map(function (x, i) { return '<button type="button" class="btn ghost" data-hz="' + i + '">' + x[0] + ' (' + tl(x[1]) + ')</button>'; }).join('');
+		dlgGuncelle(); var dl = $('#dlg'); if (dl.showModal) dl.showModal(); else dl.setAttribute('open', '');
+	}
+	function serbestSatisVar(s, kod, q) { return s.kredi + s.faiz >= 1 && satSegmentleri(s, kod, q).some(function (g) { return g.d === 'serbest'; }); }
+	function satOp(kod, q) { return { t: serbestSatisVar(S, kod, q) ? 'satOde' : 'sell', kod: kod, adet: q }; }
+	function dlgOp() {
+		var ey = (document.querySelector('[name=ey]:checked') || {}).value || DLG.eylem, row = bul(S, DLG.from, DLG.kod), a = Math.floor(num($('#dlg-adet').value));
+		if (!row || isNaN(a) || a <= 0) return null;
+		if (ey === 'sell') { var qa = Math.min(a, toplamAdet(S, DLG.kod)); return { t: ($('#dlg-ode').checked && serbestSatisVar(S, DLG.kod, qa)) ? 'satOde' : 'sell', kod: DLG.kod, adet: qa }; }
+		return { t: 'move', kod: DLG.kod, from: DLG.from, to: $('#dlg-hedef').value, adet: Math.min(a, row.adet) };
+	}
+	function dlgGuncelle() {
+		var op = dlgOp(), el = $('#dlg-onizleme'), sec = (document.querySelector('[name=ey]:checked') || {}).value || DLG.eylem;
+		$('#dlg-hedef-wrap').style.display = sec === 'sell' ? 'none' : '';
+		var qv = Math.floor(num($('#dlg-adet').value)); $('#dlg-ode-wrap').style.display = (sec === 'sell' && qv > 0 && serbestSatisVar(S, DLG.kod, Math.min(qv, toplamAdet(S, DLG.kod)))) ? '' : 'none';
+		if (!op) { el.textContent = 'Adet gir.'; return; }
+		if ((op.t === 'sell' || op.t === 'satOde') && px(S, op.kod) <= 0) { el.textContent = 'Önce bu hissenin fiyatını gir.'; return; }
+		var n = uygula(S, op), a = metr(S), b = metr(n);
+		var seg = (op.t === 'sell' || op.t === 'satOde') ? '<br><span class="kucuk">Satış dağılımı: ' + satSegmentleri(S, op.kod, op.adet).map(function (g) { return g.d === 'serbest' ? 'serbest ' + tl(g.q) + ' (para nakde gelir)' : (g.d === 'kredi' ? 'kredi depo ' : 'teminat depo ') + tl(g.q) + ' (krediyi kapatır)'; }).join(' · ') + '</span>' : '';
+		el.innerHTML = 'Özkaynak <b>' + pct(a.e) + '</b> → <b class="' + ok2(b.e) + '">' + pct(b.e) + '</b>' + (b.e != null && a.e != null ? (b.e > a.e ? ' ▲' : b.e < a.e ? ' ▼' : '') : '') + seg + '<br><span class="kucuk">Teminat ' + tl(a.C) + ' → ' + tl(b.C) + ' · borç ' + tl(a.D) + ' → ' + tl(b.D) + ' · nakit (bugün) ' + tl(S.nakit.t0) + ' → ' + tl(n.nakit.t0) + ' · alım limiti ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(n)) + ' · serbest depo ' + tl(depoPiyasa(S, 'serbest')) + ' → ' + tl(depoPiyasa(n, 'serbest')) + ' TL</span>';
+	}
+	function ok2(e) { return e == null ? '' : e >= S.hedef / 100 ? 'iyi' : e >= S.min / 100 ? 'uyari' : 'kotu'; }
+
+	/* ---- olaylar ---- */
+	function parametre() {
+		var k = num($('#p-kredi').value), f = num($('#p-faiz').value), h = num($('#p-hedef').value), mn = num($('#p-min').value);
+		S.kredi = isNaN(k) ? 0 : Math.max(0, k); S.faiz = isNaN(f) ? 0 : Math.max(0, f);
+		if (!isNaN(h) && h > 0 && h < 95) S.hedef = h; if (!isNaN(mn) && mn > 0 && mn < 95) S.min = mn;
+		if (!HIST.length) BASE = clone(S);
+		kaydet(); renderHepsi();
+	}
+	['p-kredi', 'p-faiz', 'p-hedef', 'p-min'].forEach(function (id) { $('#' + id).addEventListener('input', parametre); });
+	$('#b-sifirla').addEventListener('click', function () { if (confirm('Tüm depolar ve girdiler silinsin mi?')) { S = bos(); BASE = clone(S); HIST = []; kaydet(); render(); } });
+	$('#b-ornek').addEventListener('click', function () {
+		/* Bilal'in örneği: ~5 mio TL %90 oranlı hisse teminatta, 4 mio TL kredili alım, serbest depoda 2 hisse */
+		S = bos(); S.fiyat = { AKBNK: 100, ASELS: 200, EREGL: 25 };
+		S.depo.teminat = [{ kod: 'AKBNK', adet: 50000 }];
+		S.depo.serbest = [{ kod: 'ASELS', adet: 10000 }, { kod: 'EREGL', adet: 40000 }];
+		S = uygula(S, { t: 'buy', kod: 'THYAO', adet: 20000, fiyat: 200 });
+		HIST = []; BASE = clone(S); kaydet(); render(); $('#girdi').open = false; toast('Örnek yüklendi: 5 mio TL teminat depo (%90), 4 mio TL kredili alım, serbest depoda 2 hisse. Özkaynak ≈ %52.');
+	});
+	document.addEventListener('input', function (e) { if (e.target.id === 'kap-fiyat') { var v = e.target.value; renderKapasite(); var n = $('#kap-fiyat'); n.focus(); n.setSelectionRange(v.length, v.length); } });
+	$('#k-uygula').addEventListener('click', function () {
+		var kod = $('#k-kod').value.trim().toUpperCase(), tutar = num($('#k-tutar').value), fy = num($('#k-fiyat').value);
+		if (!kod || !(tutar > 0) || !(fy > 0)) { toast('Hisse, tutar ve fiyat gir.'); return; }
+		var adet = Math.floor(tutar / fy); if (adet < 1) { toast('Tutar tek lot için bile yetmiyor.'); return; }
+		if (S.limit > 0 && adet * fy > S.limit) toast('Uyarı: tutar kullanılabilir kredi limitini (' + tl(S.limit) + ' TL) aşıyor.'); var op = { t: 'buy', kod: kod, adet: adet, fiyat: fy }; adim(op, uygula(S, op)); $('#k-kod').value = ''; $('#k-tutar').value = ''; $('#k-fiyat').value = '';
+	});
+	$('#o-uygula').addEventListener('click', function () {
+		var t = num($('#o-tutar').value); if (!(t > 0)) { toast('Ödenecek tutarı gir.'); return; }
+		if (t > S.kredi + S.faiz + 1) { toast('Tutar borçtan büyük, borç kadarı ödenir.'); }
+		if (S.nakit.t0 < t) toast('Uyarı: serbest nakit ' + tl(S.nakit.t0) + ' TL, tutardan az. Bakiye eksiye düşer.');
+		var op = { t: 'pay', tutar: t }, fr = serbestFark(S, uygula(S, op)); adim(op, uygula(S, op)); $('#o-tutar').value = '';
+		toast('Kredi ödendi.' + (fr.length ? ' Boşa düşen hisseler serbest depoda: ' + fr.map(function (x) { return x.kod + ' ' + tl(x.adet); }).join(', ') + '.' : ''));
+	});
+	function geriAl() { var h = HIST.pop(); if (h) { S = h.s; kaydet(); render(); return true; } return false; }
+	$('#b-geri').addEventListener('click', geriAl);
+
+	document.addEventListener('submit', function (e) {
+		var f = e.target.closest('[data-ekle]'); if (!f) return; e.preventDefault();
+		var d = f.getAttribute('data-ekle'), kod = f.kod.value.trim().toUpperCase(), adet = Math.floor(num(f.adet.value)), fy = num(f.fiyat.value);
+		if (!kod || !(adet > 0)) { toast('Hisse ve adet gir.'); return; }
+		if (!isNaN(fy) && fy > 0) { S.fiyat[kod] = fy; fiyatYaz(kod, fy); } else if (!S.fiyat[kod] && fiyatHafiza()[kod]) S.fiyat[kod] = fiyatHafiza()[kod];
+		if (!S.fiyat[kod]) { if (FIYAT_API) fiyatCek([kod], true); else toast(kod + ' için fiyat girmedin; değer 0 görünür.'); }
+		ekle(S, d, kod, adet); if (d === 'kredi') { toast('Kredi depoya doğrudan eklendi; kredi borcunu ayrıca girmeyi unutma.'); }
+		if (!HIST.length) BASE = clone(S);
+		kaydet(); render();
+	});
+	document.addEventListener('change', function (e) {
+		if (e.target.matches('[data-fy]')) { var v = num(e.target.value), k = e.target.getAttribute('data-fy'); S.fiyat[k] = isNaN(v) ? 0 : Math.max(0, v); BASE.fiyat[k] = S.fiyat[k]; delete S.fiyatMeta[k]; if (v > 0) fiyatYaz(k, v); kaydet(); render(); }
+	});
+	document.addEventListener('click', function (e) {
+		var t = e.target.closest('[data-tasi]'); if (t) { var p = t.getAttribute('data-tasi').split('|'); dlgAc(p[0], p[1], null); return; }
+		if (e.target.id === 'b-plan') { var pl = planla(S, S.hedef); HIST.push({ s: clone(S), yazi: 'Plan uygulandı: ' + pl.steps.map(opYazi).join(' · ') }); S = pl.son; kaydet(); render(); toast('Plan uygulandı. Geri almak için “Son adımı geri al”.'); return; }
+		var hz = e.target.closest('[data-hz]'); if (hz && DLG) { var row = bul(S, DLG.from, DLG.kod); $('#dlg-adet').value = String(Math.min(DLG.hizli[+hz.getAttribute('data-hz')][1], row.adet)); dlgGuncelle(); return; }
+	});
+	$('#dlg-ode').addEventListener('change', dlgGuncelle); $('#dlg-eylem').addEventListener('change', dlgGuncelle); $('#dlg-hedef').addEventListener('change', dlgGuncelle); $('#dlg-adet').addEventListener('input', dlgGuncelle);
+	$('#dlg-form').addEventListener('submit', function (e) { e.preventDefault(); $('#dlg-tamam').click(); });
+	$('#dlg-iptal').addEventListener('click', function () { $('#dlg').close ? $('#dlg').close() : $('#dlg').removeAttribute('open'); });
+	$('#dlg-tamam').addEventListener('click', function () {
+		var op = dlgOp(); if (!op) return;
+		if (op.t === 'sell' && px(S, op.kod) <= 0) { toast('Önce fiyat gir.'); return; }
+		$('#dlg').close ? $('#dlg').close() : $('#dlg').removeAttribute('open'); adim(op, uygula(S, op));
+	});
+
+	/* sürükle-bırak */
+	document.addEventListener('dragstart', function (e) { var r = e.target.closest && e.target.closest('.satir-h'); if (!r) return; e.dataTransfer.setData('text/plain', r.getAttribute('data-d') + '|' + r.getAttribute('data-kod')); e.dataTransfer.effectAllowed = 'move'; r.classList.add('surukle'); });
+	document.addEventListener('dragend', function (e) { document.querySelectorAll('.surukle,.hedef').forEach(function (x) { x.classList.remove('surukle', 'hedef'); }); });
+	document.addEventListener('dragover', function (e) { var d = e.target.closest && e.target.closest('[data-drop]'); if (d) { e.preventDefault(); document.querySelectorAll('.hedef').forEach(function (x) { x.classList.remove('hedef'); }); d.classList.add('hedef'); } });
+	document.addEventListener('drop', function (e) {
+		var d = e.target.closest && e.target.closest('[data-drop]'); if (!d) return; e.preventDefault();
+		var p = (e.dataTransfer.getData('text/plain') || '').split('|'), to = d.getAttribute('data-drop'); if (p.length !== 2 || p[0] === to) return;
+		if (p[0] === 'kredi') { toast('Kredi depodaki hisse depo değiştirmez; “Taşı / Sat” ile satış yapılabilir.'); return; }
+		if (to === 'kredi') { toast('Kredi depoya yalnızca “Kredili alım” ile hisse girer.'); return; }
+		if (e.shiftKey) { var rw = bul(S, p[0], p[1]); if (rw && rw.adet > 0) { var op = { t: 'move', kod: p[1], from: p[0], to: to, adet: rw.adet }; adim(op, uygula(S, op)); toast(opYazi(op) + ' (Shift: hepsi taşındı)'); return; } }
+		dlgAc(p[0], p[1], to);
+	});
+
+
+	/* ---- hesap ekranından içe aktar ---- */
+	function trnum(t) { if (t == null) return NaN; var x = String(t).trim().replace(/\s/g, '').replace(/[()%]/g, ''); if (!/^[-+]?[\d.,]+$/.test(x)) return NaN; return parseFloat(x.replace(/\./g, '').replace(',', '.')); }
+	function ayristir(metin) {
+		var sonuc = { depo: { serbest: [], kredi: [], teminat: [] }, fiyat: {}, kredi: null, faiz: null, limit: null, nakit: null, uyari: [] }, bekleyen = [];
+		var satirlar = String(metin).replace(/\r/g, '').split('\n');
+		function ilk(re, l) { var m = l.match(re); return m ? trnum(m[1]) : NaN; }
+		for (var i = 0; i < satirlar.length; i++) {
+			var l = satirlar[i].replace(/ /g, ' ').trim(); if (!l) continue; var v;
+			v = ilk(/Kredili\s+[İIi]şlem\s+Tutar[ıi]\s*[:\t ]+(-?[\d.,]+)/i, l); if (!isNaN(v)) { sonuc.kredi = Math.abs(v); continue; }
+			v = ilk(/Kredi\s+Faiz\s+Tutar[ıi]\s*[:\t ]+(-?[\d.,]+)/i, l); if (!isNaN(v)) { sonuc.faiz = Math.abs(v); continue; }
+			v = ilk(/Kullan[ıi]labilir\s+Kredi\s+Limiti\s*[:\t ]+(-?[\d.,]+)/i, l); if (!isNaN(v)) { sonuc.limit = Math.abs(v); continue; }
+			var dm = l.match(/^(Serbest|Kredi|Teminat)\s+Depo\b/i);
+			if (dm) { var dk = dm[1].toLowerCase().replace('ı', 'i'); dk = dk.indexOf('serbest') === 0 ? 'serbest' : dk.indexOf('kredi') === 0 ? 'kredi' : 'teminat'; bekleyen.forEach(function (r) { sonuc.depo[dk].push(r); }); bekleyen = []; continue; }
+			var tk = l.split(/[\t ]+/);
+			if (tk[0] === 'TL' && tk.length >= 5) { var ns = tk.slice(1).map(trnum); if (!isNaN(ns[0]) && !isNaN(ns[1])) { sonuc.nakit = { t0: ns[0], t1: ns[1], t2: isNaN(ns[2]) ? 0 : ns[2], t3: isNaN(ns[3]) ? 0 : ns[3] }; } continue; }
+			if (/^[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9]{2,5}$/.test(tk[0])) {
+				var rest = tk.slice(1); if (rest.length && isNaN(trnum(rest[0]))) rest = rest.slice(1); /* Tip: ESKI */
+				var ns2 = rest.map(trnum).filter(function (x) { return !isNaN(x); });
+				if (ns2.length >= 6) { var bg = Math.trunc(ns2[0]), t2 = Math.trunc(ns2[2]); if (bg !== 0 || t2 !== 0 || Math.trunc(ns2[1]) !== 0) bekleyen.push({ kod: tk[0], bugun: bg, t1: Math.trunc(ns2[1]), adet: t2, t3: Math.trunc(ns2[3]), fy: ns2[5] }); }
+			}
+		}
+		if (bekleyen.length) sonuc.uyari.push(bekleyen.length + ' satır “Serbest/Kredi/Teminat Depo” toplam satırı görülmediği için alınmadı. Depo satırlarını da kopyaladığından emin ol.');
+		return sonuc;
+	}
+	$('#ice-btn').addEventListener('click', function () {
+		var r = ayristir($('#ice-metin').value), adetSay = r.depo.serbest.length + r.depo.kredi.length + r.depo.teminat.length;
+		if (!adetSay && r.kredi == null) { $('#ice-sonuc').textContent = 'Tablo tanınamadı. Hisse satırlarını ve depo toplam satırlarını kopyala.'; return; }
+		if (HIST.length === 0 && (S.depo.serbest.length + S.depo.kredi.length + S.depo.teminat.length) && !confirm('Mevcut depolar bu tabloyla değiştirilsin mi?')) return;
+		var n = bos(); n.hedef = S.hedef; n.min = S.min;
+		['serbest', 'kredi', 'teminat'].forEach(function (d) { r.depo[d].forEach(function (x) { if (x.fy > 0) n.fiyat[x.kod] = x.fy; n.depo[d].push({ kod: x.kod, adet: x.adet, bugun: x.bugun, t1: x.t1, t3: x.t3 }); }); });
+		if (r.kredi != null) n.kredi = r.kredi; if (r.faiz != null) n.faiz = r.faiz; if (r.limit != null) n.limit = r.limit; if (r.nakit) n.nakit = r.nakit;
+		n.akis = akisHesapla(n); Object.keys(n.fiyat).forEach(function (k) { n.kapanis[k] = n.fiyat[k]; });
+		S = n; HIST = []; BASE = clone(S); kaydet(); render();
+		var bil = r.depo.teminat.concat(r.depo.serbest).filter(function (x) { return !ORAN[x.kod]; }).map(function (x) { return x.kod; });
+		$('#ice-sonuc').textContent = 'Aktarıldı: serbest ' + r.depo.serbest.length + ', kredi ' + r.depo.kredi.length + ', teminat ' + r.depo.teminat.length + ' hisse.' + (bil.length ? ' Oran listesinde olmayan: ' + bil.join(', ') + ' (oran 0 sayıldı).' : '') + ' ' + r.uyari.join(' ');
+		$('#girdi').open = false;
+	});
+
+	/* =========================================================
+	   Nakit takvimi (T0 / T+1 / T+2 / T+3)
+	   TL satırı: her sütun o gün gelecek/çıkacak nakit akışı, net pozisyon = toplamları.
+	   Hisse satırlarında: bir satış T+2'de biter → T+2 adedi düşer; dün yapılan satış T+1'de düşer.
+	   ========================================================= */
+	function akisHesapla(n) {
+		var m = {};
+		['serbest', 'kredi', 'teminat'].forEach(function (d) { n.depo[d].forEach(function (r) {
+			if (r.bugun == null) return; var x = m[r.kod] || (m[r.kod] = { kod: r.kod, d1: 0, d2: 0, d3: 0 });
+			x.d1 += (r.bugun || 0) - (r.t1 != null ? r.t1 : r.bugun); x.d2 += (r.t1 != null ? r.t1 : r.bugun) - r.adet; x.d3 += r.adet - (r.t3 != null ? r.t3 : r.adet);
+		}); });
+		var k = Object.keys(m).map(function (c) { var x = m[c], p = n.fiyat[c] || 0; x.v1 = x.d1 * p; x.v2 = x.d2 * p; x.v3 = x.d3 * p; return x; }).filter(function (x) { return x.d1 || x.d2 || x.d3; });
+		return { a1: k.reduce(function (t, x) { return t + x.v1; }, 0), a2: k.reduce(function (t, x) { return t + x.v2; }, 0), a3: k.reduce(function (t, x) { return t + x.v3; }, 0), kalem: k };
+	}
+	function renderNakit() {
+		var el = $('#nakit'), n = S.nakit || { t0: 0, t1: 0, t2: 0, t3: 0 }, ak = S.akis || { a1: 0, a2: 0, a3: 0, kalem: [] };
+		var c = [cumNakit(S, 0), cumNakit(S, 1), cumNakit(S, 2), cumNakit(S, 3)], ac = ['Bugün (T0, serbest)', 'T+1', 'T+2', 'T+3'], k = ['t0', 't1', 't2', 't3'];
+		function ren(v) { return '<span class="' + (v > 0.5 ? 'yuk' : v < -0.5 ? 'dusus' : '') + '">' + (v > 0.5 ? '▲ ' : v < -0.5 ? '▼ ' : '') + tl2(v) + '</span>'; }
+		var kalemler = ak.kalem.filter(function (x) { return Math.abs(x.d1) + Math.abs(x.d2) + Math.abs(x.d3) > 0; }).map(function (x) {
+			var p = [];
+			if (x.d1) p.push('T+1: ' + (x.d1 > 0 ? 'satış ' : 'alış ') + tl(Math.abs(x.d1)) + ' adet (≈' + tl(Math.abs(x.v1)) + ' TL)');
+			if (x.d2) p.push('T+2: ' + (x.d2 > 0 ? 'satış ' : 'alış ') + tl(Math.abs(x.d2)) + ' adet (≈' + tl(Math.abs(x.v2)) + ' TL)');
+			if (x.d3) p.push('T+3: ' + (x.d3 > 0 ? 'satış ' : 'alış ') + tl(Math.abs(x.d3)) + ' adet (≈' + tl(Math.abs(x.v3)) + ' TL)');
+			return '<li><b class="tk">' + esc(x.kod) + '</b> ' + p.join(' · ') + '</li>';
+		}).join('');
+		var kullan = Math.max(0, c[2]), borc = S.kredi + S.faiz, odenebilir = Math.min(kullan, S.kredi + S.faiz);
+		var oz = ''; if (odenebilir >= 1) { var son = uygula(S, { t: 'pay', tutar: odenebilir }), a = metr(S), b = metr(son); oz = '<div class="aksiyon"><button class="btn" type="button" id="nk-ode">T+2 nakitle krediyi öde (' + tl(odenebilir) + ' TL)</button><span class="kucuk">Özkaynak ' + pct(a.e) + ' → ' + pct(b.e) + '; boşa düşen kredi depo hisseleri serbeste geçer.</span></div>'; }
+		var uyar = c[0] < -0.5 ? '<p class="kucuk dusus">▼ Serbest nakit eksi (' + tl2(c[0]) + ' TL): faiz işler, gün içinde kapatmayı düşün.</p>' : '';
+		el.innerHTML = '<h2>Nakit takvimi</h2><p class="kucuk">Ekrandaki TL satırının Serbest / T+1 / T+2 / T+3 değerleri (elle de düzenleyebilirsin). Satışlar T+2’de nakde döner; dün yapılan satış T+1’de.</p>'
+			+ '<div class="tw"><table><thead><tr><th></th>' + ac.map(function (a) { return '<th class="r">' + a + '</th>'; }).join('') + '</tr></thead><tbody>'
+			+ '<tr><td>O gün gelen / giden</td>' + k.map(function (kk) { return '<td class="r"><input class="n nk-in" data-nk="' + kk + '" inputmode="decimal" value="' + String(n[kk] || 0).replace('.', ',') + '" aria-label="' + kk + ' nakit"></td>'; }).join('') + '</tr>'
+			+ '<tr><td>Toplam nakit (kümülatif)</td>' + c.map(function (v) { return '<td class="r deger">' + ren(v) + '</td>'; }).join('') + '</tr>'
+			+ (ak.kalem.length ? '<tr><td>Hisse hareketlerinden tahmin</td><td class="r kucuk">—</td><td class="r">' + ren(ak.a1) + '</td><td class="r">' + ren(ak.a2) + '</td><td class="r">' + ren(ak.a3) + '</td></tr>' : '') + '</tbody></table></div>'
+			+ '<p class="nk-cumle">2 gün sonra (T+2) toplam nakit: <b>' + tl2(c[2]) + ' TL</b>' + (S.kredi + S.faiz > 0 ? ' · borç ' + tl(borc) : '') + '.</p>' + uyar + oz
+			+ (kalemler ? '<details class="kucuk"><summary>Hisse hareketleri (satış/alış, kapanış fiyatıyla tahmin)</summary><ul class="komut-liste">' + kalemler + '</ul><p class="kucuk">Tahmin, kapanış fiyatıyla hesaplanır; gerçek işlem fiyatı ve masraflar nedeniyle TL satırından biraz farklı çıkabilir.</p></details>' : '');
+	}
+	document.addEventListener('change', function (e) {
+		if (e.target.matches('.nk-in')) { var v = trnum(e.target.value); S.nakit[e.target.getAttribute('data-nk')] = isNaN(v) ? 0 : v; if (!HIST.length) { BASE = clone(S); } kaydet(); renderHepsi(); }
+	});
+	document.addEventListener('click', function (e) {
+		if (e.target.id === 'nk-ode') { var o = Math.min(Math.max(0, cumNakit(S, 2)), S.kredi + S.faiz), op = { t: 'pay', tutar: o }, fr = serbestFark(S, uygula(S, op)); adim(op, uygula(S, op)); toast('Kredi ödendi.' + (fr.length ? ' Boşa düşen: ' + fr.map(function (x) { return x.kod + ' ' + tl(x.adet); }).join(', ') : '')); }
+	});
+
+	/* =========================================================
+	   Fiyat düşüş testi
+	   ========================================================= */
+	var STRES = 10;
+	function dus(s, x, kod) { var n = clone(s); Object.keys(n.fiyat).forEach(function (k) { if (!kod || k === kod) n.fiyat[k] = n.fiyat[k] * (1 - x); }); return n; }
+	/* tüm hisseler aynı oranda düşerse özkaynak e'ye ne zaman iner: C(1-x) = D / (1-e) */
+	function esikDusus(s, e) { var m = metr(s); if (!(m.D > 0) || !(m.C > 0)) return null; return 1 - m.D / ((1 - e) * m.C); }
+	function renderStres() {
+		var el = $('#stres'), m = metr(S);
+		if (!(m.C > 0)) { el.innerHTML = '<h2>Fiyat düşüş testi</h2><p class="kucuk">Depoları doldurunca “hisseler düşerse özkaynak ne olur?” burada çıkar.</p>'; return; }
+		var x = STRES / 100, sn = dus(S, x), mm = metr(sn), e35 = esikDusus(S, S.min / 100), eh = esikDusus(S, S.hedef / 100);
+		var satirlar = [5, 10, 15, 20, 25, 30, 40].map(function (d) { var r = metr(dus(S, d / 100)); return '<tr><td>−%' + d + '</td><td class="r deger">' + pct(r.e) + '</td><td class="r">' + tl(r.C) + '</td><td class="r">' + tl(alimLimiti(dus(S, d / 100))) + '</td><td>' + (r.e < S.min / 100 ? '<span class="rozet kotu">çağrı</span>' : r.e < S.hedef / 100 ? '<span class="rozet uyari">hedef altı</span>' : '<span class="rozet">ok</span>') + '</td></tr>'; }).join('');
+		var tekil = []; var toplamC = m.C;
+		['kredi', 'teminat'].forEach(function (d) { S.depo[d].forEach(function (r) { if (r.adet > 0) { var v = r.adet * px(S, r.kod) * rate(r.kod, d), y = tekil.filter(function (t) { return t.kod === r.kod; })[0]; if (y) y.v += v; else tekil.push({ kod: r.kod, v: v }); } }); });
+		tekil.sort(function (a, b) { return b.v - a.v; });
+		var tk = tekil.slice(0, 5).map(function (t) { var r = metr(dus(S, x, t.kod)); return '<tr><td class="tk">' + esc(t.kod) + '</td><td class="r">' + pct(t.v / toplamC) + '</td><td class="r deger">' + pct(r.e) + '</td></tr>'; }).join('');
+		var cumle = e35 == null ? '' : (e35 <= 0 ? '<span class="dusus">▼ Özkaynak zaten alt sınırın (%' + S.min + ') altında.</span>' : 'Tüm hisseler ortalama <b>%' + (e35 * 100).toFixed(1).replace('.', ',') + '</b> düşerse özkaynak %' + S.min + '’e iner (çağrı bölgesi)' + (eh > 0 ? '; hedef %' + S.hedef + '’ın altına <b>%' + (eh * 100).toFixed(1).replace('.', ',') + '</b> düşüşte iner' : '') + '.');
+		el.innerHTML = '<h2>Fiyat düşüş testi</h2><p class="kucuk">Kredi ve teminat depodaki tüm hisselerin fiyatı aynı oranda düşerse (borç sabit). Serbest depo özkaynağa girmez ama alım limitini etkiler.</p>'
+			+ '<div class="kayd"><label for="st-kayd">Düşüş: <b id="st-deger">−%' + STRES + '</b></label><input type="range" id="st-kayd" min="0" max="50" step="1" value="' + STRES + '"></div>'
+			+ '<div class="kap-grid"><div class="kap-ana"><div class="l">Özkaynak ' + pct(m.e) + ' → </div><div class="v" style="color:' + (mm.e < S.min / 100 ? '#ff8f85' : mm.e < S.hedef / 100 ? '#e9a23b' : '#6fe0a8') + '">' + pct(mm.e) + '</div><div class="n">Teminat ' + tl(m.C) + ' → ' + tl(mm.C) + ' · alım limiti ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(sn)) + '</div></div>'
+			+ '<div class="kap-yan"><div class="t"><div class="l">Bu düşüşte hedefe dönmek için</div><div class="vv">' + (mm.e >= S.hedef / 100 ? 'gerek yok' : tl(Math.max(0, gerek(sn, S.hedef / 100))) + ' TL teminat değeri') + '</div></div></div></div>'
+			+ '<p class="nk-cumle">' + cumle + '</p>'
+			+ '<div class="tw"><table><thead><tr><th>Düşüş</th><th class="r">Özkaynak</th><th class="r">Teminat</th><th class="r">Alım limiti</th><th></th></tr></thead><tbody>' + satirlar + '</tbody></table></div>'
+			+ (tk ? '<h3 style="margin-top:14px">Tek hisse düşerse (−%' + STRES + ')</h3><div class="tw"><table><thead><tr><th>Hisse</th><th class="r">Teminattaki payı</th><th class="r">Özkaynak</th></tr></thead><tbody>' + tk + '</tbody></table></div>' : '');
+	}
+	document.addEventListener('input', function (e) { if (e.target.id === 'st-kayd') { STRES = +e.target.value; renderStres(); var k = $('#st-kayd'); k.focus(); } });
+
+	/* =========================================================
+	   Uyarılar / kontrol paneli
+	   ========================================================= */
+	function uyarilar() {
+		var u = [], m = metr(S), e = m.e, tumler = [];
+		if (e != null && e < S.min / 100) u.push(['kotu', 'Özkaynak %' + (e * 100).toFixed(1).replace('.', ',') + ', alt sınır %' + S.min + ' altında: çağrı bölgesi. Aşağıdaki plana bak.']);
+		else if (e != null && e < S.hedef / 100) u.push(['uyari', 'Özkaynak hedefin (%' + S.hedef + ') altında.']);
+		var fyok = {}, listedisi = {}, tedbir = {}, oran0 = {}, kredik = {};
+		['serbest', 'kredi', 'teminat'].forEach(function (d) { S.depo[d].forEach(function (r) {
+			if (!(px(S, r.kod) > 0) && r.adet > 0) fyok[r.kod] = 1;
+			if (d !== 'kredi' && !ORAN[r.kod]) listedisi[r.kod] = 1;
+			if (d !== 'kredi' && ORAN[r.kod] && ORAN[r.kod].a && /tedbir/i.test(ORAN[r.kod].a)) tedbir[r.kod] = ORAN[r.kod].a;
+			if (d === 'teminat' && ORAN[r.kod] && ORAN[r.kod].o === 0 && r.adet > 0) oran0[r.kod] = 1;
+			if (r.adet < 0 && d === 'serbest') u.push(['uyari', r.kod + ': serbest depoda ' + tl(r.adet) + ' (açık) — bu adet kredi/teminat depodan düşer.']);
+			if (r.bugun != null && r.adet < r.bugun && r.adet >= 0) u.push(['bilgi', r.kod + ' (' + d + '): T+2 adedi bugünkünden ' + tl(r.bugun - r.adet) + ' az, satılmış.']);
+		}); });
+		if (Object.keys(fyok).length) u.push(['uyari', 'Fiyatı girilmemiş (değer 0): ' + Object.keys(fyok).join(', ') + '. “Toplu fiyat” ile güncelle.']);
+		if (Object.keys(listedisi).length) u.push(['uyari', 'Oran listesinde yok (oran 0 sayıldı): ' + Object.keys(listedisi).join(', ') + '.']);
+		Object.keys(tedbir).forEach(function (k) { u.push(['uyari', k + ': tedbir notu — ' + tedbir[k]]); });
+		if (Object.keys(oran0).length) u.push(['bilgi', 'Oranı 0 olan hisse teminat depoda: ' + Object.keys(oran0).join(', ') + ' — teminata katkısı yok.']);
+		var kd = depoDeger(S, 'kredi'); if (kd > 0) { var top = null; S.depo.kredi.forEach(function (r) { var v = r.adet * px(S, r.kod); if (!top || v > top.v) top = { kod: r.kod, v: v }; }); if (top && top.v / kd > 0.8 && S.depo.kredi.length >= 1) u.push(['bilgi', 'Kredi depoda ağırlık tek hissede (' + top.kod + ', %' + Math.round(top.v / kd * 100) + '). Tek hissede kredi taşırsan kurum daha yüksek özkaynak (%50) isteyebilir.']); }
+		if (cumNakit(S, 0) < -0.5) u.push(['uyari', 'Serbest nakit eksi (' + tl2(cumNakit(S, 0)) + ' TL).']);
+		if (S.akis && S.akis.kalem.length && Math.abs(S.akis.a1 + S.akis.a2 + S.akis.a3 - (S.nakit.t1 + S.nakit.t2 + S.nakit.t3)) > Math.max(1000, 0.1 * Math.abs(S.akis.a1 + S.akis.a2 + S.akis.a3))) u.push(['bilgi', 'Hisse hareketlerinden tahmin edilen nakit (' + tl(S.akis.a1 + S.akis.a2 + S.akis.a3) + ' TL) ile TL satırı (' + tl(S.nakit.t1 + S.nakit.t2 + S.nakit.t3) + ' TL) farklı: fiyat/masraf farkı ya da eksik satır olabilir.']);
+		return u;
+	}
+	function renderUyari() {
+		var u = uyarilar(), el = $('#uyari'), ciddi = u.filter(function (x) { return x[0] !== 'bilgi'; }).length, kotu = u.some(function (x) { return x[0] === 'kotu'; });
+		$('#uyari-ozet').innerHTML = u.length ? '· ' + (ciddi ? '<b class="' + (kotu ? 'dusus' : '') + '">' + ciddi + ' uyarı</b>' : '') + (u.length - ciddi ? ' ' + (u.length - ciddi) + ' not' : '') : '· sorun yok';
+		var tr = $('#tab-uy'); if (tr) { tr.hidden = !ciddi; tr.textContent = ciddi; tr.className = 'tab-rozet' + (kotu ? ' kotu' : ''); }
+		if (kotu) $('#uyari-d').open = true;
+		if (!u.length) { el.innerHTML = '<p class="uy-ok">▲ Her şey yolunda görünüyor: uyarı yok.</p>'; return; }
+		el.innerHTML = '<ul class="uy">' + u.map(function (x) { return '<li class="' + x[0] + '"><span>' + (x[0] === 'kotu' ? '⚠' : x[0] === 'uyari' ? '!' : 'i') + '</span>' + esc(x[1]) + '</li>'; }).join('') + '</ul>';
+	}
+
+	/* =========================================================
+	   Yapışkan özet çubuğu + hedef çipleri
+	   ========================================================= */
+	function renderSticky() {
+		var m = metr(S), e = m.e, cls = ok(e), pl = planla(S, S.hedef), al = alimLimiti(S);
+		$('#sk-row').innerHTML = '<div class="sk"><span class="sk-l">Özkaynak</span><b class="sk-v ' + cls + '">' + pct(e) + '</b></div>'
+			+ '<div class="sk"><span class="sk-l">Hedef</span><b>%' + S.hedef + '</b></div>'
+			+ '<div class="sk hide-m"><span class="sk-l">Alım limiti</span><b>' + tl(al) + '</b></div>'
+			+ '<div class="sk hide-m"><span class="sk-l">Nakit T+2</span><b>' + tl(cumNakit(S, 2)) + '</b></div>'
+			+ '<div class="sk-b">' + (pl.steps.length ? '<button class="btn" type="button" id="sk-plan">Planı uygula (' + pl.steps.length + ')</button>' : '') + (HIST.length ? '<button class="btn ghost" type="button" id="sk-geri">Geri al</button>' : '') + '</div>';
+	}
+	function renderCipler() { $('#hedef-cipler').innerHTML = '<span class="kucuk">Hızlı hedef:</span>' + [35, 36, 40, 50].map(function (h) { return '<button type="button" class="chip" data-hedef="' + h + '" aria-pressed="' + (S.hedef === h) + '">%' + h + '</button>'; }).join(''); }
+	document.addEventListener('click', function (e) {
+		var h = e.target.closest('[data-hedef]'); if (h) { S.hedef = +h.getAttribute('data-hedef'); kaydet(); render(); return; }
+		if (e.target.id === 'sk-plan') { $('#b-plan') ? $('#b-plan').click() : planUygula(); return; }
+		if (e.target.id === 'sk-geri') geriAl();
+	});
+	function planUygula() { var pl = planla(S, S.hedef); if (!pl.steps.length) { toast('Uygulanacak adım yok.'); return; } HIST.push({ s: clone(S), yazi: 'Plan uygulandı: ' + pl.steps.map(opYazi).join(' · ') }); S = pl.son; kaydet(); render(); toast('Plan uygulandı. Geri almak için Ctrl+Z ya da “Geri al”.'); }
+
+	/* =========================================================
+	   Müşteri özeti (kopyalanabilir metin)
+	   ========================================================= */
+	function ozetMetni() {
+		var m = metr(S), pl = planla(S, S.hedef), x = maxAlim(S, S.hedef / 100), al = alimLimiti(S), lim = S.limit > 0 ? S.limit : Infinity, alinabilir = Math.min(x, al, lim), e35 = esikDusus(S, S.min / 100);
+		var t = ['Özkaynak özeti (simülasyon, T+2 görünümü)', '', 'Özkaynak: ' + pct(m.e) + ' (hedef %' + S.hedef + ', alt sınır %' + S.min + ')', 'Toplam teminat: ' + tl(m.C) + ' TL · Borç (kredi + faiz): ' + tl(m.D) + ' TL', 'Alım limiti (' + limitEtiket(S) + '): ' + tl(al) + ' TL', 'Nakit: bugün ' + tl(cumNakit(S, 0)) + ' · T+1 ' + tl(cumNakit(S, 1)) + ' · T+2 ' + tl(cumNakit(S, 2)) + ' TL'];
+		t.push('Yeni alım kapasitesi: en fazla ' + tl(alinabilir) + ' TL (%' + S.hedef + ' özkaynağa göre)');
+		if (pl.durum === 'fazla' && pl.steps.length) t.push('', 'Fazla teminat: aşağıdaki hisseler serbest depoya alınabilir:'), pl.steps.forEach(function (o, i) { t.push((i + 1) + ') ' + opYazi(o)); });
+		else if ((pl.durum === 'acik' || pl.durum === 'yetmez') && pl.steps.length) { t.push('', '%' + S.hedef + ' özkaynak için yapılacaklar:'); pl.steps.forEach(function (o, i) { t.push((i + 1) + ') ' + opYazi(o)); }); if (pl.durum === 'yetmez') t.push('Not: eldeki hisselerle hedefe tam ulaşılamıyor.'); }
+		else if (pl.durum === 'ok') t.push('', 'Özkaynak hedefte, işlem gerekmiyor.');
+		if (e35 != null && e35 > 0) t.push('', 'Fiyat riski: hisseler ortalama %' + (e35 * 100).toFixed(1).replace('.', ',') + ' düşerse özkaynak %' + S.min + '’e iner.');
+		t.push('', 'Bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.');
+		return t.join('\n');
+	}
+	function renderOzet() {
+		var m = metr(S); if (!(m.C > 0 || m.D > 0)) { $('#ozet').innerHTML = '<h2>Müşteri özeti</h2><p class="kucuk">Hesabı doldurunca WhatsApp’a yapıştırılabilir özet çıkar.</p>'; return; }
+		$('#ozet').innerHTML = '<div class="baslik-satir"><h2>Müşteri özeti</h2><div class="aksiyon"><button class="btn" type="button" id="oz-kopya">Kopyala</button>' + (navigator.share ? '<button class="btn ghost" type="button" id="oz-paylas">Paylaş</button>' : '') + '</div></div><pre class="ozet-metin" id="oz-metin">' + esc(ozetMetni()) + '</pre>';
+	}
+	document.addEventListener('click', function (e) {
+		if (e.target.id === 'oz-kopya') { var t = $('#oz-metin').textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('Özet kopyalandı.'); }, function () { var r = document.createRange(); r.selectNodeContents($('#oz-metin')); var sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); toast('Metin seçildi, Ctrl+C ile kopyala.'); }); }
+		if (e.target.id === 'oz-paylas') navigator.share({ text: $('#oz-metin').textContent }).catch(function () {});
+	});
+
+	/* =========================================================
+	   Kayıtlı senaryolar (hesap yok: hepsi simülasyon)
+	   ========================================================= */
+	var SKEY = 'ozkaynak-senaryolar-v1';
+	function senaryolar() { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } }
+	function senaryoYaz(o) { try { localStorage.setItem(SKEY, JSON.stringify(o)); } catch (e) { toast('Kaydedilemedi (tarayıcı depolaması dolu ya da kapalı).'); } }
+	function renderSenaryo() {
+		var o = senaryolar(), ad = Object.keys(o).sort(function (a, b) { return (o[b].tarih || '').localeCompare(o[a].tarih || ''); });
+		$('#senaryo').innerHTML = '<h2>Senaryolar</h2><p class="kucuk">Hesap numarası yok, hepsi simülasyon. Adlandırıp kaydet, sonra tek tıkla geri yükle.</p>'
+			+ '<div class="satir"><div class="f"><label for="sn-ad">Senaryo adı</label><input id="sn-ad" placeholder="örn. Müşteri A — kredili alım"></div><button class="btn" type="button" id="sn-kaydet">Kaydet</button><button class="btn ghost" type="button" id="sn-disa">Yedeği indir</button><label class="btn ghost dosya-btn">Yedeği yükle<input type="file" id="sn-ice" accept=".json" hidden></label></div>'
+			+ (ad.length ? '<ul class="sn-liste">' + ad.map(function (a) { var m = metr(o[a].S); return '<li><div><b>' + esc(a) + '</b><span class="kucuk"> · ' + esc((o[a].tarih || '').replace('T', ' ').slice(0, 16)) + ' · özkaynak ' + pct(m.e) + '</span></div><div class="aksiyon"><button class="btn ghost kucuk-b" data-sn-yukle="' + esc(a) + '">Yükle</button><button class="btn ghost kucuk-b" data-sn-sil="' + esc(a) + '">Sil</button></div></li>'; }).join('') + '</ul>' : '<p class="kucuk">Henüz kayıtlı senaryo yok.</p>');
+	}
+	document.addEventListener('click', function (e) {
+		if (e.target.id === 'sn-kaydet') { var ad = ($('#sn-ad').value || '').trim(); if (!ad) { toast('Senaryoya bir ad ver.'); return; } var o = senaryolar(); o[ad] = { S: clone(S), tarih: new Date().toISOString() }; senaryoYaz(o); renderSenaryo(); toast('Senaryo kaydedildi: ' + ad); return; }
+		var y = e.target.closest('[data-sn-yukle]'); if (y) { var o2 = senaryolar(), a = y.getAttribute('data-sn-yukle'); if (o2[a]) { S = hazirla(o2[a].S); BASE = clone(S); HIST = []; kaydet(); render(); $('#girdi').open = false; toast('Yüklendi: ' + a); } return; }
+		var d = e.target.closest('[data-sn-sil]'); if (d) { if (confirm('Senaryo silinsin mi?')) { var o3 = senaryolar(); delete o3[d.getAttribute('data-sn-sil')]; senaryoYaz(o3); renderSenaryo(); } return; }
+		if (e.target.id === 'sn-disa') { var blob = new Blob([JSON.stringify(senaryolar(), null, 1)], { type: 'application/json' }), a2 = document.createElement('a'); a2.href = URL.createObjectURL(blob); a2.download = 'ozkaynak-senaryolar.json'; a2.click(); }
+	});
+	document.addEventListener('change', function (e) {
+		if (e.target.id !== 'sn-ice' || !e.target.files[0]) return;
+		var fr = new FileReader(); fr.onload = function () { try { var j = JSON.parse(fr.result), o = senaryolar(), n = 0; Object.keys(j).forEach(function (k) { if (j[k] && j[k].S && j[k].S.depo) { o[k] = j[k]; n++; } }); senaryoYaz(o); renderSenaryo(); toast(n + ' senaryo içe aktarıldı.'); } catch (x) { toast('Dosya okunamadı.'); } }; fr.readAsText(e.target.files[0]);
+	});
+
+	/* =========================================================
+	   Araçlar: toplu fiyat, oran listesi (Excel yükleme)
+	   ========================================================= */
+	var FYKEY = 'ozkaynak-fiyat-v1', OKEY = 'ozkaynak-oranlar-v1', ORAN_KAYNAK = 'Varsayılan liste';
+	function fiyatHafiza() { try { return JSON.parse(localStorage.getItem(FYKEY)) || {}; } catch (e) { return {}; } }
+	function fiyatYaz(k, v) { try { var h = fiyatHafiza(); h[k] = v; localStorage.setItem(FYKEY, JSON.stringify(h)); } catch (e) {} }
+	$('#tf-btn').addEventListener('click', function () {
+		var say = 0, yok = [];
+		String($('#tf-metin').value).split('\n').forEach(function (l) { l = l.trim(); if (!l) return; var m = l.match(/^([A-Za-zÇĞİÖŞÜçğıöşü0-9]{2,8})[\s;:=,\t]+([\d.,]+)/); if (!m) { yok.push(l); return; } var k = m[1].toUpperCase(), v = trnum(m[2]); if (isNaN(v) || v <= 0) { yok.push(l); return; } S.fiyat[k] = v; if (BASE) BASE.fiyat[k] = v; fiyatYaz(k, v); say++; });
+		kaydet(); renderHepsi(); $('#tf-sonuc').textContent = say + ' fiyat güncellendi.' + (yok.length ? ' Okunamayan satır: ' + yok.length : '');
+	});
+	function oranUygula(a, kaynak) { ORAN = {}; a.forEach(function (x) { ORAN[x.k] = x; }); ORAN_KAYNAK = kaynak; $('#hisseler').innerHTML = a.map(function (x) { return '<option value="' + esc(x.k) + '">'; }).join(''); }
+	function renderOranDurum() { $('#oran-durum').innerHTML = '<b>Kullanılan liste:</b> ' + esc(ORAN_KAYNAK) + ' · ' + Object.keys(ORAN).length + ' hisse'; }
+	async function xlsxOku(buf) {
+		var u8 = new Uint8Array(buf), dv = new DataView(buf), i = u8.length - 22; while (i >= 0 && dv.getUint32(i, true) !== 0x06054b50) i--;
+		if (i < 0) throw new Error('xlsx değil'); var n = dv.getUint16(i + 10, true), off = dv.getUint32(i + 16, true), files = {}, dec = new TextDecoder();
+		for (var k = 0; k < n; k++) { if (dv.getUint32(off, true) !== 0x02014b50) break; var mth = dv.getUint16(off + 10, true), cs = dv.getUint32(off + 20, true), nl = dv.getUint16(off + 28, true), el = dv.getUint16(off + 30, true), cl = dv.getUint16(off + 32, true), lho = dv.getUint32(off + 42, true), name = dec.decode(u8.subarray(off + 46, off + 46 + nl)), ln = dv.getUint16(lho + 26, true), le = dv.getUint16(lho + 28, true); files[name] = { m: mth, d: u8.subarray(lho + 30 + ln + le, lho + 30 + ln + le + cs) }; off += 46 + nl + el + cl; }
+		async function al(name) { var f = files[name]; if (!f) return null; if (f.m === 0) return dec.decode(f.d); var ds = new DecompressionStream('deflate-raw'), w = ds.writable.getWriter(); w.write(f.d); w.close(); return dec.decode(await new Response(ds.readable).arrayBuffer()); }
+		var P = new DOMParser(), ss = [], sx = await al('xl/sharedStrings.xml');
+		if (sx) P.parseFromString(sx, 'application/xml').querySelectorAll('si').forEach(function (si) { ss.push(Array.prototype.map.call(si.querySelectorAll('t'), function (t) { return t.textContent; }).join('')); });
+		var wb = P.parseFromString(await al('xl/workbook.xml'), 'application/xml'), rels = P.parseFromString(await al('xl/_rels/workbook.xml.rels'), 'application/xml'), rmap = {};
+		rels.querySelectorAll('Relationship').forEach(function (r) { rmap[r.getAttribute('Id')] = r.getAttribute('Target'); });
+		var sheets = []; wb.querySelectorAll('sheet').forEach(function (sh) { var rid = sh.getAttribute('r:id') || sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id'), t = rmap[rid] || ''; sheets.push({ ad: sh.getAttribute('name'), yol: t.indexOf('/') === 0 ? t.slice(1) : 'xl/' + t }); });
+		function kolon(r) { var h = r.replace(/\d/g, ''), c = 0; for (var q = 0; q < h.length; q++) c = c * 26 + h.charCodeAt(q) - 64; return c - 1; }
+		var out = [];
+		for (var si = 0; si < sheets.length; si++) {
+			var xm = await al(sheets[si].yol); if (!xm) continue; var rows = [];
+			P.parseFromString(xm, 'application/xml').querySelectorAll('sheetData > row').forEach(function (row) { var arr = []; row.querySelectorAll('c').forEach(function (c) { var v = c.querySelector('v'), t = c.getAttribute('t'), val = null; if (t === 'inlineStr') val = (c.querySelector('t') || {}).textContent; else if (v) val = t === 's' ? ss[+v.textContent] : (t === 'str' || t === 'b' || t === 'e' ? v.textContent : parseFloat(v.textContent)); arr[kolon(c.getAttribute('r'))] = val; }); rows.push(arr); });
+			out.push({ ad: sheets[si].ad, rows: rows });
+		}
+		return out;
+	}
+	function norm(t) { return String(t == null ? '' : t).toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim(); }
+	function oranListesiCikar(sayfalar) {
+		for (var i = 0; i < sayfalar.length; i++) {
+			var rows = sayfalar[i].rows, hi = -1, ix = {};
+			for (var r = 0; r < Math.min(rows.length, 10); r++) { var h = (rows[r] || []).map(norm); var k = h.findIndex(function (x) { return x.indexOf('hisse kodu') === 0; }); if (k > -1) { hi = r; ix.k = k; ix.o = h.findIndex(function (x) { return x.indexOf('özkaynak') > -1 || x.indexOf('ozkaynak') > -1; }); ix.g = h.findIndex(function (x) { return x === 'grup'; }); ix.e = h.findIndex(function (x) { return x === 'endeks'; }); ix.p = h.findIndex(function (x) { return x === 'pazar'; }); ix.y = h.findIndex(function (x) { return x.indexOf('yo') === 0 && x.indexOf('oran') > -1; }); ix.a = h.findIndex(function (x) { return x.indexOf('açıklama') > -1 || x.indexOf('aciklama') > -1; }); break; } }
+			if (hi < 0 || ix.o < 0) continue;
+			var liste = []; for (var q = hi + 1; q < rows.length; q++) { var rw = rows[q] || [], kod = rw[ix.k]; if (!kod) continue; var o = rw[ix.o]; if (typeof o !== 'number') o = trnum(o); if (isNaN(o)) o = 0; if (o > 1) o = o / 100; var y = ix.y > -1 ? rw[ix.y] : null; liste.push({ k: String(kod).trim().toUpperCase(), g: ix.g > -1 ? rw[ix.g] : null, e: ix.e > -1 ? rw[ix.e] : null, p: ix.p > -1 ? rw[ix.p] : null, o: o, y: typeof y === 'number' ? y : null, a: ix.a > -1 && rw[ix.a] && rw[ix.a] !== '-' ? String(rw[ix.a]).trim() : '' }); }
+			if (liste.length) return liste;
+		}
+		return null;
+	}
+	$('#oran-dosya').addEventListener('change', async function (e) {
+		var f = e.target.files[0]; if (!f) return; var son = $('#oran-sonuc');
+		try {
+			if (typeof DecompressionStream === 'undefined') throw new Error('Bu tarayıcı Excel okumayı desteklemiyor, güncel Chrome/Safari kullan.');
+			var liste = oranListesiCikar(await xlsxOku(await f.arrayBuffer())); if (!liste) throw new Error('“Hisse Kodu” ve “Özkaynak Değerleme Oranı” sütunlu sayfa bulunamadı.');
+			localStorage.setItem(OKEY, JSON.stringify({ ad: f.name, tarih: new Date().toISOString(), liste: liste })); oranUygula(liste, f.name + ' (' + new Date().toLocaleDateString('tr-TR') + ')'); son.textContent = liste.length + ' hisse yüklendi.'; renderHepsi();
+		} catch (x) { son.textContent = 'Yüklenemedi: ' + x.message; }
+	});
+	$('#oran-sifirla').addEventListener('click', function () { try { localStorage.removeItem(OKEY); } catch (e) {} Promise.resolve(window.OZ_ORANLAR).then(function (a) { oranUygula(a, 'Varsayılan liste'); $('#oran-sonuc').textContent = 'Varsayılana dönüldü.'; renderHepsi(); }); });
+
+	/* =========================================================
+	   Hızlı komut satırı
+	   ========================================================= */
+	function sayi(t) {
+		t = String(t).toLocaleLowerCase('tr').replace(/\s+/g, ''); var m = t.match(/^([\d.,]+)(k|bin|m|mn|milyon)?$/); if (!m) return NaN; var v = trnum(m[1]); if (isNaN(v)) return NaN; var c = m[2]; return c === 'k' || c === 'bin' ? v * 1e3 : (c === 'm' || c === 'mn' || c === 'milyon') ? v * 1e6 : v;
+	}
+	function komut(metin) {
+		var t = String(metin).trim(); if (!t) return null; var tok = t.replace(/[,;]+$/, '').split(/\s+/), low = tok.map(function (x) { return x.toLocaleLowerCase('tr'); }), ilk = low[0];
+		function hata(m) { return { hata: m }; }
+		if (['geri', 'undo'].indexOf(ilk) > -1) return geriAl() ? { ok: 'Son adım geri alındı.' } : hata('Geri alınacak adım yok.');
+		if (['basa', 'başa', 'başlangıç', 'baslangic'].indexOf(ilk) > -1) { S = clone(BASE); HIST = []; kaydet(); render(); return { ok: 'Başlangıca dönüldü.' }; }
+		if (['plan', 'uygula'].indexOf(ilk) > -1) { planUygula(); return { ok: 'Plan uygulandı.' }; }
+		if (ilk === 'hedef') { var h = sayi(tok[1]); if (!(h > 0 && h < 95)) return hata('Örnek: hedef 40'); S.hedef = h; kaydet(); render(); return { ok: 'Hedef %' + h + '.' }; }
+		if (ilk === 'atl') { if (['yok', 'kapat', 'kaldır', 'kaldir', 'hayır', 'hayir'].indexOf(low[1]) > -1) { S.atl.var = false; kaydet(); render(); return { ok: 'ATL kapatıldı, alım limiti serbest depo × ' + LIMIT_CARPANI + '.' }; } var av = sayi(tok[1]); if (!(av > 0)) return hata('Örnek: atl 5m  ·  atl yok'); S.atl = { var: true, tutar: av }; kaydet(); render(); return { ok: 'ATL var: ' + tl(av) + ' TL, alım limiti bu.' }; }
+		if (ilk === 'fiyatlar' || (ilk === 'fiyat' && ['çek', 'cek', 'güncelle', 'guncelle'].indexOf(low[1]) > -1)) { fiyatCek(); return { ok: 'Fiyatlar çekiliyor…' }; }
+		if (ilk === 'fiyat') { var k0 = (tok[1] || '').toUpperCase(), f0 = sayi(tok[2]); if (!k0 || !(f0 > 0)) return hata('Örnek: fiyat THYAO 312,5'); S.fiyat[k0] = f0; if (BASE) BASE.fiyat[k0] = f0; fiyatYaz(k0, f0); kaydet(); render(); return { ok: k0 + ' fiyatı ' + tl2(f0) + '.' }; }
+		if (['öde', 'ode'].indexOf(ilk) > -1) { var tu = sayi(tok[1]); if (!(tu > 0)) return hata('Örnek: öde 500k'); var op = { t: 'pay', tutar: tu }; adim(op, uygula(S, op)); return { ok: 'Kredi ödendi: ' + tl(Math.min(tu, S.kredi + S.faiz + tu)) + ' TL.' }; }
+		if (['al', 'alım', 'alim'].indexOf(ilk) > -1) {
+			var kod = null, sayilar = []; tok.slice(1).forEach(function (x) { if (isNaN(sayi(x))) kod = x.toUpperCase(); else sayilar.push(sayi(x)); });
+			if (!kod || sayilar.length < 2) return hata('Örnek: al THYAO 2m 312,5 (tutar sonra fiyat)'); var tutar = sayilar[0], fy = sayilar[1], adet = Math.floor(tutar / fy); if (adet < 1) return hata('Tutar tek lota yetmiyor.');
+			var ob = { t: 'buy', kod: kod, adet: adet, fiyat: fy }; adim(ob, uygula(S, ob)); return { ok: kod + ': ' + tl(adet) + ' adet kredili alım.' };
+		}
+		var kd = tok[0].toUpperCase(), fiil = low[low.length - 1]; if (!/^[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9]{2,5}$/.test(kd)) return hata('Anlaşılamadı. Örnek: THYAO 5000 sat');
+		var fiillar = { sat: 'sat', çek: 'cek', cek: 'cek', teminata: 'cek', serbest: 'serbest', serbeste: 'serbest', bırak: 'serbest', birak: 'serbest' }; var f = fiillar[fiil]; if (!f) return hata('Sonunda sat / çek / serbest yaz. Örnek: ' + kd + ' 5000 sat');
+		var orta = low.slice(1, -1).join(' '), tlMi = /\btl\b/.test(orta); orta = orta.replace(/\btl\b/, '').trim(); var hepsi = /hepsi|tümü|tumu/.test(orta), q = hepsi ? Infinity : sayi(orta.split(' ')[0]); if (isNaN(q) || q <= 0) return hata('Adet/tutar yaz. Örnek: ' + kd + ' 5000 sat');
+		var p = px(S, kd); if (tlMi) { if (!(p > 0)) return hata(kd + ' için önce fiyat gir (fiyat ' + kd + ' 12,5).'); q = Math.floor(q / p); }
+		if (f === 'sat') { var mx = toplamAdet(S, kd); if (mx <= 0) return hata(kd + ' depolarda yok.'); if (!(p > 0)) return hata(kd + ' için önce fiyat gir.'); q = Math.min(q, mx); if (q < 1) return hata('Adet 1’den az.'); var os = satOp(kd, q); adim(os, uygula(S, os)); return { ok: kd + ': ' + tl(q) + ' adet satıldı' + (os.t === 'satOde' ? ' (serbest kısmın parasıyla kredi ödendi)' : '') + '.' }; }
+		var from = f === 'cek' ? 'serbest' : 'teminat', to = f === 'cek' ? 'teminat' : 'serbest', row = bul(S, from, kd); if (!row || row.adet <= 0) return hata(kd + ' ' + (from === 'serbest' ? 'serbest' : 'teminat') + ' depoda yok.');
+		q = Math.min(q, row.adet); var om = { t: 'move', kod: kd, from: from, to: to, adet: q }; adim(om, uygula(S, om)); return { ok: kd + ': ' + tl(q) + ' adet ' + from + ' → ' + to + '.' };
+	}
+	$('#cmd').addEventListener('keydown', function (e) { if (e.key !== 'Enter') return; var r = komut(this.value); var el = $('#cmd-sonuc'); if (!r) return; el.textContent = r.hata || r.ok; el.className = 'kucuk ' + (r.hata ? 'dusus' : 'yuk'); if (!r.hata) this.value = ''; });
+	document.addEventListener('keydown', function (e) {
+		var hedef = e.target, yaz = hedef && /^(INPUT|TEXTAREA|SELECT)$/.test(hedef.tagName);
+		if (e.key === '/' && !yaz && !e.ctrlKey && !e.metaKey && document.activeElement === document.body && !$('#dlg').open) { e.preventDefault(); $('#cmd').focus(); return; }
+		if (!yaz && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-5]$/.test(e.key) && !$('#dlg').open) { tabAc(TABLAR[+e.key - 1]); return; }
+		if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !yaz) { e.preventDefault(); if (!geriAl()) toast('Geri alınacak adım yok.'); }
+	});
+	$('#b-basa').addEventListener('click', function () { S = clone(BASE); HIST = []; kaydet(); render(); toast('Başlangıç durumuna dönüldü.'); });
+
+	/* =========================================================
+	   ATL (açık takas limiti): hesaba tanımlı alım limiti
+	   ========================================================= */
+	function renderAtlNot() {
+		var sb = alimLimitiSerbest(S);
+		$('#atl-not').innerHTML = atlAktif(S) ? 'Alım limiti <b>ATL: ' + tl(S.atl.tutar) + ' TL</b>. Serbest depo teminatı × ' + LIMIT_CARPANI + ' = ' + tl(sb) + ' TL (bu hesapta kullanılmıyor).' : 'Alım limiti: serbest depo teminatı × ' + LIMIT_CARPANI + ' = <b>' + tl(sb) + ' TL</b>' + (S.atl.var ? ' (ATL işaretli ama tutar girilmedi).' : '.');
+	}
+	function atlGuncelle() {
+		var t = trnum($('#atl-tutar').value); S.atl = { var: $('#atl-var').checked, tutar: isNaN(t) ? 0 : Math.max(0, t) };
+		if (!HIST.length) BASE = clone(S); kaydet(); renderHepsi();
+	}
+	$('#atl-var').addEventListener('change', atlGuncelle); $('#atl-tutar').addEventListener('input', atlGuncelle);
+	function renderGirdiOzet() { var n = ['serbest', 'kredi', 'teminat'].reduce(function (t, d) { return t + S.depo[d].length; }, 0); $('#girdi-ozet').textContent = n ? '· ' + n + ' hisse · kredi ' + tl(S.kredi) + ' · faiz ' + tl(S.faiz) + ' · hedef %' + S.hedef : '· boş: hisse ekle ya da içe aktar'; }
+
+	/* =========================================================
+	   Fiyatlar: Yahoo Finance (sunucu üzerinden), makul aralık kontrolüyle
+	   ========================================================= */
+	var FIYAT_API = (typeof window.OZ_FIYAT_API === 'undefined') ? '/api/fiyat' : window.OZ_FIYAT_API;
+	function tumKodlar() { var m = {}; ['serbest', 'kredi', 'teminat'].forEach(function (d) { S.depo[d].forEach(function (r) { m[r.kod] = 1; }); }); return Object.keys(m); }
+	function saat(t) { try { return new Date(t * 1000).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+	function fiyatSatiri() {
+		var kod = tumKodlar(), y = kod.filter(function (k) { return S.fiyatMeta[k]; }), son = y.reduce(function (t, k) { return Math.max(t, S.fiyatMeta[k].z || 0); }, 0);
+		if (!kod.length) return '';
+		return '<div class="fy-satir kucuk">Fiyatlar: ' + (y.length ? y.length + '/' + kod.length + ' Yahoo (gecikmeli' + (son ? ', ' + saat(son) : '') + ')' : 'elle / hesap ekranı') + (kod.length - y.length ? ' · ' + (kod.length - y.length) + ' elle' : '') + (FIYAT_API ? ' · <button type="button" class="link" id="fy-cek2">↻ güncelle</button>' : '') + '</div>';
+	}
+	async function fiyatCek(kodlar, sessiz) {
+		var d = $('#fy-durum');
+		if (!FIYAT_API) { if (!sessiz) toast('Bu sürümde canlı fiyat yok; fiyatları elle gir.'); return null; }
+		kodlar = (kodlar || tumKodlar()).filter(function (k) { return /^[A-Z][A-Z0-9]{1,5}$/.test(k); });
+		if (!kodlar.length) { if (!sessiz) toast('Depolarda hisse yok.'); return null; }
+		if (d) d.textContent = 'çekiliyor…';
+		try {
+			var r = await fetch(FIYAT_API + '?k=' + encodeURIComponent(kodlar.join(',')), { cache: 'no-store' }), j = await r.json();
+			if (!r.ok) throw new Error(j.hata || ('Hata ' + r.status));
+			var ok = [], atla = [], yok = j.hatalar || [];
+			Object.keys(j.fiyatlar || {}).forEach(function (k) {
+				var v = j.fiyatlar[k], f = v.f, on = v.onceki, eldeki = S.kapanis[k] || S.fiyat[k];
+				if (on && Math.abs(f / on - 1) > 0.15) { atla.push(k + ' (Yahoo ' + tl2(f) + ', önceki kapanış ' + tl2(on) + ': şüpheli)'); return; }
+				if (eldeki > 0 && Math.abs(f / eldeki - 1) > 0.35) { atla.push(k + ' (Yahoo ' + tl2(f) + ', elindeki ' + tl2(eldeki) + ': fark büyük)'); return; }
+				S.fiyat[k] = f; if (BASE) BASE.fiyat[k] = f; fiyatYaz(k, f); S.fiyatMeta[k] = { z: v.zaman || Math.floor(Date.now() / 1000) }; ok.push(k);
+			});
+			kaydet(); renderHepsi();
+			var m = ok.length + ' fiyat güncellendi (Yahoo, gecikmeli).' + (atla.length ? ' Atlanan: ' + atla.join('; ') + '.' : '') + (yok.length ? ' Bulunamayan: ' + yok.join(', ') + '.' : '');
+			if (d) d.textContent = m; if (!sessiz || atla.length) toast(m); return ok;
+		} catch (x) { var msg = 'Fiyat çekilemedi: ' + x.message + '. Elle gir.'; if (d) d.textContent = msg; if (!sessiz) toast(msg); return null; }
+	}
+	document.addEventListener('click', function (e) { if (e.target.id === 'fy-cek' || e.target.id === 'fy-cek2') fiyatCek(); });
+
+	/* =========================================================
+	   Sekmeler
+	   ========================================================= */
+	var TABLAR = ['hesap', 'alim', 'nakit', 'risk', 'ozet'];
+	function tabAc(id) {
+		if (TABLAR.indexOf(id) < 0) id = 'hesap';
+		document.querySelectorAll('[data-panel]').forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== id; });
+		document.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === id); });
+		try { localStorage.setItem('ozkaynak-tab', id); } catch (e) {}
+	}
+	document.addEventListener('click', function (e) { var t = e.target.closest('[data-tab]'); if (t) { tabAc(t.getAttribute('data-tab')); window.scrollTo({ top: 0 }); } });
+	/* satıra tıklayınca taşı/sat penceresi */
+	document.addEventListener('click', function (e) {
+		if (e.target.closest('input,button,select,label,a')) return; var r = e.target.closest('.satir-h'); if (r) dlgAc(r.getAttribute('data-d'), r.getAttribute('data-kod'), null);
+	});
+
+	if (!FIYAT_API) { var fc = document.querySelector('.fy-canli'); if (fc) fc.style.display = 'none'; }
+	/* başlat */
+	Promise.resolve(window.OZ_ORANLAR).then(function (a) {
+		var ov = null; try { ov = JSON.parse(localStorage.getItem(OKEY)); } catch (e) {}
+		if (ov && ov.liste && ov.liste.length) oranUygula(ov.liste, ov.ad + ' (' + new Date(ov.tarih).toLocaleDateString('tr-TR') + ')'); else oranUygula(a, 'Varsayılan liste (Excel, 29.09.2026)');
+		if (!yukle()) { S = bos(); BASE = clone(S); }
+		var fh = fiyatHafiza(); Object.keys(fh).forEach(function (k) { if (!S.fiyat[k]) S.fiyat[k] = fh[k]; });
+		render(); $('#girdi').open = tumKodlar().length === 0; var t0 = 'hesap'; try { t0 = location.hash.slice(1) || localStorage.getItem('ozkaynak-tab') || 'hesap'; } catch (e) {} tabAc(t0);
+	}).catch(function () { S = bos(); BASE = clone(S); render(); toast('Oran listesi yüklenemedi.'); });
+
+</script>
+</body>
+</html>
