@@ -42,6 +42,7 @@ export const menuGruplari: MenuGrup[] = [
 			{ t: 'Teminat simülatörü', href: '/teminat-simulatoru' },
 			{ t: 'Opsiyon lab', href: '/opsiyon-lab' },
 			{ t: 'Grafik oyunu', href: '/grafik-oyunu' },
+			{ t: 'Trade defteri', href: '/trade-defteri' },
 		],
 	},
 ];
