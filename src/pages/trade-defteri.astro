@@ -51,6 +51,8 @@ import Rozet from '../components/Rozet.astro';
 			<div class="aksiyon">
 				<button class="btn ghost" type="button" id="x-csv">CSV indir</button>
 				<button class="btn ghost" type="button" id="x-json">JSON yedek</button>
+				<button class="btn ghost" type="button" id="x-tam">Tam yedek (görseller dahil)</button>
+				<label class="btn ghost dosya-btn">Yedek yükle<input type="file" id="x-ice" accept=".json" hidden /></label>
 			</div>
 		</div>
 		<div class="chips" id="tchips" role="group" aria-label="Durum filtresi"></div>
@@ -260,6 +262,28 @@ import Rozet from '../components/Rozet.astro';
 		var head = ['Tarih', 'Hisse', 'Yön', 'Giriş', 'TP1', 'TP2', 'Stop', 'Çıkış', 'Durum', 'R', 'Güven', 'Kaynak', 'Gerekçe', 'Koşul'];
 		var rows = trades.slice().sort(function (a, b) { return a.date.localeCompare(b.date); }).map(function (t) { var r = realR(t); return [t.date, t.tk, t.side === 'S' ? 'SAT' : 'AL', t.en, t.tp1, t.tp2, t.sl, t.exit, t.status, r == null ? '' : r.toFixed(2), t.conf, (t.src || []).join('+'), t.why, t.cond].map(cell).join(','); });
 		download('trade-defteri-' + today() + '.csv', '﻿' + [head.join(',')].concat(rows).join('\n'), 'text/csv');
+	});
+
+	/* Tam yedek: görseller dahil (başka projeye/cihaza taşımak için) ve geri yükleme */
+	function blobToDataUrl(b) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = rej; fr.readAsDataURL(b); }); }
+	async function gorselVeri(id) { var r = await fetch('/api/trade?gorsel=' + encodeURIComponent(id)); if (!r.ok) return null; return blobToDataUrl(await r.blob()); }
+	async function gorselleriDoldur(list) { for (var i = 0; i < (list || []).length; i++) { list[i].veri = await gorselVeri(list[i].id); } }
+	$('#x-tam').addEventListener('click', async function () {
+		try {
+			msg('Yedek hazırlanıyor… (görseller indiriliyor)'); var kopya = JSON.parse(JSON.stringify(trades));
+			for (var i = 0; i < kopya.length; i++) { await gorselleriDoldur(kopya[i].images); for (var j = 0; j < (kopya[i].updates || []).length; j++) await gorselleriDoldur(kopya[i].updates[j].images); }
+			download('trade-defteri-tam-yedek-' + today() + '.json', JSON.stringify({ surum: 1, tarih: new Date().toISOString(), trades: kopya }), 'application/json'); msg('Tam yedek indirildi (' + kopya.length + ' trade).');
+		} catch (e) { msg('Yedek alınamadı: ' + e.message, true); }
+	});
+	$('#x-ice').addEventListener('change', async function (e) {
+		var f = e.target.files[0]; if (!f) return; e.target.value = '';
+		try {
+			var j = JSON.parse(await f.text()), arr = Array.isArray(j) ? j : j.trades; if (!Array.isArray(arr)) throw new Error('Geçerli bir yedek dosyası değil');
+			var n = 0; msg('Yükleniyor…');
+			async function yukleGorseller(list) { for (var i = 0; i < (list || []).length; i++) { var im = list[i]; if (im.veri) await api('POST', '/api/trade?gorsel=1', { id: im.id, veri: im.veri }); delete im.veri; } }
+			for (var i = 0; i < arr.length; i++) { var t = arr[i]; if (!t || !t.id || !t.date || !t.tk) continue; await yukleGorseller(t.images); for (var k = 0; k < (t.updates || []).length; k++) await yukleGorseller(t.updates[k].images); await save(t); n++; }
+			await load(); msg(n + ' trade yüklendi.');
+		} catch (err) { msg('Yedek yüklenemedi: ' + err.message, true); }
 	});
 
 	/* Bülten'den ön dolgu: /trade-defteri?tk=EKGYO&why=...&conf=Orta */
