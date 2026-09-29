@@ -434,7 +434,8 @@ button {
 			/* serbestten satış + o tutarda kredi öde (T+2 varsayımı) + boşa düşen hisseleri teminata al */
 			var sg0 = satSegmentleri(n, op.kod, op.adet).filter(function (g) { return g.d === 'serbest'; })[0], serbestGelir = sg0 ? sg0.q * px(n, op.kod) : 0;
 			n = uygula(n, { t: 'sell', kod: op.kod, adet: op.adet, oto: op.oto });
-			var Vo = Math.min(serbestGelir, Math.max(0, n.kredi + n.faiz - (n.bekleyenOdeme || 0)));
+			/* satış parası önce serbest nakit eksisini kapatır; krediye ancak nakit artıya geçen kısım ödenir */
+			var Vo = Math.min(serbestGelir, Math.max(0, cumNakit(n, 2)), Math.max(0, n.kredi + n.faiz - (n.bekleyenOdeme || 0)));
 			if (Vo >= 1) { var z = odeZinciri(n, Vo); n = z.s; }
 		} else if (op.t === 'pay') {
 			var V = Math.max(0, Math.min(op.tutar, n.kredi + n.faiz)); nakitDus(n, V);
@@ -622,6 +623,7 @@ button {
 		else if (pl.durum === 'ok' || (pl.steps.length === 0 && pl.durum !== 'yetmez')) bas = 'Özkaynak hedefte (' + pct(e) + '), yapılacak bir şey yok.';
 		else if (pl.durum === 'acik') bas = 'Özkaynak ' + pct(e) + ' → hedef %' + h + '. Plan sonrası (T+2) özkaynak ' + pct(son.e) + '.';
 		else bas = 'Eldeki hisselerle hedefe ulaşılamıyor. Plan sonrası özkaynak ' + pct(son.e) + ', hâlâ ' + tl(pl.kalan) + ' TL teminat değeri eksik. Fiyatları ve depoları kontrol et.';
+		var nakitEksi = cumNakit(S, 2) < -0.5 ? '<p class="kucuk dusus">Serbest nakit eksi (' + tl(cumNakit(S, 2)) + ' TL): serbestten satış parası önce bunu kapatır; kredi ödemesi ancak nakit artıya geçince yapılır.</p>' : '';
 		var limitSatir = pl.steps.length ? '<p class="kucuk">Plan sonrası alım limiti (' + limitEtiket(S) + '): ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(pl.son)) + ' TL</p>' : '';
 		/* adımları grupla: kredi ödemesi + hemen ardından gelen "boşa düşen" taşımalar tek satır */
 		var rows = [], i = 0, sirano = 0, satisToplam = 0, cur = S;
@@ -644,7 +646,7 @@ button {
 		el.innerHTML = '<div class="baslik-satir"><h2>Hedefe ulaşmak için</h2>' + (pl.steps.length ? '<button class="btn" type="button" id="b-plan">Planı uygula</button>' : '') + '</div><p class="oz-ozet">' + bas + '</p>' + ozetSatir
 			+ (pl.steps.length ? '<div class="tw"><table><thead><tr><th>#</th><th>Hisse</th><th>İşlem</th><th class="r">Adet</th><th class="r">Tutar</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' : '')
 			+ (pl.steps.length && pl.durum !== 'fazla' ? '<p class="kucuk">Sıra: serbestten teminata çek → nakitle kredi öde → serbest hisse sat → en son kredi/teminat depodan sat. Satışta önce serbest depo, sonra kredi, sonra teminat depo düşer; yetmeyen kısım serbestte eksi lot olarak görünür. Plan T+2 durumunu gösterir.</p>' : '')
-			+ limitSatir + (pl.durum === 'fazla' && pl.steps.length ? '<p class="kucuk">Serbest depoya alınacak hisse seçiminde varsayım: oranı düşük olan önce (aynı teminat gevşemesiyle daha çok piyasa değeri serbest kalır). Farklı sıra istersen hisseyi elle sürükle.</p>' : '');
+			+ nakitEksi + limitSatir + (pl.durum === 'fazla' && pl.steps.length ? '<p class="kucuk">Serbest depoya alınacak hisse seçiminde varsayım: oranı düşük olan önce (aynı teminat gevşemesiyle daha çok piyasa değeri serbest kalır). Farklı sıra istersen hisseyi elle sürükle.</p>' : '');
 	}
 	function renderGecmis() {
 		$('#gecmis-kart').hidden = !HIST.length;
@@ -702,8 +704,9 @@ button {
 		if (!op) { el.textContent = 'Adet gir.'; return; }
 		if ((op.t === 'sell' || op.t === 'satOde') && px(S, op.kod) <= 0) { el.textContent = 'Önce bu hissenin fiyatını gir.'; return; }
 		var n = uygula(S, op), a = metr(S), b = metr(n);
-		var seg = (op.t === 'sell' || op.t === 'satOde') ? '<br><span class="kucuk">Satış dağılımı: ' + satSegmentleri(S, op.kod, op.adet).map(function (g) { return g.d === 'serbest' ? 'serbest ' + tl(g.q) + ' (para nakde gelir)' : (g.d === 'kredi' ? 'kredi depo ' : 'teminat depo ') + tl(g.q) + ' (krediyi kapatır)'; }).join(' · ') + '</span>' : '';
-		el.innerHTML = 'Özkaynak <b>' + pct(a.e) + '</b> → <b class="' + ok2(b.e) + '">' + pct(b.e) + '</b>' + (b.e != null && a.e != null ? (b.e > a.e ? ' ▲' : b.e < a.e ? ' ▼' : '') : '') + seg + '<br><span class="kucuk">Teminat ' + tl(a.C) + ' → ' + tl(b.C) + ' · borç ' + tl(a.D) + ' → ' + tl(b.D) + ' · nakit (bugün) ' + tl(S.nakit.t0) + ' → ' + tl(n.nakit.t0) + ' · alım limiti ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(n)) + ' · serbest depo ' + tl(depoPiyasa(S, 'serbest')) + ' → ' + tl(depoPiyasa(n, 'serbest')) + ' TL</span>';
+		var nakitNot = (op.t === 'satOde' || op.t === 'sell') && cumNakit(S, 2) < -0.5 && satSegmentleri(S, op.kod, op.adet).some(function (g) { return g.d === 'serbest'; }) ? '<br><span class="kucuk dusus">Serbest nakit eksi (' + tl(cumNakit(S, 2)) + ' TL): satış parası önce bunu kapatır; kredi ancak nakit artıya geçince ödenir.</span>' : '';
+		var seg = nakitNot + ((op.t === 'sell' || op.t === 'satOde') ? '<br><span class="kucuk">Satış dağılımı: ' + satSegmentleri(S, op.kod, op.adet).map(function (g) { return g.d === 'serbest' ? 'serbest ' + tl(g.q) + ' (para nakde gelir)' : (g.d === 'kredi' ? 'kredi depo ' : 'teminat depo ') + tl(g.q) + ' (serbestte eksi lot, T+2\u2019de bu depodan kapanır)'; }).join(' · ') + '</span>' : '');
+		el.innerHTML = 'Özkaynak <b>' + pct(a.e) + '</b> → <b class="' + ok2(b.e) + '">' + pct(b.e) + '</b>' + (b.e != null && a.e != null ? (b.e > a.e ? ' ▲' : b.e < a.e ? ' ▼' : '') : '') + seg + '<br><span class="kucuk">Teminat ' + tl(a.C) + ' → ' + tl(b.C) + ' · borç ' + tl(a.D) + ' → ' + tl(b.D) + ' · T+2 nakit ' + tl(cumNakit(S, 2)) + ' → ' + tl(cumNakit(n, 2)) + ' · alım limiti ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(n)) + ' · serbest depo ' + tl(depoPiyasa(S, 'serbest')) + ' → ' + tl(depoPiyasa(n, 'serbest')) + ' TL</span>';
 	}
 	function ok2(e) { return e == null ? '' : e >= S.hedef / 100 ? 'iyi' : e >= S.min / 100 ? 'uyari' : 'kotu'; }
 
