@@ -183,6 +183,9 @@ button {
 	.oz .plan-toplam { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 6px 0 12px; } @media (max-width: 700px) { .oz .plan-toplam { grid-template-columns: 1fr; } }
 	.oz .plan-toplam > div { background: #f3f3fd; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; } .oz .plan-toplam .l { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); } .oz .plan-toplam b { font-family: var(--font-mono); font-size: 18px; }
 	.oz tr.plan-satir td { background: #f3f3fd; }
+	.oz .dep-arac { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } @media (max-width: 700px) { .oz .dep-arac { grid-template-columns: 1fr; } } .oz .dep-arac input, .oz .dep-arac select { font: inherit; padding: 10px; min-height: 44px; border: 1px solid var(--kenarlik); border-radius: 10px; background: #fff; width: 100%; }
+	.oz .metrikler .ana .alt.zaman { font-family: var(--font-mono); font-size: 12px; opacity: .9; margin-top: 4px; }
+	@media print { body.oz-yazdir * { visibility: hidden; } body.oz-yazdir #ozet, body.oz-yazdir #ozet * { visibility: visible; } body.oz-yazdir #ozet { position: absolute; left: 0; top: 0; width: 100%; border: 0; } body.oz-yazdir #ozet .aksiyon { display: none; } }
 	.oz .yasal { font-size: 11.5px; color: var(--metin-ikincil); border-top: 1px solid var(--kenarlik); padding-top: 12px; }
 	.oz .kap-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin-top: 10px; }
 	@media (max-width: 800px) { .oz .kap-grid { grid-template-columns: 1fr; } }
@@ -229,6 +232,7 @@ button {
 						<li><b>KOD 5000 çek</b> — serbest → teminat · <b>KOD 5000 serbest</b> — teminat → serbest</li>
 						<li><b>öde 500k</b> — nakitle kredi öde · <b>al KOD 2m 312,5</b> — 2 mio TL kredili alım</li>
 						<li><b>atl 5m</b> — ATL var, tutar 5 mio · <b>atl yok</b> · <b>hedef 40</b> · <b>fiyat KOD 12,5</b> · <b>fiyatlar</b> (Yahoo) · <b>plan</b> · <b>geri</b> · <b>başa</b></li>
+						<li><b>KOD</b> (tek başına) — hisse bilgisi: hangi depoda, oranı, satarsan özkaynak, tedbir/yasak · <b>emir</b> ve <b>özet</b> ekranlarındaki kopyala düğmeleri</li>
 						<li>Sayılar: <b>500k</b> = 500 bin, <b>2m</b> = 2 milyon, <b>1.250.000</b></li>
 					</ul>
 				</details>
@@ -260,9 +264,16 @@ button {
 
 			<section class="metrikler" id="metrik" aria-live="polite"></section>
 
+			<div class="dep-arac"><input id="dep-filtre" placeholder="Depolarda hisse ara (örn. SAS)" aria-label="Hisse ara" /><select id="dep-sira" aria-label="Sıralama"><option value="deger">Değere göre (büyük → küçük)</option><option value="ad">Ada göre (A → Z)</option><option value="oran">Orana göre (yüksek → düşük)</option></select></div>
 			<section class="depolar" id="depolar"></section>
 
 			<section class="kart" id="oneri"></section>
+
+			<details class="kart" id="sa-kart">
+				<summary>Satış adayları <span class="kucuk">— hangi hisseyi satmak özkaynağı en çok artırır?</span></summary>
+				<div class="satir"><div class="f"><label for="sa-tutar">Deneme satış tutarı (TL)</label><input id="sa-tutar" class="n" inputmode="decimal" value="100.000" /></div></div>
+				<div id="sa-tablo"></div>
+			</details>
 
 			<details class="kart" id="uyari-d"><summary>Kontrol <span id="uyari-ozet" class="kucuk"></span></summary><div id="uyari"></div></details>
 
@@ -356,7 +367,6 @@ button {
 			<div class="f" id="dlg-hedef-wrap"><label for="dlg-hedef">Hedef depo</label><select id="dlg-hedef"></select></div>
 			<div class="f"><label for="dlg-adet">Adet</label><input id="dlg-adet" class="n" inputmode="numeric" /></div>
 			<label class="ode-sec" id="dlg-ode-wrap"><input type="checkbox" id="dlg-ode" checked /> Serbestten satışın parasıyla krediyi öde, boşa düşen hisseleri teminata al (T+2 özkaynağı)</label>
-			<label class="ode-sec" id="dlg-oto-wrap"><input type="checkbox" id="dlg-oto" /> Serbestte yetmeyen (açık) kısım için satış parasıyla kredi ödensin <span class="kucuk">(özkaynak alt sınırın altındaysa sistem otomatik yapar)</span></label>
 			<div class="aksiyon" id="dlg-hizli"></div>
 			<div class="onizleme" id="dlg-onizleme"></div>
 			<div class="aksiyon">
@@ -419,26 +429,29 @@ button {
 	function toplamAdet(s, kod) { var e = ef(s); return DEPO_SIRA.reduce(function (t, d) { var r = bul(e, d, kod); return t + (r && r.adet > 0 ? r.adet : 0); }, 0); }
 	function satSegmentleri(s, kod, q) { var e = ef(s), seg = [], kal = q; DEPO_SIRA.forEach(function (d) { var r = bul(e, d, kod); if (!r || r.adet <= 0 || kal <= 0) return; var a = Math.min(kal, r.adet); seg.push({ d: d, q: a }); kal -= a; }); return seg; }
 	/* Satış: sistemde satış önce serbest depoya yazılır; yetmezse serbest depo EKSİ lota düşer ve T+2'de kredi (önce), sonra teminat depodan kapanır.
-	   Satış parası T+2 nakdine yazılır. Açık kısım için (özkaynak alt sınırın altındaysa) sistem parayla krediyi otomatik öder: op.oto */
+	   Satış parası T+2 nakdine yazılır; kredi depodan satılan kısım için kredi otomatik ödenir. */
 	function uygula(s, op) {
 		var n = clone(s); if (!n.nakit) n.nakit = { t0: 0, t1: 0, t2: 0, t3: 0 };
 		if (op.t === 'move') { var rw = bul(n, op.from, op.kod), bg = rw && rw.bugun != null ? Math.min(op.adet, Math.max(0, rw.bugun)) : null; cikar(n, op.from, op.kod, op.adet); ekle(n, op.to, op.kod, op.adet, bg); }
 		else if (op.t === 'sell') {
-			var p = px(n, op.kod), row = bul(n, 'serbest', op.kod);
+			/* Kurallar: serbestten satış → para serbest nakde (önce nakit eksisini kapatır, kredi elle ödenir);
+			   kredi depodan satış → 2 gün sonra kredi OTOMATİK ödenir (borç ve kredi depo hissesi o kadar azalır);
+			   teminat depodan satış → para nakde gelir, teminat depodaki hisse azalır (kredi ödenmez). */
+			var p = px(n, op.kod), row = bul(n, 'serbest', op.kod), hk = hold(n, 'kredi', op.kod);
 			if (!row) { row = { kod: op.kod, adet: 0, bugun: null }; n.depo.serbest.push(row); }
-			var acik = Math.max(0, op.adet - Math.max(0, row.adet)); row.adet -= op.adet;
+			var acik = Math.max(0, op.adet - Math.max(0, row.adet)), acikK = Math.min(acik, hk); row.adet -= op.adet;
 			var gelir = op.adet * p; n.satisNakit = (n.satisNakit || 0) + gelir; n.satisToplam = (n.satisToplam || 0) + gelir;
-			if (op.oto && acik > 0) { var od = Math.min(acik * p, Math.max(0, n.kredi + n.faiz - (n.bekleyenOdeme || 0))); n.bekleyenOdeme = (n.bekleyenOdeme || 0) + od; if (n.limit > 0) n.limit += od; }
+			if (acikK > 0) { var od = Math.min(acikK * p, Math.max(0, n.kredi + n.faiz - (n.bekleyenOdeme || 0))); n.bekleyenOdeme = (n.bekleyenOdeme || 0) + od; if (n.limit > 0) n.limit += od; }
 			if (row.adet === 0 && !(row.bugun > 0)) n.depo.serbest = n.depo.serbest.filter(function (x) { return x !== row; });
 		} else if (op.t === 'satOde') {
 			/* serbestten satış + o tutarda kredi öde (T+2 varsayımı) + boşa düşen hisseleri teminata al */
 			var sg0 = satSegmentleri(n, op.kod, op.adet).filter(function (g) { return g.d === 'serbest'; })[0], serbestGelir = sg0 ? sg0.q * px(n, op.kod) : 0;
-			n = uygula(n, { t: 'sell', kod: op.kod, adet: op.adet, oto: op.oto });
+			n = uygula(n, { t: 'sell', kod: op.kod, adet: op.adet });
 			/* satış parası önce serbest nakit eksisini kapatır; krediye ancak nakit artıya geçen kısım ödenir */
 			var Vo = Math.min(serbestGelir, Math.max(0, cumNakit(n, 2)), Math.max(0, n.kredi + n.faiz - (n.bekleyenOdeme || 0)));
 			if (Vo >= 1) { var z = odeZinciri(n, Vo); n = z.s; }
 		} else if (op.t === 'pay') {
-			var V = Math.max(0, Math.min(op.tutar, n.kredi + n.faiz)); nakitDus(n, V);
+			var V = Math.max(0, Math.min(op.tutar, n.kredi + n.faiz - (n.bekleyenOdeme || 0))); nakitDus(n, V);
 			var k2 = Math.min(n.kredi, V); n.kredi -= k2; if (n.limit > 0) n.limit += k2; n.faiz -= Math.min(n.faiz, V - k2);
 			/* kredi depoda boşa düşen hisseler: hangisinin düşeceğini sistem belirler; orantılı (ortalama) dağıtılır */
 			var E = ef(n), krow = E.depo.kredi.filter(function (r) { return r.adet > 0 && px(n, r.kod) > 0; }), Vk = krow.reduce(function (t, r) { return t + r.adet * px(n, r.kod); }, 0);
@@ -475,8 +488,10 @@ button {
 		return { s: n, ops: ops };
 	}
 	/* serbest hisseyi sat → nakitle krediyi öde → boşa düşenleri teminata çek */
+	/* elde kalan pozitif nakitle (kredi depodaki boşa düşenler teminata çekilerek) kredi ödenmiş halini döndürür */
+	function odeSonrasiTum(s) { var V = Math.floor(Math.max(0, Math.min(cumNakit(s, 2), s.kredi + s.faiz - (s.bekleyenOdeme || 0), s.kredi))); return V >= 1 ? odeZinciri(s, V).s : s; }
 	function satZinciri(s, kod, q) {
-		var op = { t: 'sell', kod: kod, adet: q }, n = uygula(s, op), ops = [op], V = Math.max(0, Math.min(cumNakit(n, 2), n.kredi));
+		var op = { t: 'sell', kod: kod, adet: q }, n = uygula(s, op), ops = [op], V = Math.max(0, Math.min(cumNakit(n, 2), n.kredi + n.faiz - (n.bekleyenOdeme || 0)));
 		if (V >= 1) { var z = odeZinciri(n, Math.floor(V)); n = z.s; ops = ops.concat(z.ops); }
 		return { s: n, ops: ops };
 	}
@@ -491,24 +506,25 @@ button {
 				var q = enAz(r.adet, function (q) { return esik(uygula(s, { t: 'move', kod: r.kod, from: 'serbest', to: 'teminat', adet: q }), e); });
 				if (q > 0) uy([{ t: 'move', kod: r.kod, from: 'serbest', to: 'teminat', adet: q }]);
 			});
-			/* 2) serbest nakitle krediyi öde, kredi depoda boşa düşen hisseleri teminata al */
-			if (!esik(s, e) && cumNakit(s, 2) >= 1 && s.kredi >= 1) {
-				var maxV = Math.floor(Math.min(cumNakit(s, 2), s.kredi)), V = enAz(maxV, function (q) { return esik(odeZinciri(s, q).s, e); });
+			/* 2) satışlar: her turda özkaynağa en çok katkı yapan hisseyi sat (nakitle kredi ödemesi en sonda tek adımda yapılır) */
+			function oks(x) { return esik(odeSonrasiTum(x), e); }
+			var TEST = 100000;
+			for (var tur = 0; tur < 80 && !oks(s); tur++) {
+				var Es = ef(s), kodlar = {}; DEPO_SIRA.forEach(function (d) { Es.depo[d].forEach(function (r) { if (r.adet > 0 && px(s, r.kod) > 0) kodlar[r.kod] = 1; }); });
+				var en = null, e0 = metr(odeSonrasiTum(s)).e;
+				Object.keys(kodlar).forEach(function (kod) {
+					var mx = toplamAdet(s, kod); if (mx < 1) return; var qq = Math.min(mx, Math.max(1, Math.ceil(TEST / px(s, kod))));
+					var g = (metr(odeSonrasiTum(uygula(s, { t: 'sell', kod: kod, adet: qq }))).e - e0) / (qq * px(s, kod)); if (g > 1e-15 && (!en || g > en.g)) en = { kod: kod, g: g, mx: mx };
+				});
+				if (!en) break;
+				var q = enAz(en.mx, function (q) { return oks(uygula(s, { t: 'sell', kod: en.kod, adet: q })); });
+				if (q < 1) break; uy([{ t: 'sell', kod: en.kod, adet: q }]);
+			}
+			/* 3) nakitle kredi öde (gereken kadar), kredi depoda boşa düşen hisseleri teminata al */
+			if (!esik(s, e) && cumNakit(s, 2) >= 1) {
+				var maxV = Math.floor(Math.min(cumNakit(s, 2), s.kredi + s.faiz - (s.bekleyenOdeme || 0), s.kredi)), V = enAz(maxV, function (v) { return esik(odeZinciri(s, v).s, e); });
 				if (V >= 1) uy(odeZinciri(s, V).ops);
 			}
-			/* 3) serbestte kalan hisseleri sat → nakit → öde → teminata çek (oranı düşük olan önce) */
-			s.depo.serbest.filter(function (x) { return x.adet > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(a.kod) - oran(b.kod); }).forEach(function (r0) {
-				if (esik(s, e) || s.kredi < 1) return; var r = bul(s, 'serbest', r0.kod); if (!r || r.adet <= 0) return;
-				var q = enAz(r.adet, function (q) { return esik(satZinciri(s, r.kod, q).s, e); });
-				if (q > 0) uy(satZinciri(s, r.kod, q).ops);
-			});
-			/* 4) kredi / teminat depodaki hisseyi sat (serbestte yoksa): serbest depo eksi lota düşer, T+2'de kredi depodan (önce) kapanır; parayla kredi ödenir */
-			var E = ef(s), adaylar = {}; ['kredi', 'teminat'].forEach(function (d) { E.depo[d].forEach(function (r) { if (r.adet > 0 && px(s, r.kod) > 0 && !hold(s, 'serbest', r.kod)) adaylar[r.kod] = 1; }); });
-			Object.keys(adaylar).sort(function (a, b) { var ra = hold(s, 'kredi', a) ? 1 : oran(a), rb = hold(s, 'kredi', b) ? 1 : oran(b); return ra - rb; }).forEach(function (kod) {
-				if (esik(s, e)) return; var mx = toplamAdet(s, kod); if (mx < 1) return;
-				var q = enAz(mx, function (q) { return esik(uygula(s, { t: 'sell', kod: kod, adet: q, oto: true }), e); });
-				if (q > 0) uy([{ t: 'sell', kod: kod, adet: q, oto: true }]);
-			});
 			durum = esik(s, e) ? (steps.length ? 'acik' : 'ok') : 'yetmez';
 			return { durum: durum, steps: steps, son: s, kalan: Math.max(0, gerek(s, e)) };
 		}
@@ -533,6 +549,13 @@ button {
 
 	/* ---- çizim ---- */
 	function ok(e) { return e == null ? '' : e >= S.hedef / 100 ? 'iyi' : e >= S.min / 100 ? 'uyari' : 'kotu'; }
+	/* Bugün / T+1 / T+2 özkaynak (içe aktarılan hesapta satır başına T0, T+1, T+2 adetleri var) */
+	function durumT(s, k) { var n = clone(s); ['serbest', 'kredi', 'teminat'].forEach(function (d) { n.depo[d].forEach(function (r) { var v = k === 0 ? r.bugun : k === 1 ? r.t1 : r.adet; if (v != null) r.adet = v; }); }); n.bekleyenOdeme = 0; n.satisNakit = 0; return n; }
+	function zamanSatiri() {
+		var var_ = ['serbest', 'kredi', 'teminat'].some(function (d) { return S.depo[d].some(function (r) { return r.bugun != null; }); }); if (!var_) return '';
+		var a = metr(durumT(S, 0)).e, b = metr(durumT(S, 1)).e, c = metr(S).e; if (a == null) return '';
+		return '<div class="alt zaman">Bugün ' + pct(a) + ' · T+1 ' + pct(b) + ' · T+2 ' + pct(c) + '</div>';
+	}
 	function renderMetrik() {
 		var m = metr(S), b = metr(BASE), e = m.e, h = S.hedef / 100, mn = S.min / 100, cls = ok(e);
 		var durum = e == null ? 'Veri gir' : e >= h ? '▲ Hedefin üstünde' : e >= mn ? '▼ Hedefin altında' : '▼ Çağrı bölgesinde';
@@ -541,7 +564,7 @@ button {
 		var need = gerek(S, h), sb = depoPiyasa(S, 'serbest'), sbd = depoDeger(S, 'serbest');
 		var ihtiyac = e == null ? '—' : need > 1 ? '<span class="dusus">▼ ' + tl(need) + ' TL teminat değeri eksik</span>' : need < -1 ? '<span class="yuk">▲ ' + tl(-need) + ' TL teminat değeri serbest bırakılabilir</span>' : 'Hedefte';
 		$('#metrik').innerHTML =
-			'<div class="ana ' + cls + '"><div class="l">Özkaynak oranı</div><div class="v">' + pct(e) + '</div><div class="durum">' + durum + '</div><div class="alt">' + ihtiyac + '</div>' + fark
+			'<div class="ana ' + cls + '"><div class="l">Özkaynak oranı</div><div class="v">' + pct(e) + '</div><div class="durum">' + durum + '</div><div class="alt">' + ihtiyac + '</div>' + zamanSatiri() + fark
 			+ '<div class="bar"><i class="dolu ' + cls + '" style="width:' + (pos * 100) + '%"></i><b class="isaret" style="left:' + (mn / 0.8 * 100) + '%" title="Alt sınır"></b><b class="isaret h" style="left:' + (h / 0.8 * 100) + '%" title="Hedef"></b></div><div class="skala"><span>0</span><span>Alt %' + S.min + '</span><span>Hedef %' + S.hedef + '</span><span>%80</span></div></div>'
 			+ '<div class="t"><div class="l">Toplam teminat</div><div class="v">' + tl(m.C) + '</div><div class="n">kredi depo ' + tl(depoDeger(S, 'kredi')) + ' + teminat depo ' + tl(depoDeger(S, 'teminat')) + '</div></div>'
 			+ '<div class="t"><div class="l">Borç (kredi + faiz)</div><div class="v">' + tl(m.D) + '</div><div class="n">net teminat ' + tl(m.net) + '</div></div>'
@@ -572,6 +595,13 @@ button {
 			+ '<div class="f kap-f"><label for="kap-fiyat">Hisse fiyatı (adet için, isteğe bağlı)</label><input id="kap-fiyat" class="n" inputmode="decimal" placeholder="0,00" value="' + (fy > 0 ? String(fy).replace('.', ',') : '') + '" /></div>'
 			+ '<p class="kap-cumle">Özkaynak ' + pct(m.e) + '; %' + S.hedef + ' hedefe göre <b>en fazla ' + tl(alinabilir) + ' TL</b> kredili alım yapılabilir' + adetYazi + '.</p>' + (alt ? '<p class="kucuk dusus">' + alt + '</p>' : '') + '<p class="kucuk">' + (atlAktif(S) ? 'Alım limiti ATL’den geldiği için hisse taşımak limiti değiştirmez.' : 'Hisseyi serbest depodan teminat depoya çekmek özkaynağı yükseltir ama alım limitini düşürür: dengeyi buradan izle.') + '</p>';
 	}
+	/* Tedbir / yasak yeni kredili alımlar içindir; mevcut kredi/teminat pozisyonlarını bozmaz */
+	function alimEngeli(kod) {
+		var o = ORAN[kod]; if (!o) return null;
+		if (o.a && /tedbir|krediye konu edilmemektedir|yasak/i.test(o.a)) return kod + ': ' + o.a + ' — yeni kredili alım yapılamaz (kredi/teminattaki mevcut pozisyon etkilenmez).';
+		if (o.o === 0) return kod + ': oran %0, krediye konu edilmiyor — kredili alım yapılamaz.';
+		return null;
+	}
 	function ipucu(d, r, need) {
 		var p = px(S, r.kod), o = rate(r.kod, d), unit = o * p, h = S.hedef / 100;
 		if (r.adet <= 0) return '';
@@ -582,8 +612,8 @@ button {
 				var qz = enAz(r.adet, function (q) { return esik(satZinciri(S, r.kod, q).s, h); });
 				return esik(satZinciri(S, r.kod, qz).s, h) ? 'Sat ' + tl(qz) + ' adet → nakitle kredi öde' : '<span class="kucuk">tamamı yetmez</span>';
 			}
-			var mx = toplamAdet(S, r.kod), qs = enAz(mx, function (q) { return esik(uygula(S, { t: 'sell', kod: r.kod, adet: q, oto: true }), h); });
-			return esik(uygula(S, { t: 'sell', kod: r.kod, adet: qs }), h) ? 'Tek başına ' + tl(qs) + ' adet sat' : '<span class="kucuk">tamamı yetmez</span>';
+			var mx = toplamAdet(S, r.kod), qs = enAz(mx, function (q) { return esik(satZinciri(S, r.kod, q).s, h); });
+			return esik(satZinciri(S, r.kod, qs).s, h) ? 'Tek başına ' + tl(qs) + ' adet sat' : '<span class="kucuk">tamamı yetmez</span>';
 		}
 		if (need < -1 && d === 'teminat') { if (unit <= 0) return 'Tamamı serbest kalabilir'; var qm = Math.min(r.adet, Math.floor(-need / unit)); return qm > 0 ? 'En çok ' + tl(qm) + ' adet serbeste al' : ''; }
 		return '';
@@ -599,21 +629,53 @@ button {
 	function renderDepolar() {
 		var need = gerek(S, S.hedef / 100), E = ef(S);
 		$('#depolar').innerHTML = DEPOLAR.map(function (dp) {
-			var d = dp[0], rows = S.depo[d];
+			var d = dp[0], rows = S.depo[d].slice(), flt = ($('#dep-filtre').value || '').trim().toUpperCase(), srt = $('#dep-sira').value;
+			if (flt) rows = rows.filter(function (r) { return r.kod.indexOf(flt) > -1; });
+			rows.sort(function (a, b) { if (srt === 'ad') return a.kod < b.kod ? -1 : 1; if (srt === 'oran') return rate(b.kod, d) - rate(a.kod, d) || a.kod.localeCompare(b.kod); return (Math.max(0, b.adet) * px(S, b.kod)) - (Math.max(0, a.adet) * px(S, a.kod)); });
 			var govde = rows.length ? rows.map(function (r) {
 				var re = bul(E, d, r.kod), eff = re ? re.adet : r.adet, rEff = { kod: r.kod, adet: Math.max(0, eff), bugun: r.bugun };
 				var o = ORAN[r.kod], rr = rate(r.kod, d), p = px(S, r.kod), deger = Math.max(0, eff) * p * (d === 'serbest' ? 1 : rr);
-				var uyar = !o && d !== 'kredi' ? '<span class="rozet kotu" title="Listede yok, oran 0 sayıldı">liste dışı</span>' : (o && o.a && /tedbir/i.test(o.a) ? '<span class="rozet uyari" title="' + esc(o.a) + '">tedbir</span>' : '');
+				var uyar = !o && d !== 'kredi' ? '<span class="rozet kotu" title="Listede yok, oran 0 sayıldı">liste dışı</span>' : (o && o.a && d === 'serbest' && /tedbir/i.test(o.a) ? '<span class="rozet uyari" title="' + esc(o.a) + ' — yeni alım için; kredi/teminattaki mevcut pozisyon etkilenmez">tedbir</span>' : '');
 				return '<div class="satir-h" draggable="true" data-d="' + d + '" data-kod="' + esc(r.kod) + '"><div class="h1"><span class="tutac" aria-hidden="true">⋮⋮</span><b class="tk">' + esc(r.kod) + '</b>' + (d !== 'kredi' ? '<span class="rozet">%' + Math.round(rr * 100) + '</span>' : '') + uyar + '</div>'
 					+ '<div class="h2">' + adetBilgi(d, r, d === 'serbest' ? null : eff) + '</div>'
 					+ '<div class="h5"><input class="n fy" data-fy="' + esc(r.kod) + '" inputmode="decimal" value="' + (p ? String(p).replace('.', ',') : '') + '" placeholder="fiyat" aria-label="' + esc(r.kod) + ' fiyatı"></div>'
 					+ '<div class="h3"><span class="deger">' + tl(deger) + ' TL</span></div>'
 					+ '<div class="ip">' + ipucu(d, rEff, need) + '</div>'
 					+ '<div class="h4"><button class="btn ghost kucuk-b" data-tasi="' + d + '|' + esc(r.kod) + '" aria-label="' + esc(r.kod) + ' taşı veya sat" title="Taşı / Sat">⇄</button></div></div>';
-			}).join('') : '<div class="bosdepo">Boş. Hisse ekle, içe aktar ya da başka depodan sürükle.</div>';
+			}).join('') : '<div class="bosdepo">' + (flt ? 'Bu aramayla eşleşen hisse yok.' : 'Boş. Hisse ekle, içe aktar ya da başka depodan sürükle.') + '</div>';
 			return '<div class="depo" data-drop="' + d + '"><div class="dh"><h3>' + dp[1] + '</h3><span class="kucuk">' + dp[2] + '</span><div class="dt">' + tl(d === 'serbest' ? depoPiyasa(S, d) : depoDeger(S, d)) + ' TL' + (d !== 'serbest' ? ' <span class="kucuk">(piyasa ' + tl(depoPiyasa(S, d)) + ')</span>' : '') + '</div></div><div class="dg">' + govde + '</div>'
 				+ '<form class="ekle" data-ekle="' + d + '"><input list="hisseler" name="kod" placeholder="Hisse" style="text-transform:uppercase" aria-label="Hisse kodu"><input class="n" name="adet" inputmode="numeric" placeholder="Adet" aria-label="Adet"><input class="n" name="fiyat" inputmode="decimal" placeholder="Fiyat" aria-label="Fiyat"><button class="btn" type="submit">Ekle</button></form></div>';
 		}).join('');
+	}
+	function segNot(segs) {
+		return segs.map(function (g) { return g.d === 'serbest' ? 'serbest: para serbest nakde gelir (önce nakit eksisini kapatır)' : g.d === 'kredi' ? 'kredi depo: 2 gün sonra kredi otomatik ödenir; borç ve kredi depodaki hisse o kadar düşer' : 'teminat depo: para nakde gelir, teminat depodaki hisse azalır'; }).join(' · ');
+	}
+	/* planı satırlara çevir: kredi ödemesi + hemen ardından "boşa düşen" taşımalar tek satır */
+	function planSatirlari(pl) {
+		var rows = [], i = 0, cur = S;
+		while (i < pl.steps.length) {
+			var op = pl.steps[i];
+			if (op.t === 'pay') {
+				var grup = [], j = i + 1; while (j < pl.steps.length && pl.steps[j].t === 'move' && pl.steps[j].from === 'serbest' && pl.steps[j].to === 'teminat') { grup.push(pl.steps[j]); j++; }
+				rows.push({ tur: 'ode', tutar: op.tutar, n: grup.length, deg: grup.reduce(function (t, g) { return t + g.adet * px(S, g.kod); }, 0), kat: grup.reduce(function (t, g) { return t + g.adet * px(S, g.kod) * oran(g.kod); }, 0) });
+				for (var q = i; q < j; q++) cur = uygula(cur, pl.steps[q]); i = j; continue;
+			}
+			var tutar = op.adet * px(S, op.kod);
+			if (op.t === 'move') rows.push({ tur: 'tasi', kod: op.kod, adet: op.adet, tutar: tutar, yon: op.to === 'teminat' ? 'Serbest → teminat' : 'Teminat → serbest' });
+			else rows.push({ tur: 'sat', kod: op.kod, adet: op.adet, tutar: tutar, segs: satSegmentleri(cur, op.kod, op.adet) });
+			cur = uygula(cur, op); i++;
+		}
+		return rows;
+	}
+	function emirMetni(pl) {
+		var rows = planSatirlari(pl), son = metr(pl.son), m = metr(S), t = ['EMİR LİSTESİ (T+2 plan, simülasyon)', ''], sat = 0;
+		rows.forEach(function (r, i) {
+			if (r.tur === 'sat') { sat += r.tutar; t.push((i + 1) + ') SAT     ' + r.kod + '   ' + tl(r.adet) + ' adet   ≈ ' + tl(r.tutar) + ' TL   [' + r.segs.map(function (g) { return g.d + ' ' + tl(g.q); }).join(', ') + ']'); }
+			else if (r.tur === 'tasi') t.push((i + 1) + ') TAŞI    ' + r.kod + '   ' + tl(r.adet) + ' adet   ' + r.yon);
+			else t.push((i + 1) + ') KREDİ ÖDE   ' + tl(r.tutar) + ' TL' + (r.n ? '   (kredi depoda ≈' + tl(r.deg) + ' TL hisse boşa düşer; sistemin seçtiklerini teminata al)' : ''));
+		});
+		t.push('', (sat ? 'Toplam satış: ' + tl(sat) + ' TL (T+2 nakde döner) · ' : '') + 'Borç ' + tl(m.D) + ' → ' + tl(son.D) + ' TL · Özkaynak ' + pct(m.e) + ' → ' + pct(son.e));
+		return t.join('\n');
 	}
 	function renderOneri() {
 		var h = S.hedef, pl = planla(S, h), m = metr(S), e = m.e, el = $('#oneri');
@@ -625,29 +687,21 @@ button {
 		else bas = 'Eldeki hisselerle hedefe ulaşılamıyor. Plan sonrası özkaynak ' + pct(son.e) + ', hâlâ ' + tl(pl.kalan) + ' TL teminat değeri eksik. Fiyatları ve depoları kontrol et.';
 		var nakitEksi = cumNakit(S, 2) < -0.5 ? '<p class="kucuk dusus">Serbest nakit eksi (' + tl(cumNakit(S, 2)) + ' TL): serbestten satış parası önce bunu kapatır; kredi ödemesi ancak nakit artıya geçince yapılır.</p>' : '';
 		var limitSatir = pl.steps.length ? '<p class="kucuk">Plan sonrası alım limiti (' + limitEtiket(S) + '): ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(pl.son)) + ' TL</p>' : '';
-		/* adımları grupla: kredi ödemesi + hemen ardından gelen "boşa düşen" taşımalar tek satır */
-		var rows = [], i = 0, sirano = 0, satisToplam = 0, cur = S;
-		while (i < pl.steps.length) {
-			var op = pl.steps[i]; sirano++;
-			if (op.t === 'pay') {
-				var grup = [], j = i + 1; while (j < pl.steps.length && pl.steps[j].t === 'move' && pl.steps[j].from === 'serbest' && pl.steps[j].to === 'teminat') { grup.push(pl.steps[j]); j++; }
-				var deg = grup.reduce(function (t, g) { return t + g.adet * px(S, g.kod); }, 0), kat = grup.reduce(function (t, g) { return t + g.adet * px(S, g.kod) * oran(g.kod); }, 0);
-				rows.push('<tr><td>' + sirano + '</td><td class="tk">—</td><td><b>Nakitle kredi öde</b><div class="kucuk">Kredi depoda boşa düşen hisseler (sistem seçer, tahmini): ' + (grup.length ? grup.length + ' hisse, ≈' + tl(deg) + ' TL → teminat depoya alınır (teminat katkısı ≈' + tl(kat) + ' TL)' : 'yok') + '</div></td><td class="r">—</td><td class="r">' + tl(op.tutar) + ' TL</td></tr>');
-				for (var q = i; q < j; q++) cur = uygula(cur, pl.steps[q]); i = j; continue;
-			}
-			var tutar = op.adet * px(S, op.kod), aciklama;
-			if (op.t === 'move') aciklama = op.to === 'teminat' ? 'Serbest → teminat' : 'Teminat → serbest';
-			else { satisToplam += tutar; aciklama = '<b>SAT</b> <span class="kucuk">(' + satSegmentleri(cur, op.kod, op.adet).map(function (g) { return g.d + ' ' + tl(g.q); }).join(', ') + ')</span>' + (satSegmentleri(cur, op.kod, op.adet).some(function (g) { return g.d !== 'serbest'; }) ? '<div class="kucuk">Serbest depoda eksi lot kalır; T+2’de kredi/teminat depodan kapanır, para krediyi öder.</div>' : ''); }
-			rows.push('<tr><td>' + sirano + '</td><td class="tk">' + esc(op.kod) + '</td><td>' + aciklama + '</td><td class="r">' + tl(op.adet) + '</td><td class="r">' + tl(tutar) + ' TL</td></tr>');
-			cur = uygula(cur, op); i++;
-		}
-		var ozetSatir = '';
-		if (pl.steps.length && satisToplam > 0) ozetSatir = '<div class="plan-toplam"><div><span class="l">Toplam satış</span><b>' + tl(satisToplam) + ' TL</b><span class="kucuk">T+2’de nakde döner (Nakit sekmesine yansır)</span></div><div><span class="l">Borç</span><b>' + tl(m.D) + ' → ' + tl(son.D) + ' TL</b></div><div><span class="l">Özkaynak</span><b>' + pct(e) + ' → ' + pct(son.e) + '</b></div></div>';
-		el.innerHTML = '<div class="baslik-satir"><h2>Hedefe ulaşmak için</h2>' + (pl.steps.length ? '<button class="btn" type="button" id="b-plan">Planı uygula</button>' : '') + '</div><p class="oz-ozet">' + bas + '</p>' + ozetSatir
-			+ (pl.steps.length ? '<div class="tw"><table><thead><tr><th>#</th><th>Hisse</th><th>İşlem</th><th class="r">Adet</th><th class="r">Tutar</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' : '')
-			+ (pl.steps.length && pl.durum !== 'fazla' ? '<p class="kucuk">Sıra: serbestten teminata çek → nakitle kredi öde → serbest hisse sat → en son kredi/teminat depodan sat. Satışta önce serbest depo, sonra kredi, sonra teminat depo düşer; yetmeyen kısım serbestte eksi lot olarak görünür. Plan T+2 durumunu gösterir.</p>' : '')
+		var pr = planSatirlari(pl), satisToplam = pr.reduce(function (t, r) { return t + (r.tur === 'sat' ? r.tutar : 0); }, 0);
+		var rows = pr.map(function (r, i) {
+			if (r.tur === 'ode') return '<tr><td>' + (i + 1) + '</td><td class="tk">—</td><td><b>Nakitle kredi öde</b><div class="kucuk">Kredi depoda boşa düşen hisseler (sistem seçer, tahmini): ' + (r.n ? r.n + ' hisse, ≈' + tl(r.deg) + ' TL → teminat depoya alınır (teminat katkısı ≈' + tl(r.kat) + ' TL)' : 'yok') + '</div></td><td class="r">—</td><td class="r">' + tl(r.tutar) + ' TL</td></tr>';
+			if (r.tur === 'tasi') return '<tr><td>' + (i + 1) + '</td><td class="tk">' + esc(r.kod) + '</td><td>' + r.yon + '</td><td class="r">' + tl(r.adet) + '</td><td class="r">' + tl(r.tutar) + ' TL</td></tr>';
+			return '<tr><td>' + (i + 1) + '</td><td class="tk">' + esc(r.kod) + '</td><td><b>SAT</b> <span class="kucuk">(' + r.segs.map(function (g) { return g.d + ' ' + tl(g.q); }).join(', ') + ')</span><div class="kucuk">' + segNot(r.segs) + '</div></td><td class="r">' + tl(r.adet) + '</td><td class="r">' + tl(r.tutar) + ' TL</td></tr>';
+		}).join('');
+		var ozetSatir = (pl.steps.length && satisToplam > 0) ? '<div class="plan-toplam"><div><span class="l">Toplam satış</span><b>' + tl(satisToplam) + ' TL</b><span class="kucuk">T+2’de nakde döner (Nakit sekmesine yansır)</span></div><div><span class="l">Borç</span><b>' + tl(m.D) + ' → ' + tl(son.D) + ' TL</b></div><div><span class="l">Özkaynak</span><b>' + pct(e) + ' → ' + pct(son.e) + '</b></div></div>' : '';
+		el.innerHTML = '<div class="baslik-satir"><h2>Hedefe ulaşmak için</h2>' + (pl.steps.length ? '<div class="aksiyon"><button class="btn ghost" type="button" id="emir-kopya">Emir listesini kopyala</button><button class="btn" type="button" id="b-plan">Planı uygula</button></div>' : '') + '</div><p class="oz-ozet">' + bas + '</p>' + ozetSatir
+			+ (pl.steps.length ? '<div class="tw"><table><thead><tr><th>#</th><th>Hisse</th><th>İşlem</th><th class="r">Adet</th><th class="r">Tutar</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '')
+			+ (pl.steps.length && pl.durum !== 'fazla' ? '<p class="kucuk">Sıra: serbestten teminata çek → nakitle kredi öde → her turda özkaynağa en çok katkı yapan hisseyi sat (gerekirse parayla kredi öde). Satış önce serbest depoya yazılır, yetmeyen kısım serbestte eksi lot olarak görünür ve T+2’de kredi (önce), sonra teminat depodan kapanır. Plan T+2 durumunu gösterir.</p>' : '')
 			+ nakitEksi + limitSatir + (pl.durum === 'fazla' && pl.steps.length ? '<p class="kucuk">Serbest depoya alınacak hisse seçiminde varsayım: oranı düşük olan önce (aynı teminat gevşemesiyle daha çok piyasa değeri serbest kalır). Farklı sıra istersen hisseyi elle sürükle.</p>' : '');
 	}
+	document.addEventListener('click', function (e) {
+		if (e.target.id === 'emir-kopya') { var t = emirMetni(planla(S, S.hedef)); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('Emir listesi kopyalandı.'); }, function () { toast('Kopyalanamadı; Özet sekmesinden metni seç.'); }); }
+	});
 	function renderGecmis() {
 		$('#gecmis-kart').hidden = !HIST.length;
 		$('#gecmis').innerHTML = HIST.map(function (h) { return '<li>' + esc(h.yazi) + '</li>'; }).join('');
@@ -660,7 +714,7 @@ button {
 		renderHepsi();
 	}
 	function renderHepsi() {
-		renderMetrik(); renderKapasite(); renderNakit(); renderUyari(); renderDepolar(); renderOneri(); renderStres(); renderOzet(); renderSenaryo(); renderGecmis(); renderSticky(); renderCipler(); renderOranDurum(); renderAtlNot(); renderGirdiOzet();
+		renderMetrik(); renderKapasite(); renderNakit(); renderUyari(); renderDepolar(); renderOneri(); renderStres(); renderOzet(); renderSenaryo(); renderGecmis(); renderSticky(); renderCipler(); renderOranDurum(); renderAtlNot(); renderGirdiOzet(); renderSatisAdaylari();
 	}
 
 	/* ---- diyalog ---- */
@@ -681,31 +735,30 @@ button {
 		var need = gerek(S, S.hedef / 100), p = px(S, kod), o = rate(kod, from), h = S.hedef / 100, hz = [['Tümü', row.adet]];
 		if (p > 0 && need > 1) {
 			if (from === 'serbest' && oran(kod) > 0) hz.push(['Hedef için çek', Math.ceil(need / (oran(kod) * p))]);
-			var mx = toplamAdet(S, kod), qs = enAz(mx, function (q) { return esik(uygula(S, satOp(kod, q)), h); });
-			if (qs > 0 && esik(uygula(S, satOp(kod, qs)), h)) hz.push(['Hedef için sat', qs]);
+			var mx = toplamAdet(S, kod), qs = enAz(mx, function (q) { return esik(satZinciri(S, kod, q).s, h); });
+			if (qs > 0 && esik(satZinciri(S, kod, qs).s, h)) hz.push(['Hedef için sat', qs]);
 		} else if (p > 0 && need < -1 && from === 'teminat') { var u = o * p; hz.push(['Hedefe kadar serbeste al', u > 0 ? Math.min(row.adet, Math.floor(-need / u)) : row.adet]); }
 		DLG.hizli = hz.filter(function (x) { return x[1] != null && x[1] > 0; });
 		$('#dlg-hizli').innerHTML = DLG.hizli.map(function (x, i) { return '<button type="button" class="btn ghost" data-hz="' + i + '">' + x[0] + ' (' + tl(x[1]) + ')</button>'; }).join('');
-		$('#dlg-oto').checked = (metr(S).e != null && metr(S).e < S.min / 100); dlgGuncelle(); var dl = $('#dlg'); if (dl.showModal) dl.showModal(); else dl.setAttribute('open', '');
+		dlgGuncelle(); var dl = $('#dlg'); if (dl.showModal) dl.showModal(); else dl.setAttribute('open', '');
 	}
 	function serbestSatisVar(s, kod, q) { return s.kredi + s.faiz >= 1 && satSegmentleri(s, kod, q).some(function (g) { return g.d === 'serbest'; }); }
-	function satOp(kod, q) { return { t: serbestSatisVar(S, kod, q) ? 'satOde' : 'sell', kod: kod, adet: q, oto: true }; }
+	function satOp(kod, q) { return { t: serbestSatisVar(S, kod, q) ? 'satOde' : 'sell', kod: kod, adet: q }; }
 	function dlgOp() {
 		var ey = (document.querySelector('[name=ey]:checked') || {}).value || DLG.eylem, row = bul(S, DLG.from, DLG.kod), a = Math.floor(num($('#dlg-adet').value));
 		if (!row || isNaN(a) || a <= 0) return null;
-		if (ey === 'sell') { var qa = Math.min(a, toplamAdet(S, DLG.kod)); return { t: ($('#dlg-ode').checked && serbestSatisVar(S, DLG.kod, qa)) ? 'satOde' : 'sell', kod: DLG.kod, adet: qa, oto: $('#dlg-oto').checked }; }
+		if (ey === 'sell') { var qa = Math.min(a, toplamAdet(S, DLG.kod)); return { t: ($('#dlg-ode').checked && serbestSatisVar(S, DLG.kod, qa)) ? 'satOde' : 'sell', kod: DLG.kod, adet: qa }; }
 		return { t: 'move', kod: DLG.kod, from: DLG.from, to: $('#dlg-hedef').value, adet: Math.min(a, row.adet) };
 	}
 	function dlgGuncelle() {
 		var op = dlgOp(), el = $('#dlg-onizleme'), sec = (document.querySelector('[name=ey]:checked') || {}).value || DLG.eylem;
 		$('#dlg-hedef-wrap').style.display = sec === 'sell' ? 'none' : '';
 		var qv = Math.floor(num($('#dlg-adet').value)); $('#dlg-ode-wrap').style.display = (sec === 'sell' && qv > 0 && serbestSatisVar(S, DLG.kod, Math.min(qv, toplamAdet(S, DLG.kod)))) ? '' : 'none';
-		var acikVar = sec === 'sell' && qv > 0 && Math.min(qv, toplamAdet(S, DLG.kod)) > hold(S, 'serbest', DLG.kod); $('#dlg-oto-wrap').style.display = acikVar ? '' : 'none';
 		if (!op) { el.textContent = 'Adet gir.'; return; }
 		if ((op.t === 'sell' || op.t === 'satOde') && px(S, op.kod) <= 0) { el.textContent = 'Önce bu hissenin fiyatını gir.'; return; }
 		var n = uygula(S, op), a = metr(S), b = metr(n);
 		var nakitNot = (op.t === 'satOde' || op.t === 'sell') && cumNakit(S, 2) < -0.5 && satSegmentleri(S, op.kod, op.adet).some(function (g) { return g.d === 'serbest'; }) ? '<br><span class="kucuk dusus">Serbest nakit eksi (' + tl(cumNakit(S, 2)) + ' TL): satış parası önce bunu kapatır; kredi ancak nakit artıya geçince ödenir.</span>' : '';
-		var seg = nakitNot + ((op.t === 'sell' || op.t === 'satOde') ? '<br><span class="kucuk">Satış dağılımı: ' + satSegmentleri(S, op.kod, op.adet).map(function (g) { return g.d === 'serbest' ? 'serbest ' + tl(g.q) + ' (para nakde gelir)' : (g.d === 'kredi' ? 'kredi depo ' : 'teminat depo ') + tl(g.q) + ' (serbestte eksi lot, T+2\u2019de bu depodan kapanır)'; }).join(' · ') + '</span>' : '');
+		var seg = nakitNot + ((op.t === 'sell' || op.t === 'satOde') ? '<br><span class="kucuk">Satış dağılımı: ' + satSegmentleri(S, op.kod, op.adet).map(function (g) { return g.d === 'serbest' ? 'serbest ' + tl(g.q) + ' (para serbest nakde gelir, önce nakit eksisini kapatır)' : (g.d === 'kredi' ? 'kredi depo ' + tl(g.q) + ' (T+2\u2019de kredi otomatik ödenir, kredi depodan düşer)' : 'teminat depo ' + tl(g.q) + ' (para nakde gelir, teminat depodaki hisse azalır)'); }).join(' · ') + '</span>' : '');
 		el.innerHTML = 'Özkaynak <b>' + pct(a.e) + '</b> → <b class="' + ok2(b.e) + '">' + pct(b.e) + '</b>' + (b.e != null && a.e != null ? (b.e > a.e ? ' ▲' : b.e < a.e ? ' ▼' : '') : '') + seg + '<br><span class="kucuk">Teminat ' + tl(a.C) + ' → ' + tl(b.C) + ' · borç ' + tl(a.D) + ' → ' + tl(b.D) + ' · T+2 nakit ' + tl(cumNakit(S, 2)) + ' → ' + tl(cumNakit(n, 2)) + ' · alım limiti ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(n)) + ' · serbest depo ' + tl(depoPiyasa(S, 'serbest')) + ' → ' + tl(depoPiyasa(n, 'serbest')) + ' TL</span>';
 	}
 	function ok2(e) { return e == null ? '' : e >= S.hedef / 100 ? 'iyi' : e >= S.min / 100 ? 'uyari' : 'kotu'; }
@@ -732,6 +785,7 @@ button {
 	$('#k-uygula').addEventListener('click', function () {
 		var kod = $('#k-kod').value.trim().toUpperCase(), tutar = num($('#k-tutar').value), fy = num($('#k-fiyat').value);
 		if (!kod || !(tutar > 0) || !(fy > 0)) { toast('Hisse, tutar ve fiyat gir.'); return; }
+		var eng = alimEngeli(kod); if (eng) { toast(eng); return; }
 		var adet = Math.floor(tutar / fy); if (adet < 1) { toast('Tutar tek lot için bile yetmiyor.'); return; }
 		if (S.limit > 0 && adet * fy > S.limit) toast('Uyarı: tutar kullanılabilir kredi limitini (' + tl(S.limit) + ' TL) aşıyor.'); var op = { t: 'buy', kod: kod, adet: adet, fiyat: fy }; adim(op, uygula(S, op)); $('#k-kod').value = ''; $('#k-tutar').value = ''; $('#k-fiyat').value = '';
 	});
@@ -763,7 +817,7 @@ button {
 		if (e.target.id === 'b-plan') { var pl = planla(S, S.hedef); HIST.push({ s: clone(S), yazi: 'Plan uygulandı: ' + pl.steps.map(opYazi).join(' · ') }); S = pl.son; kaydet(); render(); toast('Plan uygulandı. Geri almak için “Son adımı geri al”.'); return; }
 		var hz = e.target.closest('[data-hz]'); if (hz && DLG) { var row = bul(S, DLG.from, DLG.kod); $('#dlg-adet').value = String(Math.min(DLG.hizli[+hz.getAttribute('data-hz')][1], row.adet)); dlgGuncelle(); return; }
 	});
-	$('#dlg-oto').addEventListener('change', dlgGuncelle); $('#dlg-ode').addEventListener('change', dlgGuncelle); $('#dlg-eylem').addEventListener('change', dlgGuncelle); $('#dlg-hedef').addEventListener('change', dlgGuncelle); $('#dlg-adet').addEventListener('input', dlgGuncelle);
+	$('#dlg-ode').addEventListener('change', dlgGuncelle); $('#dlg-eylem').addEventListener('change', dlgGuncelle); $('#dlg-hedef').addEventListener('change', dlgGuncelle); $('#dlg-adet').addEventListener('input', dlgGuncelle);
 	$('#dlg-form').addEventListener('submit', function (e) { e.preventDefault(); $('#dlg-tamam').click(); });
 	$('#dlg-iptal').addEventListener('click', function () { $('#dlg').close ? $('#dlg').close() : $('#dlg').removeAttribute('open'); });
 	$('#dlg-tamam').addEventListener('click', function () {
@@ -906,14 +960,14 @@ button {
 		['serbest', 'kredi', 'teminat'].forEach(function (d) { S.depo[d].forEach(function (r) {
 			if (!(px(S, r.kod) > 0) && r.adet > 0) fyok[r.kod] = 1;
 			if (d !== 'kredi' && !ORAN[r.kod]) listedisi[r.kod] = 1;
-			if (d !== 'kredi' && ORAN[r.kod] && ORAN[r.kod].a && /tedbir/i.test(ORAN[r.kod].a)) tedbir[r.kod] = ORAN[r.kod].a;
+			if (d === 'serbest' && ORAN[r.kod] && ORAN[r.kod].a && /tedbir/i.test(ORAN[r.kod].a)) tedbir[r.kod] = ORAN[r.kod].a;
 			if (d === 'teminat' && ORAN[r.kod] && ORAN[r.kod].o === 0 && r.adet > 0) oran0[r.kod] = 1;
 			if (r.adet < 0 && d === 'serbest') u.push(['uyari', r.kod + ': serbest depoda ' + tl(r.adet) + ' (açık) — bu adet kredi/teminat depodan düşer.']);
 			if (r.bugun != null && r.adet < r.bugun && r.adet >= 0) u.push(['bilgi', r.kod + ' (' + d + '): T+2 adedi bugünkünden ' + tl(r.bugun - r.adet) + ' az, satılmış.']);
 		}); });
 		if (Object.keys(fyok).length) u.push(['uyari', 'Fiyatı girilmemiş (değer 0): ' + Object.keys(fyok).join(', ') + '. “Toplu fiyat” ile güncelle.']);
 		if (Object.keys(listedisi).length) u.push(['uyari', 'Oran listesinde yok (oran 0 sayıldı): ' + Object.keys(listedisi).join(', ') + '.']);
-		Object.keys(tedbir).forEach(function (k) { u.push(['uyari', k + ': tedbir notu — ' + tedbir[k]]); });
+		Object.keys(tedbir).forEach(function (k) { u.push(['bilgi', k + ': tedbir notu — ' + tedbir[k] + ' (yeni alımlar için; kredi/teminat depodaki mevcut pozisyon eskisi gibi devam eder)']); });
 		if (Object.keys(oran0).length) u.push(['bilgi', 'Oranı 0 olan hisse teminat depoda: ' + Object.keys(oran0).join(', ') + ' — teminata katkısı yok.']);
 		var kd = depoDeger(S, 'kredi'); if (kd > 0) { var top = null; S.depo.kredi.forEach(function (r) { var v = r.adet * px(S, r.kod); if (!top || v > top.v) top = { kod: r.kod, v: v }; }); if (top && top.v / kd > 0.8 && S.depo.kredi.length >= 1) u.push(['bilgi', 'Kredi depoda ağırlık tek hissede (' + top.kod + ', %' + Math.round(top.v / kd * 100) + '). Tek hissede kredi taşırsan kurum daha yüksek özkaynak (%50) isteyebilir.']); }
 		if (cumNakit(S, 0) < -0.5) u.push(['uyari', 'Serbest nakit eksi (' + tl2(cumNakit(S, 0)) + ' TL).']);
@@ -932,6 +986,19 @@ button {
 	/* =========================================================
 	   Yapışkan özet çubuğu + hedef çipleri
 	   ========================================================= */
+	function renderSatisAdaylari() {
+		var kart = $('#sa-kart'); if (!kart || !kart.open) return;
+		var T = trnum($('#sa-tutar').value); if (!(T > 0)) T = 100000; var Es = ef(S), kodlar = {}, e0 = metr(S).e;
+		DEPO_SIRA.forEach(function (d) { Es.depo[d].forEach(function (r) { if (r.adet > 0 && px(S, r.kod) > 0) kodlar[r.kod] = 1; }); });
+		var list = Object.keys(kodlar).map(function (kod) {
+			var p = px(S, kod), mx = toplamAdet(S, kod), q = Math.min(mx, Math.max(1, Math.ceil(T / p))), r = satZinciri(S, kod, q), m = metr(r.s);
+			return { kod: kod, q: q, tut: q * p, e: m.e, d: (m.e == null || e0 == null) ? 0 : m.e - e0, nasil: hold(S, 'serbest', kod) ? 'serbest' : hold(S, 'kredi', kod) ? 'kredi' : 'teminat', oran: oran(kod) };
+		}).sort(function (a, b) { return b.d - a.d; }).slice(0, 12);
+		$('#sa-tablo').innerHTML = list.length ? '<div class="tw"><table><thead><tr><th>Hisse</th><th>Önce satılan depo</th><th class="r">Oran</th><th class="r">Adet</th><th class="r">Tutar</th><th class="r">Özkaynak</th></tr></thead><tbody>' + list.map(function (x) { return '<tr><td class="tk">' + esc(x.kod) + '</td><td>' + x.nasil + '</td><td class="r">%' + Math.round(x.oran * 100) + '</td><td class="r">' + tl(x.q) + '</td><td class="r">' + tl(x.tut) + ' TL</td><td class="r deger"><span class="' + (x.d > 0.00005 ? 'yuk' : x.d < -0.00005 ? 'dusus' : '') + '">' + (x.d > 0.00005 ? '▲ ' : x.d < -0.00005 ? '▼ ' : '') + pct(x.e) + '</span></td></tr>'; }).join('') + '</tbody></table></div><p class="kucuk">Her hisseden yaklaşık ' + tl(T) + ' TL satılırsa (T+2, serbest nakit/kredi kuralları dahil) özkaynağın ne olacağı. Şu an ' + pct(e0) + '.</p>' : '<p class="kucuk">Satılabilir hisse yok.</p>';
+	}
+	document.addEventListener('toggle', function (e) { if (e.target.id === 'sa-kart') renderSatisAdaylari(); }, true);
+	document.addEventListener('input', function (e) { if (e.target.id === 'sa-tutar') renderSatisAdaylari(); if (e.target.id === 'dep-filtre') renderDepolar(); });
+	document.addEventListener('change', function (e) { if (e.target.id === 'dep-sira') renderDepolar(); });
 	function planGrupSayisi(steps) { var n = 0, i = 0; while (i < steps.length) { n++; if (steps[i].t === 'pay') { i++; while (i < steps.length && steps[i].t === 'move' && steps[i].from === 'serbest' && steps[i].to === 'teminat') i++; } else i++; } return n; }
 	function renderSticky() {
 		var m = metr(S), e = m.e, cls = ok(e), pl = planla(S, S.hedef), al = alimLimiti(S);
@@ -966,10 +1033,11 @@ button {
 	}
 	function renderOzet() {
 		var m = metr(S); if (!(m.C > 0 || m.D > 0)) { $('#ozet').innerHTML = '<h2>Müşteri özeti</h2><p class="kucuk">Hesabı doldurunca WhatsApp’a yapıştırılabilir özet çıkar.</p>'; return; }
-		$('#ozet').innerHTML = '<div class="baslik-satir"><h2>Müşteri özeti</h2><div class="aksiyon"><button class="btn" type="button" id="oz-kopya">Kopyala</button>' + (navigator.share ? '<button class="btn ghost" type="button" id="oz-paylas">Paylaş</button>' : '') + '</div></div><pre class="ozet-metin" id="oz-metin">' + esc(ozetMetni()) + '</pre>';
+		$('#ozet').innerHTML = '<div class="baslik-satir"><h2>Müşteri özeti</h2><div class="aksiyon"><button class="btn" type="button" id="oz-kopya">Kopyala</button><button class="btn ghost" type="button" id="oz-yaz">Yazdır / PDF</button>' + (navigator.share ? '<button class="btn ghost" type="button" id="oz-paylas">Paylaş</button>' : '') + '</div></div><pre class="ozet-metin" id="oz-metin">' + esc(ozetMetni()) + '</pre>';
 	}
 	document.addEventListener('click', function (e) {
 		if (e.target.id === 'oz-kopya') { var t = $('#oz-metin').textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('Özet kopyalandı.'); }, function () { var r = document.createRange(); r.selectNodeContents($('#oz-metin')); var sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); toast('Metin seçildi, Ctrl+C ile kopyala.'); }); }
+		if (e.target.id === 'oz-yaz') { document.body.classList.add('oz-yazdir'); window.print(); setTimeout(function () { document.body.classList.remove('oz-yazdir'); }, 500); }
 		if (e.target.id === 'oz-paylas') navigator.share({ text: $('#oz-metin').textContent }).catch(function () {});
 	});
 
@@ -1055,9 +1123,17 @@ button {
 	function sayi(t) {
 		t = String(t).toLocaleLowerCase('tr').replace(/\s+/g, ''); var m = t.match(/^([\d.,]+)(k|bin|m|mn|milyon)?$/); if (!m) return NaN; var v = trnum(m[1]); if (isNaN(v)) return NaN; var c = m[2]; return c === 'k' || c === 'bin' ? v * 1e3 : (c === 'm' || c === 'mn' || c === 'milyon') ? v * 1e6 : v;
 	}
+	function hisseBilgi(kod) {
+		var o = ORAN[kod], p = px(S, kod), h = S.hedef / 100, mx = toplamAdet(S, kod), parts = [kod, p > 0 ? 'fiyat ' + tl2(p) : 'fiyat yok', o ? 'oran %' + Math.round(o.o * 100) : 'listede yok (oran 0)', 'serbest ' + tl(hold(S, 'serbest', kod)) + ' / kredi ' + tl(hold(S, 'kredi', kod)) + ' / teminat ' + tl(hold(S, 'teminat', kod)) + ' adet (T+2)'];
+		if (p > 0 && mx > 0) { parts.push('piyasa ≈' + tl(mx * p) + ' TL'); var q100 = Math.min(mx, Math.max(1, Math.ceil(100000 / p))), a = metr(S).e, b = metr(satZinciri(S, kod, q100).s).e; parts.push('≈100.000 TL satarsan özkaynak ' + pct(a) + ' → ' + pct(b)); if (!esik(S, h)) { var qq = enAz(mx, function (q) { return esik(satZinciri(S, kod, q).s, h); }); parts.push(esik(satZinciri(S, kod, qq).s, h) ? 'hedef için tek başına ' + tl(qq) + ' adet sat' : 'tek başına satış hedefe yetmez'); } }
+		var eng = alimEngeli(kod); parts.push(eng ? 'YENİ KREDİLİ ALIM YOK' : (o && o.a ? o.a : 'yeni alımda kısıt yok'));
+		return parts.join(' · ');
+	}
 	function komut(metin) {
 		var t = String(metin).trim(); if (!t) return null; var tok = t.replace(/[,;]+$/, '').split(/\s+/), low = tok.map(function (x) { return x.toLocaleLowerCase('tr'); }), ilk = low[0];
 		function hata(m) { return { hata: m }; }
+		var bk = (ilk === 'bilgi' ? tok[1] : tok.length === 1 ? tok[0] : '') || ''; bk = bk.replace(/\?$/, '').toUpperCase();
+		if (bk && /^[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9]{2,5}$/.test(bk) && ['GERI', 'PLAN', 'BASA', 'UNDO', 'ODE', 'ATL', 'FIYATLAR'].indexOf(bk) < 0) return { ok: hisseBilgi(bk) };
 		if (['geri', 'undo'].indexOf(ilk) > -1) return geriAl() ? { ok: 'Son adım geri alındı.' } : hata('Geri alınacak adım yok.');
 		if (['basa', 'başa', 'başlangıç', 'baslangic'].indexOf(ilk) > -1) { S = clone(BASE); HIST = []; kaydet(); render(); return { ok: 'Başlangıca dönüldü.' }; }
 		if (['plan', 'uygula'].indexOf(ilk) > -1) { planUygula(); return { ok: 'Plan uygulandı.' }; }
@@ -1068,14 +1144,14 @@ button {
 		if (['öde', 'ode'].indexOf(ilk) > -1) { var tu = sayi(tok[1]); if (!(tu > 0)) return hata('Örnek: öde 500k'); var op = { t: 'pay', tutar: tu }; adim(op, uygula(S, op)); return { ok: 'Kredi ödendi: ' + tl(Math.min(tu, S.kredi + S.faiz + tu)) + ' TL.' }; }
 		if (['al', 'alım', 'alim'].indexOf(ilk) > -1) {
 			var kod = null, sayilar = []; tok.slice(1).forEach(function (x) { if (isNaN(sayi(x))) kod = x.toUpperCase(); else sayilar.push(sayi(x)); });
-			if (!kod || sayilar.length < 2) return hata('Örnek: al THYAO 2m 312,5 (tutar sonra fiyat)'); var tutar = sayilar[0], fy = sayilar[1], adet = Math.floor(tutar / fy); if (adet < 1) return hata('Tutar tek lota yetmiyor.');
+			if (!kod || sayilar.length < 2) return hata('Örnek: al THYAO 2m 312,5 (tutar sonra fiyat)'); var tutar = sayilar[0], fy = sayilar[1], adet = Math.floor(tutar / fy); if (adet < 1) return hata('Tutar tek lota yetmiyor.'); var eng2 = alimEngeli(kod); if (eng2) return hata(eng2);
 			var ob = { t: 'buy', kod: kod, adet: adet, fiyat: fy }; adim(ob, uygula(S, ob)); return { ok: kod + ': ' + tl(adet) + ' adet kredili alım.' };
 		}
 		var kd = tok[0].toUpperCase(), fiil = low[low.length - 1]; if (!/^[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9]{2,5}$/.test(kd)) return hata('Anlaşılamadı. Örnek: THYAO 5000 sat');
 		var fiillar = { sat: 'sat', çek: 'cek', cek: 'cek', teminata: 'cek', serbest: 'serbest', serbeste: 'serbest', bırak: 'serbest', birak: 'serbest' }; var f = fiillar[fiil]; if (!f) return hata('Sonunda sat / çek / serbest yaz. Örnek: ' + kd + ' 5000 sat');
 		var orta = low.slice(1, -1).join(' '), tlMi = /\btl\b/.test(orta); orta = orta.replace(/\btl\b/, '').trim(); var hepsi = /hepsi|tümü|tumu/.test(orta), q = hepsi ? Infinity : sayi(orta.split(' ')[0]); if (isNaN(q) || q <= 0) return hata('Adet/tutar yaz. Örnek: ' + kd + ' 5000 sat');
 		var p = px(S, kd); if (tlMi) { if (!(p > 0)) return hata(kd + ' için önce fiyat gir (fiyat ' + kd + ' 12,5).'); q = Math.floor(q / p); }
-		if (f === 'sat') { var mx = toplamAdet(S, kd); if (mx <= 0) return hata(kd + ' depolarda yok.'); if (!(p > 0)) return hata(kd + ' için önce fiyat gir.'); q = Math.min(q, mx); if (q < 1) return hata('Adet 1’den az.'); var os = satOp(kd, q); os.oto = (metr(S).e != null && metr(S).e < S.min / 100); adim(os, uygula(S, os)); return { ok: kd + ': ' + tl(q) + ' adet satıldı' + (os.t === 'satOde' ? ' (serbest kısmın parasıyla kredi ödendi)' : '') + '.' }; }
+		if (f === 'sat') { var mx = toplamAdet(S, kd); if (mx <= 0) return hata(kd + ' depolarda yok.'); if (!(p > 0)) return hata(kd + ' için önce fiyat gir.'); q = Math.min(q, mx); if (q < 1) return hata('Adet 1’den az.'); var os = satOp(kd, q); adim(os, uygula(S, os)); return { ok: kd + ': ' + tl(q) + ' adet satıldı' + (os.t === 'satOde' ? ' (serbest kısmın parasıyla kredi ödendi)' : '') + '.' }; }
 		var from = f === 'cek' ? 'serbest' : 'teminat', to = f === 'cek' ? 'teminat' : 'serbest', row = bul(S, from, kd); if (!row || row.adet <= 0) return hata(kd + ' ' + (from === 'serbest' ? 'serbest' : 'teminat') + ' depoda yok.');
 		q = Math.min(q, row.adet); var om = { t: 'move', kod: kd, from: from, to: to, adet: q }; adim(om, uygula(S, om)); return { ok: kd + ': ' + tl(q) + ' adet ' + from + ' → ' + to + '.' };
 	}
