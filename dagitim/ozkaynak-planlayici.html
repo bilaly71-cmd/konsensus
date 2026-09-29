@@ -392,23 +392,29 @@ button {
 	var ORAN = {};
 	var S = null, HIST = [], BASE = null;
 
-	function bos() { return { kredi: 0, faiz: 0, limit: 0, nakit: { t0: 0, t1: 0, t2: 0, t3: 0 }, satisNakit: 0, satisToplam: 0, bekleyenOdeme: 0, atl: { var: false, tutar: 0 }, fiyatMeta: {}, kapanis: {}, hedef: 36, min: 35, fiyat: {}, depo: { serbest: [], kredi: [], teminat: [] } }; }
-	function hazirla(x) { if (!x.nakit) x.nakit = { t0: 0, t1: 0, t2: 0, t3: 0 }; if (!x.atl) x.atl = { var: false, tutar: 0 }; if (!x.fiyatMeta) x.fiyatMeta = {}; if (!x.kapanis) x.kapanis = {}; if (x.satisNakit == null) x.satisNakit = 0; if (x.satisToplam == null) x.satisToplam = 0; if (x.bekleyenOdeme == null) x.bekleyenOdeme = 0; return x; }
+	function bos() { return { kredi: 0, faiz: 0, limit: 0, nakit: { t0: 0, t1: 0, t2: 0, t3: 0 }, satisNakit: 0, satisToplam: 0, bekleyenOdeme: 0, bek: [], atl: { var: false, tutar: 0 }, fiyatMeta: {}, kapanis: {}, hedef: 36, min: 35, fiyat: {}, depo: { serbest: [], kredi: [], teminat: [] } }; }
+	function hazirla(x) { if (!x.bek) x.bek = []; if (!x.nakit) x.nakit = { t0: 0, t1: 0, t2: 0, t3: 0 }; if (!x.atl) x.atl = { var: false, tutar: 0 }; if (!x.fiyatMeta) x.fiyatMeta = {}; if (!x.kapanis) x.kapanis = {}; if (x.satisNakit == null) x.satisNakit = 0; if (x.satisToplam == null) x.satisToplam = 0; if (x.bekleyenOdeme == null) x.bekleyenOdeme = 0; return x; }
 	function clone(o) { return JSON.parse(JSON.stringify(o)); }
 	function oran(kod) { return ORAN[kod] ? ORAN[kod].o : 0; }
 	function rate(kod, depo) { return depo === 'kredi' ? 1 : oran(kod); }
 	function px(s, kod) { return s.fiyat[kod] || 0; }
-	/* Serbest depoda eksi (-) adet, satışın teminat / kredi depodan düşeceği anlamına gelir (her depo ayrı değerlendirilir): önce kredi depo, sonra teminat depo */
+	/* DEĞERLEME görünümü: hesaptan içe aktarılan serbestteki eksi lotlar kredi/teminat depodan HEMEN düşülmez (2 gün sonra kapanır).
+	   Yalnızca simülasyonda/planda yapılan satışlar (s.bek) T+2 öngörüsü olarak kredi (önce), sonra teminat depodan düşülür. */
 	function ef(s) {
-		if (!s.depo.serbest.some(function (r) { return r.adet < 0; })) return s;
+		if (!s.bek || !s.bek.length) return s;
 		var n = clone(s);
-		n.depo.serbest.forEach(function (r) {
-			if (r.adet >= 0) return; var a = -r.adet;
-			['kredi', 'teminat'].forEach(function (d) { var x = bul(n, d, r.kod); if (x && a > 0) { var al = Math.min(a, Math.max(0, x.adet)); x.adet -= al; a -= al; } });
-			r.adet = 0;
-		});
+		n.bek.forEach(function (b) { ['kredi', 'teminat'].forEach(function (d) { var q = d === 'kredi' ? b.k : b.t; if (q > 0) { var x = bul(n, d, b.kod); if (x) x.adet -= Math.min(q, Math.max(0, x.adet)); } }); });
 		return n;
 	}
+	/* KAPASİTE görünümü: satılabilir/taşınabilir adet = depodaki adet − (planlanan satışların çektiği) − (içe aktarılan eksi lotların kapanışta çekeceği) */
+	function planlanan(s, kod) { var k = 0, t = 0; (s.bek || []).forEach(function (b) { if (b.kod === kod) { k += b.k; t += b.t; } }); return { k: k, t: t }; }
+	function hold(s, d, kod) {
+		var r = bul(s, d, kod), raw = r ? r.adet : 0; if (d === 'serbest') return Math.max(0, raw);
+		var pl = planlanan(s, kod), sr = bul(s, 'serbest', kod), neg = sr && sr.adet < 0 ? -sr.adet : 0, imp = Math.max(0, neg - pl.k - pl.t);
+		var rk = Math.max(0, ((bul(s, 'kredi', kod) || { adet: 0 }).adet) - pl.k), impK = Math.min(imp, rk), rt = Math.max(0, ((bul(s, 'teminat', kod) || { adet: 0 }).adet) - pl.t), impT = Math.min(imp - impK, rt);
+		return Math.max(0, raw - (d === 'kredi' ? pl.k + impK : pl.t + impT));
+	}
+	function efKap(s) { var n = clone(s); ['serbest', 'kredi', 'teminat'].forEach(function (d) { n.depo[d].forEach(function (r) { r.adet = hold(s, d, r.kod); }); }); return n; }
 	function depoDeger(s, d) { return ef(s).depo[d].reduce(function (t, r) { return t + Math.max(0, r.adet) * px(s, r.kod) * rate(r.kod, d); }, 0); }
 	function depoPiyasa(s, d) { return ef(s).depo[d].reduce(function (t, r) { return t + Math.max(0, r.adet) * px(s, r.kod); }, 0); }
 	function metr(s) {
@@ -424,10 +430,8 @@ button {
 	   Satış sırası (sistem kuralı): önce serbest depo (parası serbest nakde gelir, kredi kapanmaz), sonra kredi depo, sonra teminat depo
 	   (kredi/teminat depodan satışın parası krediyi otomatik kapatır). Kredi ödeme: nakitten öder, kredi depoda boşa düşen hisseler serbest depoya geçer. */
 	var DEPO_SIRA = ['serbest', 'kredi', 'teminat'];
-	/* Etkin (T+2) elde tutulan adet: serbestteki eksi adetler kredi, sonra teminat depodan düşülmüş halde */
-	function hold(s, d, kod) { var r = bul(ef(s), d, kod); return r && r.adet > 0 ? r.adet : 0; }
-	function toplamAdet(s, kod) { var e = ef(s); return DEPO_SIRA.reduce(function (t, d) { var r = bul(e, d, kod); return t + (r && r.adet > 0 ? r.adet : 0); }, 0); }
-	function satSegmentleri(s, kod, q) { var e = ef(s), seg = [], kal = q; DEPO_SIRA.forEach(function (d) { var r = bul(e, d, kod); if (!r || r.adet <= 0 || kal <= 0) return; var a = Math.min(kal, r.adet); seg.push({ d: d, q: a }); kal -= a; }); return seg; }
+	function toplamAdet(s, kod) { return DEPO_SIRA.reduce(function (t, d) { return t + hold(s, d, kod); }, 0); }
+	function satSegmentleri(s, kod, q) { var seg = [], kal = q; DEPO_SIRA.forEach(function (d) { var h = hold(s, d, kod); if (h <= 0 || kal <= 0) return; var a = Math.min(kal, h); seg.push({ d: d, q: a }); kal -= a; }); return seg; }
 	/* Satış: sistemde satış önce serbest depoya yazılır; yetmezse serbest depo EKSİ lota düşer ve T+2'de kredi (önce), sonra teminat depodan kapanır.
 	   Satış parası T+2 nakdine yazılır; kredi depodan satılan kısım için kredi otomatik ödenir. */
 	function uygula(s, op) {
@@ -437,9 +441,11 @@ button {
 			/* Kurallar: serbestten satış → para serbest nakde (önce nakit eksisini kapatır, kredi elle ödenir);
 			   kredi depodan satış → 2 gün sonra kredi OTOMATİK ödenir (borç ve kredi depo hissesi o kadar azalır);
 			   teminat depodan satış → para nakde gelir, teminat depodaki hisse azalır (kredi ödenmez). */
-			var p = px(n, op.kod), row = bul(n, 'serbest', op.kod), hk = hold(n, 'kredi', op.kod);
+			var p = px(n, op.kod), row = bul(n, 'serbest', op.kod), hk = hold(n, 'kredi', op.kod), ht = hold(n, 'teminat', op.kod);
 			if (!row) { row = { kod: op.kod, adet: 0, bugun: null }; n.depo.serbest.push(row); }
-			var acik = Math.max(0, op.adet - Math.max(0, row.adet)), acikK = Math.min(acik, hk); row.adet -= op.adet;
+			var acik = Math.max(0, op.adet - Math.max(0, row.adet)), acikK = Math.min(acik, hk), acikT = Math.min(acik - acikK, ht); row.adet -= op.adet;
+			/* açık kısım: kredi (önce), sonra teminat depodan T+2'de düşecek; öngörü olarak kaydedilir (içe aktarılan eski açıklar bunun dışındadır) */
+			if (acikK + acikT > 0) { n.bek = n.bek || []; var bk = n.bek.filter(function (b) { return b.kod === op.kod; })[0]; if (bk) { bk.k += acikK; bk.t += acikT; } else n.bek.push({ kod: op.kod, k: acikK, t: acikT }); }
 			var gelir = op.adet * p; n.satisNakit = (n.satisNakit || 0) + gelir; n.satisToplam = (n.satisToplam || 0) + gelir;
 			if (acikK > 0) { var od = Math.min(acikK * p, Math.max(0, n.kredi + n.faiz - (n.bekleyenOdeme || 0))); n.bekleyenOdeme = (n.bekleyenOdeme || 0) + od; if (n.limit > 0) n.limit += od; }
 			if (row.adet === 0 && !(row.bugun > 0)) n.depo.serbest = n.depo.serbest.filter(function (x) { return x !== row; });
@@ -454,7 +460,7 @@ button {
 			var V = Math.max(0, Math.min(op.tutar, n.kredi + n.faiz - (n.bekleyenOdeme || 0))); nakitDus(n, V);
 			var k2 = Math.min(n.kredi, V); n.kredi -= k2; if (n.limit > 0) n.limit += k2; n.faiz -= Math.min(n.faiz, V - k2);
 			/* kredi depoda boşa düşen hisseler: hangisinin düşeceğini sistem belirler; orantılı (ortalama) dağıtılır */
-			var E = ef(n), krow = E.depo.kredi.filter(function (r) { return r.adet > 0 && px(n, r.kod) > 0; }), Vk = krow.reduce(function (t, r) { return t + r.adet * px(n, r.kod); }, 0);
+			var E = efKap(n), krow = E.depo.kredi.filter(function (r) { return r.adet > 0 && px(n, r.kod) > 0; }), Vk = krow.reduce(function (t, r) { return t + r.adet * px(n, r.kod); }, 0);
 			if (Vk > 0 && k2 > 0) krow.forEach(function (r) { var pp = px(n, r.kod), q = Math.min(r.adet, Math.floor(k2 * (r.adet * pp / Vk) / pp)); if (q > 0) n = uygula(n, { t: 'move', kod: r.kod, from: 'kredi', to: 'serbest', adet: q }); });
 		} else if (op.t === 'buy') { n.fiyat[op.kod] = op.fiyat; ekle(n, 'kredi', op.kod, op.adet, null); n.kredi += op.adet * op.fiyat; if (n.limit) n.limit = Math.max(0, n.limit - op.adet * op.fiyat); }
 		return n;
@@ -507,7 +513,7 @@ button {
 		function uy(ops) { ops.forEach(function (o) { s = uygula(s, o); steps.push(o); }); }
 		/* 0) SPK: serbest nakit eksideyse serbest depoda o kadar TL'lik hisse olmalı; yoksa teminat depodan, teminatı (oranı) en düşük hisseden serbeste çık */
 		if (!serbestYeterli(s)) {
-			ef(s).depo.teminat.filter(function (x) { return x.adet > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(a.kod) - oran(b.kod); }).forEach(function (r0) {
+			efKap(s).depo.teminat.filter(function (x) { return x.adet > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(a.kod) - oran(b.kod); }).forEach(function (r0) {
 				var eksik = serbestGerek(s) - depoPiyasa(s, 'serbest'); if (eksik <= 0.5) return;
 				var q = Math.min(r0.adet, Math.ceil(eksik / px(s, r0.kod))); if (q > 0) uy([{ t: 'move', kod: r0.kod, from: 'teminat', to: 'serbest', adet: q }]);
 			});
@@ -524,7 +530,7 @@ button {
 			function oks(x) { return esik(odeSonrasiTum(x), e); }
 			var TEST = 100000;
 			for (var tur = 0; tur < 80 && !oks(s); tur++) {
-				var Es = ef(s), kodlar = {}; DEPO_SIRA.forEach(function (d) { Es.depo[d].forEach(function (r) { if (r.adet > 0 && px(s, r.kod) > 0) kodlar[r.kod] = 1; }); });
+				var Es = efKap(s), kodlar = {}; DEPO_SIRA.forEach(function (d) { Es.depo[d].forEach(function (r) { if (r.adet > 0 && px(s, r.kod) > 0) kodlar[r.kod] = 1; }); });
 				var en = null, e0 = metr(odeSonrasiTum(s)).e;
 				Object.keys(kodlar).forEach(function (kod) {
 					var mx = Math.min(toplamAdet(s, kod), enCok(toplamAdet(s, kod), function (q) { return serbestYeterli(uygula(s, { t: 'sell', kod: kod, adet: q })); })); if (mx < 1) return; var qq = Math.min(mx, Math.max(1, Math.ceil(TEST / px(s, kod))));
@@ -545,7 +551,7 @@ button {
 		var need = gerek(s, e);
 		if (need < -1) {
 			/* fazla teminat → serbest depoya: oranı düşük olan önce (aynı teminat gevşemesiyle daha çok piyasa değeri serbest kalır) */
-			var rel = -need, tm = ef(s).depo.teminat.filter(function (x) { return x.adet > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(a.kod) - oran(b.kod); });
+			var rel = -need, tm = efKap(s).depo.teminat.filter(function (x) { return x.adet > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(a.kod) - oran(b.kod); });
 			for (var k = 0; k < tm.length && rel > 1; k++) {
 				var u = oran(tm[k].kod) * px(s, tm[k].kod), qm = u <= 0 ? tm[k].adet : Math.min(tm[k].adet, Math.floor(rel / u)); if (qm <= 0) continue;
 				uy([{ t: 'move', kod: tm[k].kod, from: 'teminat', to: 'serbest', adet: qm }]); rel = -gerek(s, e);
@@ -647,7 +653,7 @@ button {
 			if (flt) rows = rows.filter(function (r) { return r.kod.indexOf(flt) > -1; });
 			rows.sort(function (a, b) { if (srt === 'ad') return a.kod < b.kod ? -1 : 1; if (srt === 'oran') return rate(b.kod, d) - rate(a.kod, d) || a.kod.localeCompare(b.kod); return (Math.max(0, b.adet) * px(S, b.kod)) - (Math.max(0, a.adet) * px(S, a.kod)); });
 			var govde = rows.length ? rows.map(function (r) {
-				var re = bul(E, d, r.kod), eff = re ? re.adet : r.adet, rEff = { kod: r.kod, adet: Math.max(0, eff), bugun: r.bugun };
+				var re = bul(E, d, r.kod), eff = re ? re.adet : r.adet, rEff = { kod: r.kod, adet: hold(S, d, r.kod), bugun: r.bugun };
 				var o = ORAN[r.kod], rr = rate(r.kod, d), p = px(S, r.kod), deger = Math.max(0, eff) * p * (d === 'serbest' ? 1 : rr);
 				var uyar = !o && d !== 'kredi' ? '<span class="rozet kotu" title="Listede yok, oran 0 sayıldı">liste dışı</span>' : (o && o.a && d === 'serbest' && /tedbir/i.test(o.a) ? '<span class="rozet uyari" title="' + esc(o.a) + ' — yeni alım için; kredi/teminattaki mevcut pozisyon etkilenmez">tedbir</span>' : '');
 				return '<div class="satir-h" draggable="true" data-d="' + d + '" data-kod="' + esc(r.kod) + '"><div class="h1"><span class="tutac" aria-hidden="true">⋮⋮</span><b class="tk">' + esc(r.kod) + '</b>' + (d !== 'kredi' ? '<span class="rozet">%' + Math.round(rr * 100) + '</span>' : '') + uyar + '</div>'
@@ -1009,7 +1015,7 @@ button {
 	   ========================================================= */
 	function renderSatisAdaylari() {
 		var kart = $('#sa-kart'); if (!kart || !kart.open) return;
-		var T = trnum($('#sa-tutar').value); if (!(T > 0)) T = 100000; var Es = ef(S), kodlar = {}, e0 = metr(S).e;
+		var T = trnum($('#sa-tutar').value); if (!(T > 0)) T = 100000; var Es = efKap(S), kodlar = {}, e0 = metr(S).e;
 		DEPO_SIRA.forEach(function (d) { Es.depo[d].forEach(function (r) { if (r.adet > 0 && px(S, r.kod) > 0) kodlar[r.kod] = 1; }); });
 		var list = Object.keys(kodlar).map(function (kod) {
 			var p = px(S, kod), mx = toplamAdet(S, kod), q = Math.min(mx, Math.max(1, Math.ceil(T / p))), r = satZinciri(S, kod, q), m = metr(r.s);
