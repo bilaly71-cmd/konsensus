@@ -40,6 +40,7 @@ export const menuGruplari: MenuGrup[] = [
 		baslik: 'ARAÇLAR VE ARENA',
 		ogeler: [
 			{ t: 'Teminat simülatörü', href: '/teminat-simulatoru' },
+			{ t: 'Özkaynak planlayıcı', href: '/ozkaynak' },
 			{ t: 'Opsiyon lab', href: '/opsiyon-lab' },
 			{ t: 'Grafik oyunu', href: '/grafik-oyunu' },
 			{ t: 'Trade defteri', href: '/trade-defteri' },
@@ -60,5 +61,5 @@ export const altSekmeler: AltSekme[] = [
 	{ t: 'Öneriler', href: '/oneriler', ikon: 'oneriler', yollar: ['/oneriler', '/hedef-fiyatlar', '/oneri-karnesi'] },
 	{ t: 'Akıllı para', href: '/fon-radar', ikon: 'akilli', yollar: ['/fon-radar', '/takas-akd', '/kripto-balinalar'] },
 	{ t: 'Arena', href: '/grafik-oyunu', ikon: 'arena', yollar: ['/grafik-oyunu'] },
-	{ t: 'Araçlar', href: '/teminat-simulatoru', ikon: 'araclar', yollar: ['/teminat-simulatoru', '/opsiyon-lab'] },
+	{ t: 'Araçlar', href: '/teminat-simulatoru', ikon: 'araclar', yollar: ['/teminat-simulatoru', '/ozkaynak', '/opsiyon-lab'] },
 ];
