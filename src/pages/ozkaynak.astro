@@ -21,6 +21,13 @@ import Rozet from '../components/Rozet.astro';
 			</div>
 		</section>
 
+		<details class="kart ice" id="ice">
+			<summary>Hesap ekranından içe aktar (yapıştır)</summary>
+			<p class="kucuk">Hesap ekranındaki tabloyu (Kredili işlem tutarı, Nakit, Yurtiçi hisse senetleri; “Serbest Depo / Kredi Depo / Teminat Depo” satırlarıyla birlikte) kopyalayıp buraya yapıştır. Depo satırının üstündeki hisseler o depoya yazılır. Adet olarak T+2 sütunu esas alınır; bugünkü adet ayrıca gösterilir.</p>
+			<textarea id="ice-metin" rows="6" placeholder="Ekrandan kopyaladığın tabloyu buraya yapıştır"></textarea>
+			<div class="aksiyon"><button class="btn" type="button" id="ice-btn">İçe aktar</button><span class="kucuk" id="ice-sonuc"></span></div>
+		</details>
+
 		<section class="metrikler" id="metrik" aria-live="polite"></section>
 
 		<section class="kart" id="kredili">
@@ -77,29 +84,41 @@ import Rozet from '../components/Rozet.astro';
 	var ORAN = {};
 	var S = null, HIST = [], BASE = null;
 
-	function bos() { return { kredi: 0, faiz: 0, hedef: 36, min: 35, fiyat: {}, depo: { serbest: [], kredi: [], teminat: [] } }; }
+	function bos() { return { kredi: 0, faiz: 0, limit: 0, nakit: { t0: 0, t1: 0, t2: 0, t3: 0 }, hedef: 36, min: 35, fiyat: {}, depo: { serbest: [], kredi: [], teminat: [] } }; }
 	function clone(o) { return JSON.parse(JSON.stringify(o)); }
 	function oran(kod) { return ORAN[kod] ? ORAN[kod].o : 0; }
 	function rate(kod, depo) { return depo === 'kredi' ? 1 : oran(kod); }
 	function px(s, kod) { return s.fiyat[kod] || 0; }
-	function depoDeger(s, d) { return s.depo[d].reduce(function (t, r) { return t + r.adet * px(s, r.kod) * rate(r.kod, d); }, 0); }
-	function depoPiyasa(s, d) { return s.depo[d].reduce(function (t, r) { return t + r.adet * px(s, r.kod); }, 0); }
+	/* Serbest depoda eksi (-) adet, satışın teminat / kredi depodan düşeceği anlamına gelir (her depo ayrı değerlendirilir): önce teminat, sonra kredi depo */
+	function ef(s) {
+		if (!s.depo.serbest.some(function (r) { return r.adet < 0; })) return s;
+		var n = clone(s);
+		n.depo.serbest.forEach(function (r) {
+			if (r.adet >= 0) return; var a = -r.adet;
+			['teminat', 'kredi'].forEach(function (d) { var x = bul(n, d, r.kod); if (x && a > 0) { var al = Math.min(a, Math.max(0, x.adet)); x.adet -= al; a -= al; } });
+			r.adet = 0;
+		});
+		return n;
+	}
+	function depoDeger(s, d) { return ef(s).depo[d].reduce(function (t, r) { return t + Math.max(0, r.adet) * px(s, r.kod) * rate(r.kod, d); }, 0); }
+	function depoPiyasa(s, d) { return ef(s).depo[d].reduce(function (t, r) { return t + Math.max(0, r.adet) * px(s, r.kod); }, 0); }
 	function metr(s) {
 		var C = depoDeger(s, 'kredi') + depoDeger(s, 'teminat'), D = s.kredi + s.faiz;
 		return { C: C, D: D, e: C > 0 ? (C - D) / C : null, net: C - D };
 	}
 	function bul(s, d, kod) { return s.depo[d].filter(function (r) { return r.kod === kod; })[0]; }
-	function ekle(s, d, kod, adet) { var r = bul(s, d, kod); if (r) r.adet += adet; else s.depo[d].push({ kod: kod, adet: adet }); }
-	function cikar(s, d, kod, adet) { var r = bul(s, d, kod); if (!r) return; r.adet -= adet; if (r.adet <= 0) s.depo[d] = s.depo[d].filter(function (x) { return x !== r; }); }
+	/* adet = T+2 adedi (hesaplarda kullanılan), bugun = bugünkü (T0) adet; depo değiştirmede ikisi de değişir, satışta yalnız T+2 düşer */
+	function ekle(s, d, kod, adet, bugun) { var r = bul(s, d, kod); if (r) { r.adet += adet; if (r.bugun != null || bugun != null) r.bugun = (r.bugun == null ? r.adet - adet : r.bugun) + (bugun == null ? adet : bugun); } else s.depo[d].push({ kod: kod, adet: adet, bugun: bugun == null ? null : bugun }); }
+	function cikar(s, d, kod, adet, sadeceT2) { var r = bul(s, d, kod); if (!r) return; r.adet -= adet; if (r.bugun != null && !sadeceT2) r.bugun -= adet; if (r.adet <= 0 && !(r.bugun > 0)) s.depo[d] = s.depo[d].filter(function (x) { return x !== r; }); }
 
 	/* op: {t:'move',kod,from,to,adet} | {t:'sell',kod,from,adet} | {t:'buy',kod,adet,fiyat} */
 	function uygula(s, op) {
 		var n = clone(s);
-		if (op.t === 'move') { cikar(n, op.from, op.kod, op.adet); ekle(n, op.to, op.kod, op.adet); }
+		if (op.t === 'move') { var rw = bul(n, op.from, op.kod), bg = rw && rw.bugun != null ? Math.min(op.adet, Math.max(0, rw.bugun)) : null; cikar(n, op.from, op.kod, op.adet); ekle(n, op.to, op.kod, op.adet, bg); }
 		else if (op.t === 'sell') {
-			var gelir = op.adet * px(n, op.kod); cikar(n, op.from, op.kod, op.adet);
-			var f = Math.min(n.faiz, gelir); n.faiz -= f; gelir -= f; var k = Math.min(n.kredi, gelir); n.kredi -= k; gelir -= k; n.nakit = (n.nakit || 0) + gelir;
-		} else if (op.t === 'buy') { n.fiyat[op.kod] = op.fiyat; ekle(n, 'kredi', op.kod, op.adet); n.kredi += op.adet * op.fiyat; }
+			var gelir = op.adet * px(n, op.kod); cikar(n, op.from, op.kod, op.adet, true);
+			var f = Math.min(n.faiz, gelir); n.faiz -= f; gelir -= f; var k = Math.min(n.kredi, gelir); n.kredi -= k; n.limit = (n.limit || 0) + k; gelir -= k; n.artan = (n.artan || 0) + gelir;
+		} else if (op.t === 'buy') { n.fiyat[op.kod] = op.fiyat; ekle(n, 'kredi', op.kod, op.adet, null); n.kredi += op.adet * op.fiyat; if (n.limit) n.limit = Math.max(0, n.limit - op.adet * op.fiyat); }
 		return n;
 	}
 	function opYazi(op) {
@@ -117,7 +136,7 @@ import Rozet from '../components/Rozet.astro';
 		var need = gerek(s, e);
 		if (need > 1) {
 			/* 1) serbestten teminata çek: oranı yüksek olan önce */
-			var sb = s.depo.serbest.slice().sort(function (a, b) { return oran(b.kod) - oran(a.kod); });
+			var sb = s.depo.serbest.filter(function (x) { return x.adet > 0; }).sort(function (a, b) { return oran(b.kod) - oran(a.kod); });
 			for (var i = 0; i < sb.length && need > 1; i++) {
 				var unit = oran(sb[i].kod) * px(s, sb[i].kod); if (unit <= 0) continue;
 				var q = Math.min(sb[i].adet, Math.ceil(need / unit)); if (q <= 0) continue;
@@ -127,7 +146,7 @@ import Rozet from '../components/Rozet.astro';
 			if (need > 1) {
 				var adaylar = [];
 				s.depo.teminat.forEach(function (r) { adaylar.push({ kod: r.kod, d: 'teminat' }); });
-				s.depo.serbest.forEach(function (r) { adaylar.push({ kod: r.kod, d: 'serbest' }); });
+				s.depo.serbest.forEach(function (r) { if (r.adet > 0) adaylar.push({ kod: r.kod, d: 'serbest' }); });
 				s.depo.kredi.forEach(function (r) { adaylar.push({ kod: r.kod, d: 'kredi' }); });
 				var sira = { serbest: 0, teminat: 1, kredi: 2 };
 				adaylar.sort(function (a, b) { return sira[a.d] - sira[b.d] || rate(a.kod, a.d) - rate(b.kod, b.d); });
@@ -175,7 +194,8 @@ import Rozet from '../components/Rozet.astro';
 			+ '<div class="t"><div class="l">Toplam teminat</div><div class="v">' + tl(m.C) + '</div><div class="n">kredi depo ' + tl(depoDeger(S, 'kredi')) + ' + teminat depo ' + tl(depoDeger(S, 'teminat')) + '</div></div>'
 			+ '<div class="t"><div class="l">Borç (kredi + faiz)</div><div class="v">' + tl(m.D) + '</div><div class="n">net teminat ' + tl(m.net) + '</div></div>'
 			+ '<div class="t"><div class="l">Serbest depo</div><div class="v">' + tl(sb) + '</div><div class="n">piyasa değeri · teminata çekilirse ' + tl(sbd) + '</div></div>'
-			+ '<div class="t geniş"><div class="l">Hedefe göre durum</div><div class="v k">' + ihtiyac + '</div>' + (S.nakit > 1 ? '<div class="n">Artan nakit: ' + tl(S.nakit) + ' TL</div>' : '') + '</div>';
+			+ ((S.limit > 0 || (S.nakit && (S.nakit.t0 || S.nakit.t1 || S.nakit.t2 || S.nakit.t3))) ? '<div class="t"><div class="l">Kullanılabilir kredi limiti</div><div class="v">' + tl(S.limit) + '</div><div class="n">TL nakit: bugün ' + tl2(S.nakit.t0) + ' · T+1 ' + tl2(S.nakit.t1) + ' · T+2 ' + tl2(S.nakit.t2) + '</div></div>' : '')
+			+ '<div class="t geniş"><div class="l">Hedefe göre durum</div><div class="v k">' + ihtiyac + '</div>' + (S.artan > 1 ? '<div class="n">Satıştan artan nakit: ' + tl(S.artan) + ' TL</div>' : '') + '</div>';
 	}
 	function ipucu(d, r, need) {
 		var p = px(S, r.kod), o = rate(r.kod, d), unit = o * p, h = S.hedef / 100, m = metr(S);
@@ -188,19 +208,28 @@ import Rozet from '../components/Rozet.astro';
 		if (need < -1 && d === 'teminat') { if (unit <= 0) return 'Tamamı serbest kalabilir'; var qm = Math.min(r.adet, Math.floor(-need / unit)); return qm > 0 ? 'En çok ' + tl(qm) + ' adet serbeste al' : ''; }
 		return '';
 	}
+	function adetBilgi(d, r) {
+		var t2 = r.adet, bg = r.bugun;
+		if (t2 < 0) return '<span class="rozet kotu" title="Serbest depoda eksi adet: satış teminat / kredi depodan düşer">' + tl(t2) + ' (açık)</span> <span class="kucuk">teminat/kredi depodan düşer</span>';
+		var s = '<b>' + tl(t2) + '</b> <span class="kucuk">T+2</span>';
+		if (bg != null && Math.abs(bg - t2) > 1e-9) s += ' <span class="kucuk">· bugün ' + tl(bg) + '</span> ' + (t2 < bg ? '<span class="rozet uyari" title="T+2 bugünkü adetten az: satılmış">satılmış ' + tl(bg - t2) + '</span>' : '<span class="rozet" title="T+2 bugünkü adetten fazla: alım bekliyor">alım ' + tl(t2 - bg) + '</span>');
+		return s;
+	}
 	function renderDepolar() {
-		var need = gerek(S, S.hedef / 100), hasSt = metr(S).D > 0 || metr(S).C > 0;
+		var need = gerek(S, S.hedef / 100);
 		$('#depolar').innerHTML = DEPOLAR.map(function (dp) {
 			var d = dp[0], rows = S.depo[d];
 			var govde = rows.length ? rows.map(function (r) {
-				var o = ORAN[r.kod], rr = rate(r.kod, d), p = px(S, r.kod), deger = r.adet * p * (d === 'serbest' ? 1 : rr);
+				var o = ORAN[r.kod], rr = rate(r.kod, d), p = px(S, r.kod), deger = Math.max(0, r.adet) * p * (d === 'serbest' ? 1 : rr);
 				var uyar = !o && d !== 'kredi' ? '<span class="rozet kotu" title="Listede yok, oran 0 sayıldı">liste dışı</span>' : (o && o.a && /tedbir/i.test(o.a) ? '<span class="rozet uyari" title="' + esc(o.a) + '">tedbir</span>' : '');
-				return '<div class="satir-h" draggable="true" data-d="' + d + '" data-kod="' + esc(r.kod) + '"><div class="h1"><b class="tk">' + esc(r.kod) + '</b>' + (d !== 'kredi' ? '<span class="rozet">%' + Math.round(rr * 100) + '</span>' : '') + uyar + '</div>'
-					+ '<div class="h2"><span>' + tl(r.adet) + ' adet</span><span class="carpi">×</span><input class="n fy" data-fy="' + esc(r.kod) + '" inputmode="decimal" value="' + (p ? String(p).replace('.', ',') : '') + '" placeholder="fiyat" aria-label="' + esc(r.kod) + ' fiyatı"></div>'
-					+ '<div class="h3"><span class="deger">' + tl(deger) + ' TL</span><span class="ip">' + ipucu(d, r, need) + '</span></div>'
+				return '<div class="satir-h" draggable="true" data-d="' + d + '" data-kod="' + esc(r.kod) + '"><div class="h1"><span class="tutac" aria-hidden="true">⋮⋮</span><b class="tk">' + esc(r.kod) + '</b>' + (d !== 'kredi' ? '<span class="rozet">%' + Math.round(rr * 100) + '</span>' : '') + uyar + '</div>'
+					+ '<div class="h2">' + adetBilgi(d, r) + '</div>'
+					+ '<div class="h5"><input class="n fy" data-fy="' + esc(r.kod) + '" inputmode="decimal" value="' + (p ? String(p).replace('.', ',') : '') + '" placeholder="fiyat" aria-label="' + esc(r.kod) + ' fiyatı"></div>'
+					+ '<div class="h3"><span class="deger">' + tl(deger) + ' TL</span></div>'
+					+ '<div class="ip">' + ipucu(d, r, need) + '</div>'
 					+ '<div class="h4"><button class="btn ghost kucuk-b" data-tasi="' + d + '|' + esc(r.kod) + '">Taşı / Sat</button></div></div>';
-			}).join('') : '<div class="bosdepo">Boş. Hisse ekle ya da başka depodan sürükle.</div>';
-			return '<div class="depo" data-drop="' + d + '"><div class="dh"><h3>' + dp[1] + '</h3><span class="kucuk">' + dp[2] + '</span><div class="dt">' + tl(d === 'serbest' ? depoPiyasa(S, d) : depoDeger(S, d)) + ' TL</div></div><div class="dg">' + govde + '</div>'
+			}).join('') : '<div class="bosdepo">Boş. Hisse ekle, içe aktar ya da başka depodan sürükle.</div>';
+			return '<div class="depo" data-drop="' + d + '"><div class="dh"><h3>' + dp[1] + '</h3><span class="kucuk">' + dp[2] + '</span><div class="dt">' + tl(d === 'serbest' ? depoPiyasa(S, d) : depoDeger(S, d)) + ' TL' + (d !== 'serbest' ? ' <span class="kucuk">(piyasa ' + tl(depoPiyasa(S, d)) + ')</span>' : '') + '</div></div><div class="dg">' + govde + '</div>'
 				+ '<form class="ekle" data-ekle="' + d + '"><input list="hisseler" name="kod" placeholder="Hisse" style="text-transform:uppercase" aria-label="Hisse kodu"><input class="n" name="adet" inputmode="numeric" placeholder="Adet" aria-label="Adet"><input class="n" name="fiyat" inputmode="decimal" placeholder="Fiyat" aria-label="Fiyat"><button class="btn" type="submit">Ekle</button></form></div>';
 		}).join('');
 	}
@@ -237,6 +266,7 @@ import Rozet from '../components/Rozet.astro';
 	var DLG = null;
 	function dlgAc(from, kod, to) {
 		var row = bul(S, from, kod); if (!row) return;
+		if (row.adet <= 0) { toast(kod + ': T+2 adedi ' + tl(row.adet) + ', taşınacak adet yok.'); return; }
 		DLG = { from: from, kod: kod, eylem: to && to !== 'sat' ? 'move' : (to === 'sat' ? 'sell' : (from === 'kredi' ? 'sell' : 'move')), to: to && to !== 'sat' ? to : null, adet: row.adet };
 		$('#dlg-baslik').textContent = kod + ' · ' + DEPOLAR.filter(function (x) { return x[0] === from; })[0][1] + ' · ' + tl(row.adet) + ' adet';
 		var moveOk = from !== 'kredi';
@@ -295,7 +325,7 @@ import Rozet from '../components/Rozet.astro';
 		var kod = $('#k-kod').value.trim().toUpperCase(), tutar = num($('#k-tutar').value), fy = num($('#k-fiyat').value);
 		if (!kod || !(tutar > 0) || !(fy > 0)) { toast('Hisse, tutar ve fiyat gir.'); return; }
 		var adet = Math.floor(tutar / fy); if (adet < 1) { toast('Tutar tek lot için bile yetmiyor.'); return; }
-		var op = { t: 'buy', kod: kod, adet: adet, fiyat: fy }; adim(op, uygula(S, op)); $('#k-kod').value = ''; $('#k-tutar').value = ''; $('#k-fiyat').value = '';
+		if (S.limit > 0 && adet * fy > S.limit) toast('Uyarı: tutar kullanılabilir kredi limitini (' + tl(S.limit) + ' TL) aşıyor.'); var op = { t: 'buy', kod: kod, adet: adet, fiyat: fy }; adim(op, uygula(S, op)); $('#k-kod').value = ''; $('#k-tutar').value = ''; $('#k-fiyat').value = '';
 	});
 	$('#b-geri').addEventListener('click', function () { var h = HIST.pop(); if (h) { S = h.s; kaydet(); render(); } });
 
@@ -318,6 +348,7 @@ import Rozet from '../components/Rozet.astro';
 		var hz = e.target.closest('[data-hz]'); if (hz && DLG) { var row = bul(S, DLG.from, DLG.kod); $('#dlg-adet').value = String(Math.min(DLG.hizli[+hz.getAttribute('data-hz')][1], row.adet)); dlgGuncelle(); return; }
 	});
 	$('#dlg-eylem').addEventListener('change', dlgGuncelle); $('#dlg-hedef').addEventListener('change', dlgGuncelle); $('#dlg-adet').addEventListener('input', dlgGuncelle);
+	$('#dlg-form').addEventListener('submit', function (e) { e.preventDefault(); $('#dlg-tamam').click(); });
 	$('#dlg-iptal').addEventListener('click', function () { $('#dlg').close ? $('#dlg').close() : $('#dlg').removeAttribute('open'); });
 	$('#dlg-tamam').addEventListener('click', function () {
 		var op = dlgOp(); if (!op) return;
@@ -334,7 +365,46 @@ import Rozet from '../components/Rozet.astro';
 		var p = (e.dataTransfer.getData('text/plain') || '').split('|'), to = d.getAttribute('data-drop'); if (p.length !== 2 || p[0] === to) return;
 		if (p[0] === 'kredi') { toast('Kredi depodaki hisse depo değiştirmez; “Taşı / Sat” ile satış yapılabilir.'); return; }
 		if (to === 'kredi') { toast('Kredi depoya yalnızca “Kredili alım” ile hisse girer.'); return; }
+		if (e.shiftKey) { var rw = bul(S, p[0], p[1]); if (rw && rw.adet > 0) { var op = { t: 'move', kod: p[1], from: p[0], to: to, adet: rw.adet }; adim(op, uygula(S, op)); toast(opYazi(op) + ' (Shift: hepsi taşındı)'); return; } }
 		dlgAc(p[0], p[1], to);
+	});
+
+
+	/* ---- hesap ekranından içe aktar ---- */
+	function trnum(t) { if (t == null) return NaN; var x = String(t).trim().replace(/\s/g, '').replace(/[()%]/g, ''); if (!/^[-+]?[\d.,]+$/.test(x)) return NaN; return parseFloat(x.replace(/\./g, '').replace(',', '.')); }
+	function ayristir(metin) {
+		var sonuc = { depo: { serbest: [], kredi: [], teminat: [] }, fiyat: {}, kredi: null, faiz: null, limit: null, nakit: null, uyari: [] }, bekleyen = [];
+		var satirlar = String(metin).replace(/\r/g, '').split('\n');
+		function ilk(re, l) { var m = l.match(re); return m ? trnum(m[1]) : NaN; }
+		for (var i = 0; i < satirlar.length; i++) {
+			var l = satirlar[i].replace(/ /g, ' ').trim(); if (!l) continue; var v;
+			v = ilk(/Kredili\s+[İIi]şlem\s+Tutar[ıi]\s*[:\t ]+(-?[\d.,]+)/i, l); if (!isNaN(v)) { sonuc.kredi = Math.abs(v); continue; }
+			v = ilk(/Kredi\s+Faiz\s+Tutar[ıi]\s*[:\t ]+(-?[\d.,]+)/i, l); if (!isNaN(v)) { sonuc.faiz = Math.abs(v); continue; }
+			v = ilk(/Kullan[ıi]labilir\s+Kredi\s+Limiti\s*[:\t ]+(-?[\d.,]+)/i, l); if (!isNaN(v)) { sonuc.limit = Math.abs(v); continue; }
+			var dm = l.match(/^(Serbest|Kredi|Teminat)\s+Depo\b/i);
+			if (dm) { var dk = dm[1].toLowerCase().replace('ı', 'i'); dk = dk.indexOf('serbest') === 0 ? 'serbest' : dk.indexOf('kredi') === 0 ? 'kredi' : 'teminat'; bekleyen.forEach(function (r) { sonuc.depo[dk].push(r); }); bekleyen = []; continue; }
+			var tk = l.split(/[\t ]+/);
+			if (tk[0] === 'TL' && tk.length >= 5) { var ns = tk.slice(1).map(trnum); if (!isNaN(ns[0]) && !isNaN(ns[1])) { sonuc.nakit = { t0: ns[0], t1: ns[1], t2: isNaN(ns[2]) ? 0 : ns[2], t3: isNaN(ns[3]) ? 0 : ns[3] }; } continue; }
+			if (/^[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9]{2,5}$/.test(tk[0])) {
+				var rest = tk.slice(1); if (rest.length && isNaN(trnum(rest[0]))) rest = rest.slice(1); /* Tip: ESKI */
+				var ns2 = rest.map(trnum).filter(function (x) { return !isNaN(x); });
+				if (ns2.length >= 6) { bekleyen.push({ kod: tk[0], bugun: ns2[0], adet: ns2[2], fy: ns2[5] }); }
+			}
+		}
+		if (bekleyen.length) sonuc.uyari.push(bekleyen.length + ' satır “Serbest/Kredi/Teminat Depo” toplam satırı görülmediği için alınmadı. Depo satırlarını da kopyaladığından emin ol.');
+		return sonuc;
+	}
+	$('#ice-btn').addEventListener('click', function () {
+		var r = ayristir($('#ice-metin').value), adetSay = r.depo.serbest.length + r.depo.kredi.length + r.depo.teminat.length;
+		if (!adetSay && r.kredi == null) { $('#ice-sonuc').textContent = 'Tablo tanınamadı. Hisse satırlarını ve depo toplam satırlarını kopyala.'; return; }
+		if (HIST.length === 0 && (S.depo.serbest.length + S.depo.kredi.length + S.depo.teminat.length) && !confirm('Mevcut depolar bu tabloyla değiştirilsin mi?')) return;
+		var n = bos(); n.hedef = S.hedef; n.min = S.min;
+		['serbest', 'kredi', 'teminat'].forEach(function (d) { r.depo[d].forEach(function (x) { if (x.fy > 0) n.fiyat[x.kod] = x.fy; n.depo[d].push({ kod: x.kod, adet: x.adet, bugun: x.bugun }); }); });
+		if (r.kredi != null) n.kredi = r.kredi; if (r.faiz != null) n.faiz = r.faiz; if (r.limit != null) n.limit = r.limit; if (r.nakit) n.nakit = r.nakit;
+		S = n; HIST = []; BASE = clone(S); kaydet(); render();
+		var bil = r.depo.teminat.concat(r.depo.serbest).filter(function (x) { return !ORAN[x.kod]; }).map(function (x) { return x.kod; });
+		$('#ice-sonuc').textContent = 'Aktarıldı: serbest ' + r.depo.serbest.length + ', kredi ' + r.depo.kredi.length + ', teminat ' + r.depo.teminat.length + ' hisse.' + (bil.length ? ' Oran listesinde olmayan: ' + bil.join(', ') + ' (oran 0 sayıldı).' : '') + ' ' + r.uyari.join(' ');
+		$('#ice').open = true;
 	});
 
 	/* başlat */
@@ -383,18 +453,18 @@ import Rozet from '../components/Rozet.astro';
 	.oz .metrikler .t .v.k { font-family: var(--font-govde); font-size: 15px; }
 	.oz .metrikler .t .n { font-size: 11px; color: var(--metin-ikincil); margin-top: 2px; }
 	.oz .dusus { color: var(--dusus); } .oz .yuk { color: var(--yukselis); }
-	.oz .depolar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
-	@media (max-width: 1100px) { .oz .depolar { grid-template-columns: 1fr; } }
+	.oz .depolar { display: grid; grid-template-columns: 1fr; gap: 12px; }
 	.oz .depo { background: var(--kart); border: 1.5px solid var(--kenarlik); border-radius: 16px; padding: 14px; min-width: 0; transition: border-color .15s, background .15s; }
 	.oz .depo.hedef { border-color: var(--marka); background: #f3f3fd; }
 	.oz .dh { display: grid; gap: 2px; margin-bottom: 10px; } .oz .dh .dt { font-family: var(--font-mono); font-size: 20px; font-weight: 600; }
 	.oz .dg { display: grid; gap: 8px; }
-	.oz .satir-h { border: 1px solid var(--kenarlik); border-radius: 12px; padding: 10px 12px; background: #faf8f3; cursor: grab; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; }
+	.oz .satir-h { border: 1px solid var(--kenarlik); border-radius: 12px; padding: 8px 12px; background: #faf8f3; cursor: grab; display: grid; grid-template-columns: 170px minmax(180px, 1.3fr) 104px 130px minmax(120px, 1fr) auto; gap: 6px 12px; align-items: center; }
+	@media (max-width: 900px) { .oz .satir-h { grid-template-columns: 1fr 1fr; } .oz .satir-h .h1, .oz .satir-h .h2, .oz .satir-h .ip, .oz .satir-h .h4 { grid-column: 1 / -1; } }
 	.oz .satir-h.surukle { opacity: .4; }
-	.oz .satir-h .h1 { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; } .oz .tk { font-family: var(--font-mono); font-weight: 600; }
-	.oz .satir-h .h2 { display: flex; gap: 6px; align-items: center; font-size: 13px; justify-self: end; } .oz .fy { width: 96px !important; min-height: 36px !important; padding: 6px 8px !important; }
-	.oz .satir-h .h3 { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; } .oz .deger { font-family: var(--font-mono); font-weight: 600; } .oz .ip { font-size: 12px; color: var(--marka); font-weight: 600; }
-	.oz .satir-h .h4 { grid-column: 1 / -1; }
+	.oz .satir-h .h1 { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; } .oz .tk { font-family: var(--font-mono); font-weight: 600; } .oz .tutac { color: var(--metin-ikincil); letter-spacing: -2px; user-select: none; }
+	.oz .satir-h .h2 { font-size: 13px; } .oz .fy { width: 100% !important; min-height: 36px !important; padding: 6px 8px !important; }
+	.oz .deger { font-family: var(--font-mono); font-weight: 600; text-align: right; display: block; } .oz .ip { font-size: 12px; color: var(--marka); font-weight: 600; }
+	.oz .ice summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; } .oz .ice textarea { width: 100%; font: 12px var(--font-mono); padding: 10px; border: 1px solid var(--kenarlik); border-radius: 10px; background: #faf8f3; margin: 8px 0; }
 	.oz .rozet { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 6px; background: #e8e9fa; color: var(--marka); } .oz .rozet.kotu { background: #fbe4e2; color: var(--dusus); } .oz .rozet.uyari { background: #fbf0d9; color: var(--etiket-metin); }
 	.oz .bosdepo { border: 1.5px dashed var(--kenarlik); border-radius: 12px; padding: 18px 12px; text-align: center; color: var(--metin-ikincil); font-size: 13px; }
 	.oz .ekle { display: grid; grid-template-columns: 1.2fr 1fr 1fr auto; gap: 6px; margin-top: 10px; } .oz .ekle .btn { padding: 8px 12px; }
