@@ -20,6 +20,7 @@ export function bultenKontrol(b) {
 	dizi('buybacks'); dizi('rumors'); dizi('sectors'); dizi('hidden3'); dizi('watch'); dizi('reads'); dizi('calendar');
 	dizi('rumors').forEach((r) => { if (!['s-no', 's-wait', 's-idle'].includes(r.sc)) h.push('rumors: sc yalnız s-no / s-wait / s-idle olabilir'); });
 	const s = nesne('strat'); if (!s.glob || !s.dom || !Array.isArray(s.scen)) h.push('strat: glob, dom, scen[] gerekli'); (s.scen || []).forEach((c) => { if (!['up-h', 'dn-h', 'bz-h'].includes(c.k)) h.push('strat.scen: k yalnız up-h / dn-h / bz-h olabilir'); });
+	if (b.sosyal != null) { const x = b.sosyal; if (typeof x !== 'object' || Array.isArray(x)) h.push('sosyal: nesne olmalı'); else { if (!x.hava) h.push('sosyal.hava: metin gerekli'); if (!Array.isArray(x.konular) || !x.konular.length) h.push('sosyal.konular: [{k,ton,hacim,dogrulama,piyasa}] gerekli'); ['youtube', 'anormal'].forEach((a) => { if (x[a] != null && !Array.isArray(x[a])) h.push('sosyal.' + a + ': liste olmalı'); }); (x.konular || []).forEach((k) => { if (!k.k || !k.ton) h.push('sosyal.konular: her öğede k ve ton gerekli'); }); } }
 	const o = nesne('opening'); if (!(o.band >= 0 && o.band <= 4) || !o.bandText || !Array.isArray(o.basis) || !Array.isArray(o.pos) || !Array.isArray(o.neg)) h.push('opening: band(0-4), bandText, basis[], pos[], neg[] gerekli');
 	return h;
 }

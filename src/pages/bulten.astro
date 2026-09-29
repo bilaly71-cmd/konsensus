@@ -88,6 +88,16 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 			return '<div class="tw"><table><thead><tr><th>Hisse</th><th>Tutar</th><th>Süre</th><th>Not</th><th>Kaynak</th></tr></thead><tbody>' + list(b.buybacks).map(function (g) { return '<tr><td class="tk">' + esc(g[0]) + '</td><td>' + esc(g[1]) + '</td><td class="nw">' + esc(g[2]) + '</td><td>' + esc(g[3]) + '</td><td class="small">' + esc(g[4]) + '</td></tr>'; }).join('') + '</tbody></table></div>';
 		}],
 		['s-bilanco', 'Bilançolar', 'gerçekleşen vs konsensüs', function (b) { return '<div class="card prose"><p>' + md(b.earnings) + '</p></div>'; }],
+		['s-sosyal', '📡 Sosyal medya nabzı', 'X · YouTube · kalabalığın tonu (kanıt değil, duygu ölçeri)', function (b) {
+			var x = b.sosyal; if (!x) return null;
+			var h = '';
+			if (x.hava) h += '<div class="card prose"><p>' + md(x.hava) + '</p></div>';
+			if (list(x.konular).length) h += '<h3 style="font-size:16px;margin:14px 0 8px">Kalabalık ne konuşuyor?</h3><div class="tw"><table><thead><tr><th>Konu / hisse</th><th>Ton</th><th>Hacim / etkileşim</th><th>Doğrulama</th><th>Piyasa karşılığı</th></tr></thead><tbody>' + list(x.konular).map(function (k) { return '<tr><td class="tk">' + md(k.k) + '</td><td>' + md(k.ton) + '</td><td>' + md(k.hacim) + '</td><td>' + md(k.dogrulama) + '</td><td>' + md(k.piyasa) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+			if (list(x.youtube).length) h += '<h3 style="font-size:16px;margin:14px 0 8px">YouTube’da öne çıkanlar <span class="tag old">fikir, veri değil</span></h3><div class="tw"><table><thead><tr><th>Kanal</th><th>Saat</th><th>Ana argüman / seviye</th></tr></thead><tbody>' + list(x.youtube).map(function (y) { return '<tr><td class="nw"><b>' + esc(y.kanal) + '</b></td><td class="nw">' + esc(y.saat) + '</td><td>' + md(y.arguman) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+			if (list(x.anormal).length) h += '<h3 style="font-size:16px;margin:14px 0 8px">Anormal ilgi gören hisseler</h3><ul class="bl">' + list(x.anormal).map(function (a) { return '<li><b>' + esc(a.kod) + '</b> — ' + md(a.not) + '</li>'; }).join('') + '</ul>';
+			if (x.tarama) h += '<p class="small" style="margin-top:8px">' + md(x.tarama) + '</p>';
+			return h || null;
+		}],
 		['s-resmi', 'Resmi olmayan haberler', '🔸SÖYLENTİ · kaynak + teyit', function (b) {
 			return '<div class="grid2">' + list(b.rumors).map(function (r) { return '<div class="rumor"><div class="top"><span class="rtag">🔸SÖYLENTİ</span><span class="status ' + esc(r.sc) + '">' + esc(r.st) + '</span></div><b>' + md(r.h) + '</b><p class="ln">' + md(r.b) + '</p><div class="small" style="margin-top:6px">Kaynak: ' + esc(r.s) + '</div></div>'; }).join('') + '</div>';
 		}],
@@ -130,11 +140,13 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 	function renderBulten(b) {
 		CUR = b; curKapCat = 'all';
 		$('#when').textContent = b.weekday + ' ' + b.date.split('-').reverse().join('.') + ' · veri saati ' + b.asOf + ' · pencere ' + b.windowText;
-		$('#nav').innerHTML = SECTIONS.map(function (s) { return '<a href="#' + s[0] + '">' + esc(s[1]) + '</a>'; }).join('');
+		var goster = SECTIONS.map(function (s) { return [s, s[3](b)]; }).filter(function (x) { return x[1] != null; });
+		$('#nav').innerHTML = goster.map(function (x) { return '<a href="#' + x[0][0] + '">' + esc(x[0][1]) + '</a>'; }).join('');
 		$('#srcbar').innerHTML = list(b.sources).map(function (s) { return '<div class="srcchip"><span>' + esc(s.n) + ' <small>' + esc(s.k) + '</small></span></div>'; }).join('');
 		$('#bnote').textContent = b.note || 'Bülten yapay zekâ ile web taramasından hazırlanır; kaynağı doğrulanamayan veri işaretlenir.';
-		$('#bulten').innerHTML = SECTIONS.map(function (s) {
-			return '<section id="' + s[0] + '"><div class="sh"><h2>' + esc(s[1]) + '</h2>' + (s[2] ? '<span class="idea">' + esc(s[2]) + '</span>' : '') + '</div>' + s[3](b) + '</section>';
+		$('#bulten').innerHTML = goster.map(function (x) {
+			var s = x[0];
+			return '<section id="' + s[0] + '"><div class="sh"><h2>' + esc(s[1]) + '</h2>' + (s[2] ? '<span class="idea">' + esc(s[2]) + '</span>' : '') + '</div>' + x[1] + '</section>';
 		}).join('');
 		renderKap();
 	}
