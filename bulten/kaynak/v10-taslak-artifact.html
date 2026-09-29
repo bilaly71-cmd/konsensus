@@ -1,0 +1,956 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>V10 Konsolide Bülten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky masthead + anchor nav, single reading column (max 1080px) that opens with the top-5 list, then a data strip, then dense two-column blocks. Sources are color-coded D/A/İ throughout. */
+:root{
+  --bg:#eef1f5; --surface:#ffffff; --surface2:#f6f8fb; --ink:#0f1b2d; --muted:#5a6a7e; --line:#d9e0e8;
+  --accent:#0b5fd1; --accent-soft:#e3edfb;
+  --up:#0d8559; --down:#c2352d; --warn:#a86a00; --warn-soft:#fbf0d9; --up-soft:#dcf3ea; --down-soft:#fbe4e2;
+  --sd:#0b7480; --sa:#5646cc; --si:#b3540f;
+  --f-head:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b121b; --surface:#121b28; --surface2:#182333; --ink:#e6edf6; --muted:#93a3b8; --line:#243347;
+  --accent:#5ea3ff; --accent-soft:#16283f;
+  --up:#3ccb92; --down:#ff6d64; --warn:#e2b453; --warn-soft:#2e2510; --up-soft:#11342a; --down-soft:#3a1a19;
+  --sd:#45c2cf; --sa:#a498ff; --si:#f09a5b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b121b; --surface:#121b28; --surface2:#182333; --ink:#e6edf6; --muted:#93a3b8; --line:#243347;
+  --accent:#5ea3ff; --accent-soft:#16283f;
+  --up:#3ccb92; --down:#ff6d64; --warn:#e2b453; --warn-soft:#2e2510; --up-soft:#11342a; --down-soft:#3a1a19;
+  --sd:#45c2cf; --sa:#a498ff; --si:#f09a5b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:0 48px}
+h1,h2,h3{font-family:var(--f-head);text-wrap:balance;margin:0}
+a{color:var(--accent)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+b,strong{font-weight:600}
+.up{color:var(--up)} .down{color:var(--down)}
+
+/* masthead */
+.mast{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--ink);color:var(--bg);margin-inline:-16px;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
+:root[data-theme="dark"] .mast{background:#050a10;color:#e6edf6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mast{background:#050a10;color:#e6edf6}}
+.mast h1{font-size:19px;letter-spacing:.02em;font-weight:700}
+.mast .when{font-family:var(--f-mono);font-size:12px;opacity:.85}
+.nav{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;padding-block:8px;margin-inline:-16px;padding-inline:16px;background:var(--surface);border-bottom:1px solid var(--line);scrollbar-width:thin}
+.nav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:12.5px;font-weight:500;padding:5px 10px;border-radius:5px}
+.nav a:hover{background:var(--accent-soft);color:var(--accent)}
+
+.draft{margin-top:14px;padding:10px 14px;background:var(--warn-soft);border:1px solid var(--warn);border-radius:6px;color:var(--ink);font-size:13px}
+.draft b{color:var(--warn)}
+
+.srcbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.srcchip{display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12.5px}
+.srcchip small{color:var(--muted);font-size:11.5px}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:4px;font-family:var(--f-mono);font-size:11px;font-weight:600;color:#fff;line-height:1}
+.b-D{background:var(--sd)} .b-A{background:var(--sa)} .b-İ{background:var(--si)}
+:root[data-theme="dark"] .badge{color:#08111b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .badge{color:#08111b}}
+.badges{display:inline-flex;gap:3px;vertical-align:middle}
+
+/* sections */
+section{margin-top:28px;scroll-margin-top:110px}
+.sh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:12px}
+.sh h2{font-size:20px;font-weight:700}
+.sh .idea{font-size:11.5px;color:var(--muted);font-family:var(--f-mono)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid2>*{min-width:0}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.small{font-size:12px;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-family:var(--f-body)}
+.tag.old{background:var(--warn-soft);color:var(--warn)}
+.tag.hi{background:var(--down-soft);color:var(--down)}
+.tag.up{background:var(--up-soft);color:var(--up)}
+
+/* top 5 */
+.top5{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.top5 li{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.top5 .rank{grid-row:span 2;font-family:var(--f-head);font-weight:700;font-size:28px;line-height:1;color:var(--accent);width:26px;text-align:center;padding-top:2px}
+.top5 h3{font-size:16.5px;font-weight:600;line-height:1.25}
+.top5 p{margin:0;color:var(--ink);font-size:13.5px}
+.top5 .meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:4px}
+.chain{color:var(--muted);font-size:12.5px}
+.chain b{color:var(--ink)}
+
+/* strip */
+.strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:9px 11px;min-width:0}
+.tile .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+.tile .v{font-family:var(--f-mono);font-size:18px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.tile .c{font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums}
+.tile .n{font-size:10.5px;color:var(--muted);margin-top:2px}
+
+/* lists */
+.bl{margin:0;padding:0;list-style:none;display:grid;gap:9px}
+.bl li{padding-left:14px;position:relative;font-size:13.5px}
+.bl li::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:1px;background:var(--accent)}
+.colh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.colh h3{font-size:16px}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 11px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--surface2);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.nw{white-space:nowrap}
+.tk{font-family:var(--f-mono);font-weight:600}
+
+/* KAP */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{font:inherit;font-size:12.5px;font-weight:500;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+:root[data-theme="dark"] .chip[aria-pressed="true"]{background:var(--accent);color:#08111b;border-color:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{background:var(--accent);color:#08111b;border-color:var(--accent)}}
+.chip:focus-visible,.nav a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.kap{display:grid;gap:8px}
+.kitem{display:grid;grid-template-columns:76px 1fr;gap:4px 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 14px}
+.kitem .tkr{font-family:var(--f-mono);font-weight:600;font-size:15px}
+.kitem .tkr small{display:block;font-family:var(--f-body);font-weight:400;font-size:11px;color:var(--muted)}
+.kitem h3{font-size:15px;font-weight:600;line-height:1.3}
+.kitem p{margin:3px 0 0;font-size:13px}
+.kitem .why{margin-top:5px;font-size:12.5px;color:var(--muted)}
+.kitem .why b{color:var(--ink)}
+.kitem .row{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-top:6px}
+@media(max-width:520px){.kitem{grid-template-columns:1fr}}
+
+/* rumor */
+.rumor{border:1px dashed var(--warn);background:var(--surface);border-radius:8px;padding:12px 14px}
+.rumor .top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:6px}
+.rtag{font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+.status{font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px}
+.s-no{background:var(--down-soft);color:var(--down)}
+.s-wait{background:var(--warn-soft);color:var(--warn)}
+.s-idle{background:var(--surface2);color:var(--muted);border:1px solid var(--line)}
+.skel{opacity:.85}
+.skel .ph{height:9px;border-radius:3px;background:var(--line);margin-top:7px}
+.skel .ph.s{width:60%}
+
+/* flows */
+.flow{display:grid;grid-template-columns:52px 1fr 64px;gap:6px 8px;align-items:center;font-size:12.5px}
+.flow .bar{height:9px;border-radius:2px;background:var(--line);position:relative}
+.flow .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:2px}
+.flow .in i{background:var(--up)} .flow .out i{background:var(--down)}
+.flow .v{text-align:right}
+
+/* calendar */
+.cal{list-style:none;margin:0;padding:0;position:relative}
+.cal li{display:grid;grid-template-columns:52px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.cal li:last-child{border-bottom:0}
+.cal .tm{font-family:var(--f-mono);font-weight:600;font-size:13px;color:var(--accent)}
+.cal .flag{font-size:11.5px;color:var(--muted)}
+
+/* opening */
+.gauge{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin:14px 0 4px}
+.gauge div{height:34px;display:grid;place-items:center;font-size:11px;font-weight:600;text-align:center;line-height:1.1;padding:0 3px;border-radius:4px;background:var(--surface2);color:var(--muted);border:1px solid var(--line)}
+.gauge div.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+:root[data-theme="dark"] .gauge div.on{background:var(--accent);color:#08111b;border-color:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gauge div.on{background:var(--accent);color:#08111b;border-color:var(--accent)}}
+.gaugel{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);text-align:center}
+
+.blind{border-left:4px solid var(--warn);background:var(--surface);border-radius:0 8px 8px 0;padding:12px 16px;font-size:13.5px}
+footer{margin-top:32px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+@media(prefers-reduced-motion:no-preference){.chip,.nav a{transition:background .15s,color .15s}}
+
+/* strategy */
+.prose p{margin:0 0 10px;font-size:14px;line-height:1.65;max-width:68ch}
+.prose p:last-child{margin-bottom:0}
+.expect{margin-top:12px;padding:9px 12px;background:var(--accent-soft);border-radius:6px;font-size:13px}
+.scen{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+@media(max-width:760px){.scen{grid-template-columns:1fr}}
+.scen>div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 14px;min-width:0}
+.scen h4{margin:0 0 4px;font-family:var(--f-head);font-size:14px}
+.scen .lv{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--muted);margin-top:6px}
+.scen .up-h{border-top:3px solid var(--up)} .scen .dn-h{border-top:3px solid var(--down)} .scen .bz-h{border-top:3px solid var(--muted)}
+.btn{font:inherit;font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+:root[data-theme="dark"] .btn{color:#08111b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#08111b}}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.warn{background:var(--down);border-color:var(--down)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* trade log */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px}
+.form{display:grid;grid-template-columns:repeat(6,1fr);gap:10px 12px}
+.form>*{min-width:0}
+.f{display:flex;flex-direction:column;gap:3px}
+.f label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.f input,.f select,.f textarea{font:inherit;font-size:14px;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%}
+.f textarea{min-height:64px;resize:vertical}
+.f input[type=number],.f input.n{font-family:var(--f-mono)}
+.s2{grid-column:span 2} .s3{grid-column:span 3} .s6{grid-column:span 6}
+@media(max-width:760px){.form{grid-template-columns:repeat(2,1fr)}.s2,.s3{grid-column:span 1}.s6{grid-column:span 2}}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:12px;text-align:center;font-size:12.5px;color:var(--muted);background:var(--surface2);cursor:pointer}
+.drop.has{border-style:solid;color:var(--ink)}
+.drop img{max-width:100%;max-height:140px;border-radius:4px;display:block;margin:0 auto 6px}
+.rr{font-family:var(--f-mono);font-size:13px;padding:8px 10px;border-radius:6px;background:var(--surface2);border:1px solid var(--line)}
+.rr.bad{border-color:var(--warn);background:var(--warn-soft)}
+.srcpick{display:flex;gap:6px;flex-wrap:wrap}
+.srcpick label{display:flex;gap:5px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:500;cursor:pointer}
+.tlist{display:grid;gap:10px;margin-top:12px}
+.trade{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;grid-template-columns:1fr 150px;gap:10px 16px}
+.trade>*{min-width:0}
+@media(max-width:640px){.trade{grid-template-columns:1fr}}
+.trade .hd{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.trade .hd .tkr{font-family:var(--f-mono);font-weight:600;font-size:17px}
+.side{font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px}
+.side.l{background:var(--up-soft);color:var(--up)} .side.s{background:var(--down-soft);color:var(--down)}
+.tlv{display:flex;flex-wrap:wrap;gap:4px 16px;font-family:var(--f-mono);font-size:13px;margin-top:6px;font-variant-numeric:tabular-nums}
+.tlv span small{font-family:var(--f-body);font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:4px}
+.ladder{position:relative;height:50px;margin:10px 4px 4px}
+.ladder .trk{position:absolute;left:0;right:0;top:24px;height:3px;background:var(--line);border-radius:2px}
+.ladder .mk{position:absolute;top:19px;width:2px;height:13px;background:var(--ink)}
+.ladder .mk.s{background:var(--down)} .ladder .mk.t{background:var(--up)} .ladder .mk.e{background:var(--accent);height:17px;top:17px}
+.ladder .lb{position:absolute;font-family:var(--f-mono);font-size:10.5px;transform:translateX(-50%);white-space:nowrap;color:var(--muted)}
+.ladder .lb.top{top:0} .ladder .lb.bot{top:36px}
+.thumb{width:100%;height:auto;max-height:120px;object-fit:cover;border-radius:6px;border:1px solid var(--line);cursor:zoom-in;display:block}
+.tctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.tctl select,.tctl input{font:inherit;font-size:13px;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:4px 7px}
+.tctl input{width:96px;font-family:var(--f-mono)}
+.st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--surface2);color:var(--muted);border:1px solid var(--line)}
+.st.win{background:var(--up-soft);color:var(--up);border-color:transparent}
+.st.loss{background:var(--down-soft);color:var(--down);border-color:transparent}
+.st.open{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.lightbox{position:fixed;inset:0;z-index:50;background:rgba(5,10,16,.86);display:grid;place-items:center;padding:16px}
+.lightbox img{max-width:100%;max-height:100%;border-radius:6px}
+.note{padding:10px 14px;border-radius:6px;background:var(--warn-soft);border:1px solid var(--warn);font-size:13px;margin-bottom:12px}
+.empty{text-align:center;padding:26px 16px;border:1.5px dashed var(--line);border-radius:8px;color:var(--muted);font-size:13.5px}
+.tag.pick{background:var(--up-soft);color:var(--up)}
+.pend{display:grid;gap:8px;margin-top:8px}
+.pend:empty{display:none}
+.pi{display:grid;grid-template-columns:72px 1fr auto;gap:8px;align-items:center}
+.pi img{width:72px;height:52px;object-fit:cover;border-radius:4px;border:1px solid var(--line)}
+.pi input{font:inherit;font-size:13px;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0;width:100%}
+.dz{border:1.5px dashed var(--line);border-radius:8px;padding:10px;text-align:center;font-size:12.5px;color:var(--muted);background:var(--surface2);cursor:pointer}
+.dz:hover{border-color:var(--accent);color:var(--accent)}
+.ctl{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%;min-width:0}
+.ctl.num{font-family:var(--f-mono)}
+textarea.ctl{resize:vertical}
+.more{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:16px}
+.mh{margin:0 0 8px;font-family:var(--f-head);font-size:14px}
+.lvform{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:end}
+@media(max-width:640px){.lvform{grid-template-columns:repeat(2,1fr)}}
+.tl{list-style:none;margin:0 0 0 6px;padding:0 0 0 16px;border-left:2px solid var(--line);display:grid;gap:14px}
+.te{position:relative}
+.te::before{content:"";position:absolute;left:-23px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
+.te.auto::before{background:var(--muted)}
+.te .th{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:var(--muted)}
+.te .tx{margin-top:4px;font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+.fig{margin:0;min-width:0}
+.fig .thumb{height:110px;max-height:none}
+.fig figcaption{font-size:12px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}
+.addbox{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:8px}
+.grp{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;align-items:baseline;margin-top:10px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.grp h4{margin:0;font-family:var(--f-head);font-size:15px}
+
+.srcnote{font-size:11.5px;color:var(--muted);font-family:var(--f-mono)}
+#daynav[hidden]{display:none}
+#daynav{display:flex;gap:8px;align-items:center;margin-top:12px}
+#daynav select{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.top5 .meta{margin-top:6px}
+</style><div class="wrap">
+<header class="mast">
+  <h1>V10 BÜLTEN</h1>
+  <div class="when" id="when"></div>
+</header>
+<nav class="nav" id="nav" aria-label="Bölümler"></nav>
+<div class="draft"><b>TASLAK.</b> Bülten V10 prompt'uyla web taramasından yazıldı, kurum bülteni girdisi yok. Bulunamayan veri "— (doğrulanamadı)" yazıyor. <span id="bnote"></span></div>
+<div class="srcbar" id="srcbar"></div>
+<div id="daynav" hidden><label for="daysel" class="small">Arşiv:</label><select id="daysel"></select></div>
+<main id="bulten"></main>
+<section id="s-trade">
+  <div class="sh"><h2>Trade defteri</h2><span class="idea">arşiv · kayıtlar bu sayfanın veritabanında saklanır, sayfa güncellense de kalır</span></div>
+  <div id="dbnote" class="note" hidden>Kayıt özelliği bu görünümde açılamadı. Trade eklemek ve arşivi görmek için sayfayı hesabınla oturum açıp aç.</div>
+  <div class="stats" id="tstats"></div>
+
+  <div class="card">
+    <form id="tf" class="form" autocomplete="off">
+      <div class="f s2"><label for="f-date">Tarih</label><input id="f-date" type="date" required></div>
+      <div class="f s2"><label for="f-tk">Hisse</label><input id="f-tk" type="text" placeholder="EKGYO" maxlength="12" required style="text-transform:uppercase"></div>
+      <div class="f s2"><label for="f-side">Yön</label><select id="f-side"><option value="L">Al (long)</option><option value="S">Sat (short)</option></select></div>
+      <div class="f"><label for="f-en">Giriş</label><input id="f-en" class="n" inputmode="decimal" placeholder="0,00" required></div>
+      <div class="f"><label for="f-tp1">TP1</label><input id="f-tp1" class="n" inputmode="decimal" placeholder="0,00" required></div>
+      <div class="f"><label for="f-tp2">TP2</label><input id="f-tp2" class="n" inputmode="decimal" placeholder="0,00"></div>
+      <div class="f"><label for="f-sl">Stop</label><input id="f-sl" class="n" inputmode="decimal" placeholder="0,00" required></div>
+      <div class="f s2"><label>R/R (TP1'e göre)</label><div class="rr" id="f-rr">Seviyeleri gir</div></div>
+      <div class="f s3"><label for="f-why">Gerekçe / katalizör</label><textarea id="f-why" placeholder="Hangi haber, hangi seviye, neden bu giriş koşulu"></textarea></div>
+      <div class="f s3"><label for="f-cond">Giriş koşulu ve iptal</label><textarea id="f-cond" placeholder="Örn. 15 dk kapanış X üstü. İptal: fon takvimi gelmezse"></textarea></div>
+      <div class="f s3"><label>Bülten kaynağı</label>
+        <div class="srcpick">
+          <label><input type="checkbox" value="V" class="sp"><span class="tag">V10 bülten</span></label>
+          <label><input type="checkbox" value="K" class="sp"><span class="tag">Kendi fikrim</span></label>
+        </div></div>
+      <div class="f s3"><label for="f-conf">Güven</label><select id="f-conf"><option>Orta</option><option>Düşük</option><option>Yüksek</option></select></div>
+      <div class="f s6"><label>Grafikler (birden fazla olur, her birine açıklama yazılır)</label>
+        <div class="dz" data-act="pick" data-k="form" id="drop" tabindex="0" role="button">Grafikleri sürükle, yapıştır (Ctrl+V) ya da tıklayıp seç</div>
+        <div class="pend" id="pend"></div></div>
+      <div class="s6" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn" type="submit" id="f-save">Deftere kaydet</button>
+        <button class="btn ghost" type="button" id="f-clear">Formu temizle</button>
+        <span class="small" id="f-msg" role="status"></span>
+      </div>
+    </form>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:18px">
+    <h3 style="font-size:16px">Arşiv</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn ghost" type="button" id="x-csv" hidden>CSV indir</button>
+      <button class="btn ghost" type="button" id="x-json" hidden>JSON yedek indir</button>
+    </div>
+  </div>
+  <div class="chips" id="tchips" role="group" aria-label="Durum filtresi" style="margin-top:10px"></div>
+  <div class="chips" id="tgroup" role="group" aria-label="Gruplama"></div>
+  <div class="small" id="t-status" role="status" style="min-height:1.4em"></div>
+  <div class="f" style="max-width:260px;margin-bottom:6px"><label for="t-q">Hisse ara</label><input id="t-q" type="text" placeholder="EKGYO"></div>
+  <div class="tlist" id="tlist"><div class="empty">Kayıtlar yükleniyor.</div></div>
+</section>
+
+<footer>Bu sayfa yatırım tavsiyesi değildir. Rakamlar belirtilen kaynaklardan alınmıştır, kaynağı ve saati olmayan veri "doğrulanamadı" olarak işaretlenmiştir.</footer>
+</div>
+<script>
+var BULTEN_SEED = {
+  date: `2026-09-29`, weekday: `Salı`, asOf: `10:48`, windowText: `28.09 18:00 → 29.09 10:48 (TSİ)`,
+  note: `Bülten sabah 07:30 yerine 10:48'de üretildi; açılış verileri dahil.`,
+  sources: [
+    {n:`KAP (Bloomberg HT, Para Ajansı, Borsamatik derlemeleri)`, k:`Birincil / derleme`},
+    {n:`Mynet, CNBC-e, Halk TV (BIST açılışı)`, k:`Haber`},
+    {n:`TheStreet, Axios, CBS News (ABD, İran)`, k:`Haber`},
+    {n:`Cumhuriyet, GZT (altın)`, k:`Haber`},
+    {n:`TradingEconomics (Brent)`, k:`Veri`},
+    {n:`CMC Markets (haftalık takvim)`, k:`Kurum`}
+  ],
+  top5: [
+    {h:`BIST 100 açılışta da satılıyor: 12.504, 7 Eylül'den beri yaklaşık %11 aşağıda`,
+     p:`Endeks dün **%2,38** (306,59 puan) düşüp **12.592,76**'da kapandı, hacim **115,2 mlr TL**. Bu sabah **12.516** (-%0,61) açıldı, 10:25'te **12.504** (-%0,71). Haftalık **-%4,59**, aylık **-%13,99**. Teknik destek **12.500 / 12.400**, direnç **12.700 / 12.800** (CNBC-e).`,
+     chain:`Sebep: fon tasfiyesinin yarattığı nakit ihtiyacı → likit hisselerde satış → endeks. Açılışta banka endeksi **+%0,07**, holding **-%1,17**: yük bankada değil holdinglerde.`,
+     src:`Halk TV 10:25 · Mynet 10:20 · CNBC-e`},
+    {h:`Fon krizi: Erdoğan "sorun sınırlı, bulaşma riski yok" dedi, ödeme takvimi hâlâ yok`,
+     p:`Erdoğan, sorunun fon piyasasının sınırlı bir bölümünde çıktığını ve finansal sisteme bulaşma riski olmadığını söyledi (29.09 sabahı). SPK mekanizmasına göre **131 fon** tasfiye ediliyor, tasfiye en fazla **3 ay** sürecek, ödemeler pay oranında ve yürütücü bankaların belirlediği dönemlerde yapılacak. [[ESKİ 18.09, Bloomberg HT]]`,
+     chain:`Güven mesajı geldi ama somut ödeme tarihi yok. Takvim haberi gelene kadar likit hisselerdeki nakit satışı sürer. Ödemeler yürütücü bankaların (İş Bankası, Ziraat) belirleyeceği dönemlerle gelecek.`,
+     src:`CNBC-e 29.09 · Bloomberg HT 18.09`},
+    {h:`ABD 10 yıllık faiz %5,2 ile 19 yılın zirvesinde, Fed'in Ekim'de artırma olasılığı %70,3`,
+     p:`ABD endeksleri dün düştü: S&P 500 **-%0,77 (7.683,69)**, Nasdaq **-%0,92**, Dow **-%0,67**. Finansallar **-%1,14**, iletişim **-%1,56**. Piyasa Ekim artırımını **%70,3** olasılıkla fiyatlıyor.`,
+     chain:`Zincir: Brent yüksek → enflasyon endişesi → Fed artırım beklentisi → uzun faiz → hisse değerlemesi baskısı. Altın **7 haftalık dibe yakın** (**~4.125–4.132 $**), yani faiz kanalı jeopolitik kanaldan baskın.`,
+     src:`TheStreet 28.09 · Cumhuriyet 29.09 09:21 · GZT 07:33`},
+    {h:`ABD–İran: Trump "hiçbir şey teklif etmedim" dedi, ABD'li yetkili yaptırım gevşetmeye açık diyor`,
+     p:`Trump Truth Social'da **"I offered them NOTHING!"** yazdı. Buna karşın bir ABD'li yetkili CBS'e, somut nükleer ilerleme olursa yaptırım gevşetmeye açık olduğunu söyledi. Dolaylı müzakere Katar arabuluculuğunda sürüyor. Arakçi: **"Savaşın yeniden başlamasına tamamen hazırız"**.`,
+     chain:`Taraflar zamanlama ve sıralamada ayrışıyor. Cuma gecesi Hürmüz'den savaş başından beri en büyük petrol hacmi (**>20 mn varil**) geçti ama Brent yine yükseldi. Ekran: barış haberinden çok reddedilen teklif fiyatlanıyor.`,
+     src:`CBS News 28.09 · Axios 27.09`},
+    {h:`EKGYO: Kemerburgaz sözleşmesinde şirket payı 15,4 mlr TL, Bursa "20 mlr TL" iddiası yalanlandı`,
+     p:`Cevahir Yapı ile imzalanan işte satış geliri **36,66 mlr TL**, şirket payı **%42 = 15.397.620.000 TL**. Ayrı olarak Bursa Nilüfer'deki 100 bin m² arsa için basına yansıyan "20 mlr TL'lik satın alma" iddiası yalanlandı, gelir paylaşımı modeliyle nakit çıkışı yok. Aynı akşam **21:27**'de geri alım bildirimi de geldi.`,
+     chain:`İki farklı rakam karışmasın: 15,4 mlr TL gerçek gelir payı, 20 mlr TL yanlış iddia. Piyasa değerine oranı doğrulanamadı.`,
+     src:`KAP 28.09 21:27 · Borsamatik · kurum bülteni özeti`}
+  ],
+  story: `**Endeksi ezen:** yerel fon krizi. Aylık **-%13,99**, 7 Eylül'de 14.152 olan endeks **12.593**'e indi (**-%11,0**). Dış tarafta ABD 10Y **%5,2**, Brent **105 $** üstü ve Ekim'de faiz artırımı beklentisi baskıyı büyütüyor. **Endeksi tutan:** on kodda şirket geri alımı, banka endeksinin göreli direnci (**+%0,07** açılış) ve Erdoğan'ın güven mesajı. Tarihsel benzetme yapmıyorum: kur sakin (**USD/TRY 48,99–49,00**), 2018 ve 2021 gibi kur şoku yok. Bu kez kaynak faiz ya da kur değil, fon likiditesi.`,
+  strip: [
+    {l:`BIST 100`, v:`12.504`, c:`-%0,71`, d:`d`, n:`10:25 · Halk TV`},
+    {l:`BIST 100 açılış`, v:`12.516`, c:`-%0,61`, d:`d`, n:`10:20 · Mynet`},
+    {l:`BIST 30`, v:`15.649`, c:``, d:`n`, n:`28.09 kapanış · CNBC-e`},
+    {l:`VİOP Ekim`, v:`15.910`, c:`-%0,14`, d:`d`, n:`açılış · önceki kapanış 15.932 (-%2,19)`},
+    {l:`USD/TRY`, v:`48,9969`, c:`+%0,06`, d:`u`, n:`açılış · CNBC-e`},
+    {l:`Gram altın`, v:`6.534,89`, c:`+%0,85`, d:`u`, n:`10:20 · Mynet`},
+    {l:`Ons altın`, v:`4.132`, c:``, d:`n`, n:`09:21 · spot 4.124,57`},
+    {l:`Brent ⚠`, v:`105–108`, c:``, d:`n`, n:`çelişkili: 105,65 (TE 28.09), 108,50 (+%4,02 TheStreet)`},
+    {l:`ABD 10Y`, v:`%5,2`, c:``, d:`n`, n:`19 yılın zirvesi · TheStreet`},
+    {l:`Fed Ekim artırım`, v:`%70,3`, c:``, d:`n`, n:`09:21 · Cumhuriyet`},
+    {l:`S&P 500`, v:`7.683,69`, c:`-%0,77`, d:`d`, n:`28.09 kapanış`},
+    {l:`Nasdaq`, v:`26.820,38`, c:`-%0,92`, d:`d`, n:`28.09 kapanış`},
+    {l:`Dow Jones`, v:`51.481,51`, c:`-%0,67`, d:`d`, n:`28.09 kapanış`},
+    {l:`Bitcoin`, v:`83.984`, c:`+%1,28`, d:`u`, n:`10:20 · Mynet`},
+    {l:`DXY`, v:`—`, c:``, d:`n`, n:`(doğrulanamadı)`},
+    {l:`CDS 5Y`, v:`—`, c:``, d:`n`, n:`(doğrulanamadı)`}
+  ],
+  stripNote: `Brent'te üç rakam var ve birbirini tutmuyor: TradingEconomics **105,65 $** (+%1,27, 28.09), TheStreet **108,50 $** (+%4,02, ABD kapanışı), bir kurum bülteninin sabah verisi **~99,5 $**. Hangisi güncel, doğrulayamadım. Bu yüzden Brent'e bağlı yorumlarda "yüksek" diyorum, tam rakam vermiyorum.`,
+  dom: [
+    `BIST 100 dün **12.592,76**'da kapandı, bugün **12.516** açıldı. Endeks **1 Ekim'de yürürlüğe girecek endeks değişiklikleri** ve **çeyrek sonu** öncesi zaten baskılı. [[ESKİ 28.09 kurum notu]]`,
+    `VİOP Ekim kontratı **15.910** açıldı (-%0,14), önceki kapanış **15.932** (-%2,19). BIST 30 spot kapanış **15.648,91**.`,
+    `USD/TRY **48,9969**, dünkü kapanış **48,9759**. Kur tarafında olağan dışı hareket yok.`,
+    `Bugün 10:00'da eylül ekonomik güven endeksi açıklanıyor. TCMB Başkanı Karahan **6 Ekim**'de TBMM sunumu yapacak.`,
+    `Açılışta en zayıf sektör **finansal kiralama ve faktoring (-%8,14)**, en güçlüsü menkul kıymet yatırım ortaklıkları (**+%1,29**).`
+  ],
+  glob: [
+    `ABD dün zayıf kapandı: **S&P 500 7.683,69 (-%0,77)**, **Nasdaq 26.820,38 (-%0,92)**, **Dow 51.481,51 (-%0,67)**, **Russell 2000 2.817,91 (-%0,69)**.`,
+    `Sektörler: sağlık **+%0,29**, temel tüketim **+%0,22**, enerji **+%0,11**; iletişim **-%1,56**, isteğe bağlı tüketim **-%1,43**, finansallar **-%1,14**.`,
+    `Hisse: **Nvidia +%2,64** (150 mlr $ geri alım artırımı), **MongoDB -%18,43** (CEO'nun Meta'ya geçmesi), **Boeing -%6,2** (737 MAX 10 sertifikasyon gecikmesi).`,
+    `**Ons altın 4.132 $** (spot 4.124,57), yedi haftadan uzun sürenin en düşüğüne yakın. Gram altın **6.516–6.535 TL**.`,
+    `Bu hafta: **30.09** ağustos PCE (manşet aylık **+%0,4**, çekirdek **+%0,3**, yıllık çekirdek **%3,4** beklentisi), **02.10** tarım dışı istihdam (**+100 bin**, işsizlik **%4,2**). [[CMC Markets 25.09]]`
+  ],
+  regime: [
+    [`Altın ↔ jeopolitik gerilim`, `Gerilim ve petrol yükselirken altın **7 haftalık dibe** yakın, Fed Ekim artırım olasılığı **%70,3** (GZT 07:33, Cumhuriyet 09:21).`, `Gerilim artınca altını yukarı yorumlama. Altın faiz ve dolar kanalıyla işliyor.`],
+    [`Brent ↔ jeopolitik gerilim`, `Trump'ın İran teklifini reddi sonrası Brent **+%4,02** (28.09). Aylık **+%16,75** (TradingEconomics). Hürmüz'den rekor geçişe rağmen düşmedi.`, `Red haberi Brent'i hızlı yukarı, barış haberi yavaş aşağı çekiyor. Asimetrik.`],
+    [`BIST ↔ Brent`, `Brent yüksekken BIST aylık **-%13,99**. Dün ABD **-%0,77** iken BIST **-%2,38**.`, `Brent yükselişi BIST'e ek baskı ama asıl sürücü yerel fon krizi. Seri kısa, rejim kısmen belirsiz.`],
+    [`BIST ↔ USDTRY ve CDS`, `USD/TRY **48,9759 → 48,9969**, sakin. CDS bugün için doğrulanamadı.`, `Satış kur kaynaklı değil. 2018 tipi hikâye yazılmaz.`],
+    [`Bankalar ↔ tahvil faizi`, `Açılışta banka endeksi **+%0,07**, holding **-%1,17**, XU100 **-%0,61**. Faiz bugün için doğrulanamadı.`, `Bankalar defansif duruyor. Banka bazlı pozitif ve holding negatif ayrışması bugünkü yönün çerçevesi.`],
+    [`BIST ↔ EEM ve DXY`, `Veri bulunamadı.`, `Rejim belirsiz, yorum yapmıyorum.`],
+    [`ABD endeks ↔ ABD 10Y`, `10Y **%5,2** (19 yıl zirvesi) ve S&P **-%0,77**, finansallar **-%1,14**.`, `Faiz zirve yaparken endeks satılıyor. Bugün 17:00 JOLTS ve tüketici güveni faizi oynatabilir.`]
+  ],
+  regimeNote: `Elimde 5–10 günlük tam seri yok, dayanaklar tek tek günlerin haberlerinden geliyor. Otomasyonda bu tablo gerçek kapanış serisinden çıkarılmalı.`,
+  usiran: {
+    timeline: [
+      [`26.09`, `Trump, İran'ın 7 günlük planını reddetti: Hürmüz'ü açma ve nükleer görüşmeleri yeniden başlatma karşılığında deniz ablukasının kalkması, petrol yaptırımlarının kalkması ve bölgesel ateşkes. "Bir yıl önce belki kabul ederdik, elini fazla zorladılar." (WaPo, NPR, Al Jazeera)`],
+      [`27.09`, `Trump Axios'a: bu hafta yeni görüşmeler bekliyor. Hafta sonu savaş başından beri en büyük petrol hacmi Hürmüz'den geçti (Cuma gecesi **>20 mn varil**, ABD savunma yetkilisi doğruladı). Saldırıları yeniden başlatmayı sorulunca: "Hep düşünüyorum." (Axios)`],
+      [`28.09`, `Dolaylı görüşmeler Katar arabuluculuğunda yeniden başladı. Trump: "Hiçbir şey teklif etmedim." ABD'li yetkili CBS'e: somut nükleer ilerlemede yaptırım gevşetmeye açık. Arakçi: savaşa hazırız, karar Trump'ın. Taraflar sıralama ve zamanlamada ayrışıyor. (CBS News)`],
+      [`28.09`, `ABD kapanışında Brent **+%4,02 (108,50 $)**, S&P **-%0,77**. Suudi Arabistan Doğu-Batı boru hattıyla ihracatı yeniden başlattı. (TheStreet, TradingEconomics)`]
+    ],
+    verdict: `YOK`,
+    why: `Görüşmeler sürüyor ama hiçbir taraf pozisyon değiştirmedi. Rekor tanker geçişi fiziksel iyileşme, ama diplomatik ilerleme yok.`,
+    peace: [`Dolaylı görüşmelerin Katar üzerinden sürmesi`, `Hürmüz'den >20 mn varillik geçiş`, `Suudi Doğu-Batı hattı ihracatı yeniden açtı`],
+    esc: [`Trump'ın teklifi reddi ve "hep düşünüyorum" çıkışı`, `Arakçi: "savaşa tamamen hazırız"`, `Suudi koalisyonunun Husi füze ve İHA'larını engellemesi`],
+    impact: `Rejim panosuna göre: **altın** gerilimde düşüyor (faiz kanalı), **Brent** red haberinde sert, barışta yavaş; **BIST**'te asıl sürücü yerel. **Savunma** (ASELS açılışta **-%2,11**) ve **havayolu** (THYAO **+%0,78**) bugün jeopolitikten çok yerel akışla hareket ediyor.`
+  },
+  news: [
+    {h:`Erdoğan: "Sorun fon piyasasının sınırlı bir bölümünde, bulaşma riski yok"`, ts:`29.09 sabah`, src:`CNBC-e / Mynet`,
+     chain:`Güven mesajı → ama ödeme takvimi yok → nakit ihtiyacı devam → likit hisselerde satış.`, who:`Holdingler (açılış **-%1,17**), fon bağlantılı küçük hisseler (dünkü taban listesi: HEDEF, MARTI, MAGEN, BIGTK, USAK).`, priced:`Kısmen: endeks **-%0,61** açıldı, dünkü kayıp henüz geri alınmadı.`},
+    {h:`Piyasa Fed'in Ekim'de faiz artırımını %70,3 fiyatlıyor`, ts:`29.09 09:21`, src:`Cumhuriyet`,
+     chain:`Petrol ve enflasyon → Fed sıkılaşma → dolar ve faiz yukarı → altın ve riskli varlık aşağı.`, who:`Altın (7 haftalık dip), gelişen piyasa hisseleri, BIST'te yabancı payı yüksek hisseler.`, priced:`Büyük ölçüde fiyatlanmış: ons **4.132 $**, dip bölgesinde.`},
+    {h:`Hürmüz'den rekor tanker geçişi, buna rağmen Brent yukarı`, ts:`27–28.09`, src:`Axios, TheStreet`,
+     chain:`Arz iyileşmesi → Brent baskısı beklenirdi. Ekranda Trump'ın teklifi reddi baskın → Brent **+%4,02**.`, who:`Rafineri, havayolu ve sanayi maliyeti. TUPRS açılışta **-%0,19**, THYAO **+%0,78**.`, priced:`Havayolu henüz Brent'i fiyatlamamış görünüyor, ama seans içi veri yok.`},
+    {h:`Nvidia'dan 150 mlr $ geri alım artırımı, MongoDB -%18,43, Boeing -%6,2`, ts:`28.09`, src:`TheStreet`,
+     chain:`ABD'de hisse bazlı hareket: çip ve yazılımda ayrışma. BIST'e doğrudan kanal yok.`, who:`Teknoloji endeksi dolaylı. Bugün ABD verisi ve Micron (30.09) belirleyici.`, priced:`Nvidia haberi kapanışta fiyatlandı.`},
+    {h:`DMRGD'de kredili işlem ve açığa satış yasağı (28.09 – 27.10)`, ts:`28.09`, src:`KAP / Borsamatik`,
+     chain:`VBTS tedbiri → kaldıraç ve açığa satış kapanır → likidite düşer.`, who:`DMRGD.`, priced:`Tek hisse etkisi, endekse etkisi yok.`}
+  ],
+  kap: [
+    {t:`EKGYO`, c:`soz`, w:`Çok yüksek`, s:`KAP 28.09 21:27`, h:`Kemerburgaz 3. Etap sözleşmesi, şirket payı 15,4 mlr TL`, b:`Cevahir Yapı ile imzalandı. Satış geliri 36,661 mlr TL, şirket payı %42 = 15.397.620.000 TL. Aynı gün 2. etap ihalesi iptal edildi. Ayrı olarak Bursa Nilüfer arsası için "20 mlr TL" iddiası yalanlandı, gelir paylaşımı modeliyle nakit çıkışı yok. Geri alım bildirimi de var.`, y:`Yeni gelir akışı büyük, ama piyasa değerine oranı doğrulanamadı. Açılış fiyat tepkisi verisi yok.`},
+    {t:`MARMR`, c:`devir`, w:`Yüksek`, s:`KAP 28.09 21:48`, h:`Polisan Kansai payının satışına Rekabet Kurulu izni`, b:`%50 pay, 93 mn $ peşin bedel. Sözleşme 29.07'de imzalanmıştı, izin 28.09'da bildirildi.`, y:`Belirsizlik kalktı. Bedel dolar cinsinden peşin.`},
+    {t:`KRDMA / B / D`, c:`pay`, w:`Yüksek`, s:`KAP 28.09`, h:`750 mn TL'lik geri alım programı`, b:`En fazla 11,4 mn adet (sermayenin %1'i), 4 ay süreli.`, y:`Düşen piyasada şirket alıcı. Program tavanı 750 mn TL, gerçekleşme günlük bildirilecek.`},
+    {t:`ARDYZ`, c:`soz`, w:`Orta`, s:`KAP 28.09`, h:`Tokat Erbaa Belediyesi atık yönetimi ihalesi, 430,3 mn TL, 10 yıl`, b:`Sözleşme imzalandı.`, y:`10 yıllık gelir kalemi. Yıllık etkisi ciroya göre doğrulanamadı.`},
+    {t:`FONET`, c:`soz`, w:`Küçük`, s:`KAP 28.09`, h:`Denizli İl Sağlık Müdürlüğü ihalesi 153,99 mn TL, 36 ay`, b:`Ayrıca Batman İl Sağlık Müdürlüğü'nden 137,7 mn TL'lik ayrı bir ihale haberi dolaşıyor (kurum bülteni).`, y:`İki farklı ihale, karıştırılmamalı. İtiraz süresi sonrası sözleşme.`},
+    {t:`OZATD`, c:`fon`, w:`Yüksek`, s:`KAP 25.09 09:53`, h:`[[ESKİ 25.09]] Yönetim kurulu başkanı ve başkan vekili hakkında tutuklama kararı`, b:`Özdemir Ataseven ve Gökhan Ataseven hakkında sulh ceza hâkimliği tutuklama kararı verdi. Şirket, üretimin kesintisiz sürdüğünü belirtti. 28.09'da ana ortağın pay satış planından vazgeçtiği de bildirildi.`, y:`Yeni haber değil ama hâlâ fiyat üstünde baskı. Yönetim krizi ve satış planının iptali birlikte okunmalı.`},
+    {t:`PEKGY`, c:`pay`, w:`Orta`, s:`KAP 28.09`, h:`Tera Yatırım Holding zorunlu pay alım teklifi sürecini sonlandırdı`, b:`Teklif süreci sona erdi.`, y:`Tera Portföy fonları tasfiye kapsamında (Bloomberg HT), PEKGY teklifinin bununla ilişkisi doğrulanamadı.`},
+    {t:`ASTOR / ATLAS / PASEU`, c:`fon`, w:`Yüksek`, s:`KAP 28.09`, h:`Fon soruşturması açıklamaları`, b:`ASTOR: savcılık tedbirleri kalktı, faaliyet sürüyor. ATLAS: fon soruşturmasıyla bağlantısı yok, basındaki haber isim benzerliğinden. PASEU: ortak payları nisanda Pusula Portföy PHB fonuna devredilmişti, fon için tasfiye başvurusu yapıldı.`, y:`Her açıklama ayrı okunmalı. İsim benzerliği yüzünden satılan hisseler tepki verebilir.`},
+    {t:`DMRGD`, c:`fon`, w:`Küçük`, s:`KAP 28.09`, h:`VBTS: kredili işlem ve açığa satış yasağı, 28.09 – 27.10`, b:`Tedbir 27 Ekim seans sonuna kadar.`, y:`Likidite düşer.`},
+    {t:`AEFES`, c:`sermaye`, w:`Orta`, s:`KAP 28.09`, h:`15 mlr TL'ye kadar borçlanma aracı ihracı için SPK başvurusu`, b:`Halka arz edilmeden, tahsisli veya nitelikli yatırımcıya.`, y:`Finansman kaynağı, kullanım amacı bildirimde yok.`},
+    {t:`VESTL / VESBE`, c:`not`, w:`Orta`, s:`KAP 28.09`, h:`JCR: uzun vadeli ulusal not BB+ (tr), durağan`, b:`VESTL notu BBB- seviyesinden BB+ olarak bildirildi (kaynaklar önceki notu farklı yazıyor: BBB- ve BBB).`, y:`İndirim yönlü. Önceki notu doğrulanamadı.`},
+    {t:`Notlar`, c:`not`, w:`Küçük`, s:`KAP 28.09`, h:`ZOREN (Fitch, 19:32), PETKM CCC teyit, ESCAR B- negatif, ERCB BBB- teyit, DARDL BBB-, PRKAB A(tr)`, b:`ERCB'de görünüm negatiften durağana revize edildi.`, y:`ESCAR ve PETKM zayıf tarafta.`},
+    {t:`Birleşme`, c:`devir`, w:`Küçük`, s:`KAP 28.09`, h:`YATAS (Vivense), PSDTC (İdeacore) birleşmeden vazgeçti. ISSEN iştirak birleşmesi için SPK başvurusu`, b:`KTLEV'de Katılımevim, Birevim ve İktisat Katılım paylarının Emlak Katılım'a devri için Hazine, SPK ve BDDK başvuruları yapıldı. ALVES'te TMSF atanmış yönetim kurulu üyeleri göreve başladı.`, y:`Tek başına küçük, KTLEV ve ALVES yönetim değişikliği izlenmeli.`},
+    {t:`TRALT / TRENJ / TRMET`, c:`devir`, w:`Küçük`, s:`KAP 28.09`, h:`TR Tedarik paylarının Türk Altın Holding'e devri`, b:`TRALT %44 (6,6 mn adet), TRENJ ve TRMET %28 (4,2 mn adet), her biri 6,16 mn TL. Grup sadeleşmesi.`, y:`İlişkili taraf işlemi, tutar küçük.`},
+    {t:`LKMNH`, c:`temettu`, w:`Küçük`, s:`KAP 28.09`, h:`Brüt 0,23 TL temettü, verim yaklaşık %1,9`, b:`TUPRS temettüsü 30.09'da (kurum bülteni, brüt 6,7470 TL).`, y:`Ay sonu temettü etkisi.`},
+    {t:`ALKA`, c:`temettu`, w:`Küçük`, s:`KAP 28.09`, h:`Bedelli sermaye artırımı: 735 mn TL → 1 mlr TL (%37,5)`, b:`Ayrıcalıklı sermaye artırımından vazgeçildi.`, y:`Bedelli, seyreltme etkisi var.`}
+  ],
+  buybacks: [
+    [`KRDMA/B/D`, `750 mn TL, 11,4 mn adet`, `4 ay`, `Yeni program`, `KAP 28.09`],
+    [`MAVI`, `200.000 adet @ 37,41 TL`, `—`, `Kümülatif %1,93`, `KAP 28.09`],
+    [`ULUFA`, `3 mn adet @ 1,47 TL`, `25.09`, `Kümülatif %1,07`, `KAP 28.09`],
+    [`GEDIK`, `345.000 adet @ 4,97–5,10 TL`, `25.09`, `Toplam %3,85`, `KAP 28.09`],
+    [`TTKOM`, `365.000 adet`, `25.09`, `Toplam 1,24 mn adet, %0,04`, `KAP 28.09`],
+    [`LKMNH`, `4.000 adet @ 11,89–11,90 TL`, `25.09`, `Oran %5,94`, `KAP 28.09`],
+    [`PCILT`, `50.000 lot @ 30,858 TL`, `25.09`, ``, `KAP 28.09`],
+    [`EKGYO`, `Bildirim var, tutar yok`, `—`, `21:27 bildirimi`, `KAP 28.09`],
+    [`BIOEN (hakim ortak)`, `1 mlr TL'ye kadar`, `—`, `Şirket değil, ortak alımı`, `kurum bülteni`],
+    [`DERHL / DOFRB / GIPTA / TKNKA`, `100 / 50 / 350 / 750 mn TL`, `1 yıl / 3 ay / 1 yıl / 1 yıl`, `GIPTA: Tera bağı yok`, `kurum bülteni 29.09`]
+  ],
+  earnings: `BIST'te bugün öne çıkan bilanço açıklaması bulunamadı. ABD'de bugün piyasa öncesi bilanço tarayamadım (doğrulanamadı). Haftalık takvim (CMC Markets, 25.09): **Micron 30.09 Çarşamba**, beklenti hisse başı kâr **31,45 $**, gelir **50,8 mlr $**; **Nike ve McCormick 01.10**. Konsensüs rakamlarını tek kaynaktan aldım, çapraz doğrulayamadım.`,
+  rumors: [
+    {st:`Şirket yalanladı`, sc:`s-no`, h:`EKGYO: "20 mlr TL'lik Bursa arsa alımı"`, b:`Basında dolaşan iddia. Şirket KAP'ta, gelir paylaşımı protokolü imzalandığını ve nakit çıkışı olmadığını bildirdi.`, s:`Medya haberi, KAP 28.09`},
+    {st:`Çelişkili`, sc:`s-wait`, h:`Trump: "Yaptırım gevşetmeyi teklif etmedim" / ABD'li yetkili: "Açığız"`, b:`Axios ve CBS, isimsiz yetkililere dayandırdı. Trump Truth Social'da yalanladı.`, s:`Axios 27.09, CBS 28.09`},
+    {st:`Şirket reddetti`, sc:`s-no`, h:`Fon soruşturmasıyla ilişkilendirilen hisseler`, b:`ATLAS "isim benzerliği" dedi, PASEU ve YYLGD ilişkiyi reddetti, ASTOR tedbirlerin kalktığını bildirdi.`, s:`KAP 28.09, kurum bülteni`},
+    {st:`Teyitsiz`, sc:`s-idle`, h:`X, Reddit, Investing ve borsa forumları`, b:`Bu kaynaklara erişemedim. Erişim olmadan söylenti yazmıyorum.`, s:`tarama yapılamadı`}
+  ],
+  sectors: [
+    [`Banka`, `Açılışta banka endeksi **+%0,07**, yük holdingde. Dünkü satışta göreli dirençli.`, `Fon satışı bankaya yayılırsa, faiz yükselirse.`, `Nötr`],
+    [`Sınai`, `Belirgin katalizör yok. ARDYZ, FONET gibi ihale haberleri küçük.`, `Brent yüksek, dün sınai endeksi **-%4,12** (kurum bülteni), TÜSİAD rekabet gücü zayıf.`, `Hafif negatif`],
+    [`Holding`, `Açılışta **-%1,17**. Ödeme takvimi gelirse tepki yükselişi mümkün.`, `Fon bağlantılı kalemler, takvim gelmezse satış.`, `Hafif negatif`],
+    [`Ulaştırma`, `THYAO açılışta **+%0,78**, Hürmüz'den tanker geçişi artıyor.`, `Brent **105 $** üstü yakıt maliyetini yukarı çeker.`, `Nötr`],
+    [`Teknoloji`, `Nasdaq **-%0,92**. Nvidia geri alım haberi çip tarafını destekledi.`, `ABD faizi %5,2, Micron 30.09.`, `Hafif negatif`],
+    [`Savunma`, `ABD–İran gerilimi sürüyor.`, `ASELS açılışta **-%2,11**. Gerilim haberi fiyatlanmış görünüyor.`, `Hafif negatif`],
+    [`GYO`, `EKGYO'da 15,4 mlr TL sözleşme.`, `Piyasa değerine oranı doğrulanamadı, endeks zayıf.`, `Hafif pozitif`],
+    [`Finansal kiralama ve faktoring`, `Açılışta **-%8,14** ile en zayıf sektör.`, `Nedeni bulamadım (doğrulanamadı).`, `Negatif`]
+  ],
+  hidden3: [
+    {h:`Vadeli iskontolu: baz ~%1,8`, b:`VİOP Ekim kapanışı **15.932**, BIST 30 spot kapanışı **15.648,91**. Baz **+283 puan (%1,81)**. Ekim vadesine yaklaşık 1 ay var, yıllık TL faiz %37 civarındayken taşıma maliyeti ayda ~%3. Yani vadeli, olması gerekenden **~%1,3 ucuz** (temettü etkisi hariç). Vadeli piyasa spotun altını fiyatlıyor olabilir. Yorum bana ait, güven orta; TLREF verisini kurum bülteninden aldım.`},
+    {h:`7 Eylül'den beri BIST %11 aşağıda, dolar bazında biraz daha fazla`, b:`Akbank Yatırım'ın 8 Eylül bülteninde BIST 100 **14.152**, USD/TRY **48,43**. Dün kapanış **12.592,76**, USD/TRY **48,9759**. TL bazında **-%11,0**, dolar bazında yaklaşık **-%12,0**. Aylık %13,99 kaybın büyük kısmı son üç haftada.`},
+    {h:`On kodda geri alım: alıcı şirketin kendisi`, b:`28.09 KAP akışında MAVI, KRDMA, KRDMB, KRDMD, ULUFA, GEDIK, TTKOM, LKMNH, PCILT ve EKGYO için geri alım bildirimi var. En büyük program KRDM üçlüsünde **750 mn TL**. Aylık %14 düşüşte şirketler kendi hissesini topluyor, fon satışının karşı tarafında bu da var.`}
+  ],
+  sniperNote: `**BIST setup: 0 / 5.** Doğrulanmış güncel hisse fiyatım yok, seviyeler ve giriş koşulu yazmıyorum. **Yurtdışı trade fikri: 0 / 5.** ABD premarket fiyatı doğrulanamadı. Aşağıdaki liste yalnızca katalizörlü izleme listesi. Fiyatı Matriks'ten alıp defterine ekleyebilirsin.`,
+  watch: [
+    {t:`EKGYO`, conf:`Orta`, why:`Şirket payı 15,4 mlr TL olan Kemerburgaz sözleşmesi imzalandı, Türksat İnkılap 2. Etap ihalesinin 2. oturumu 02.10'da.`, bad:`Endeks 12.400 altına sarkarsa yeni iş haberi gölgede kalır. Bursa "20 mlr TL" iddiası yalanlandı, o beklentiyi fiyatlama.`},
+    {t:`MARMR`, conf:`Orta`, why:`93 mn $ peşin bedelli Polisan Kansai satışına Rekabet Kurulu izni geldi.`, bad:`İzin var, kapanış (devir) ayrı. Gecikme veya şart çıkarsa bozulur.`},
+    {t:`KRDMD`, conf:`Orta`, why:`750 mn TL'lik, 11,4 mn adetlik 4 aylık geri alım programı başladı. Düşen piyasada şirket alıcı.`, bad:`Günlük geri alım bildirimleri zayıf kalırsa program etkisiz.`},
+    {t:`ARDYZ`, conf:`Düşük`, why:`Tokat Erbaa Belediyesi'nden 430,3 mn TL, 10 yıllık atık yönetimi sözleşmesi.`, bad:`Ciroya oranı doğrulanamadı, küçük olabilir. Fon başlığı hisseyi ezerse haber kaybolur.`},
+    {t:`FONET`, conf:`Düşük`, why:`Denizli İl Sağlık Müdürlüğü'nden 153,99 mn TL, 36 aylık ihale.`, bad:`Ölçek küçük. İtiraz gelirse iptal olur.`}
+  ],
+  strat: {
+    glob: `Küresel fiyatlamanın ana değişkeni ABD uzun faizi. 10 yıllık **%5,2** ile 19 yılın zirvesinde, Fed'in Ekim artırımı **%70,3** olasılıkla fiyatlanıyor. Zincir: Brent yüksek (**105–108 $**), enflasyon endişesi, Fed artırım beklentisi, uzun faiz, hisse değerlemesi baskısı. Dün S&P 500 **-%0,77**, Nasdaq **-%0,92** kapattı. Altın bu tabloda güvenli liman gibi davranmıyor: **7 haftalık dibe** yakın, çünkü faiz ve dolar yükseliyor. ABD–İran görüşmeleri sürüyor ama taraflar sıralamada ayrışıyor, Trump "hiçbir şey teklif etmedim" diyor. Hürmüz'den rekor tanker geçişi fiziksel iyileşme, ama Brent'e yansımadı. Bugün **17:00** JOLTS ve tüketici güveni, **30.09** PCE, **02.10** istihdam raporu faizi belirleyecek.`,
+    globExp: `Faiz %5,2 üstünde kaldıkça küresel risk iştahı zayıf. Brent'te kalıcı düşüş olmadan rahatlama beklemiyorum.`,
+    dom: `Yerel hikâye faiz değil, likidite. Fon tasfiyesi nakit ihtiyacı yaratıyor, likit hisselerde satış sürüyor. BIST 100 dün **12.592,76**'ya indi, açılışta **12.516**. Aylık kayıp **%13,99**. Erdoğan "bulaşma riski yok" dedi ama ödeme takvimi yok; 131 fonun tasfiyesi en fazla 3 ay sürecek, ödemeler yürütücü bankaların belirlediği dönemlerde. USD/TRY **48,99–49,00**, kur sakin. Şirketler geri alımla karşı tarafta: on kodda bildirim var. Çeyrek sonu ve **1 Ekim** endeks değişikliği mekanik akış ekleyecek.`,
+    domExp: `Ödeme takvimi gelirse tepki yükselişi, gelmezse satış baskısı. Endeks 12.500 desteğinin altında kalırsa 12.400 test edilir.`,
+    scen: [
+      {k:`up-h`, h:`Yukarı senaryo`, d:`Fon takvimi netleşir, ABD verisi faizi düşürür.`, lv:`12.700 üstü kapanış<br>→ 12.800`},
+      {k:`bz-h`, h:`Baz senaryo`, d:`Yeni haber yok, ABD verisine kadar bekleme.`, lv:`12.400 – 12.700 bandı`},
+      {k:`dn-h`, h:`Aşağı senaryo`, d:`Takvim gelmez, faiz yeni zirve yapar.`, lv:`12.500 altı kalıcı<br>→ 12.400`}
+    ],
+    levelNote: `Seviyeler CNBC-e'nin teknik notundan (destek 12.500 ve 12.400, direnç 12.700 ve 12.800).`,
+    avoid: `**Dikkatli ol:** OZATD (yönetim tutuklu, JCR notu düşük), ESCAR (B-, negatif), PETKM (CCC). Fon soruşturmasıyla anılan hisselerde her KAP açıklamasını tek tek oku.`
+  },
+  reads: [
+    {who:`Axios`, date:`27.09`, url:`https://www.axios.com/2026/09/27/trump-iran-war-hormuz-blockade-negotiations`, txt:`Trump, Iran'ın teklifini reddettikten sonra bu hafta yeni görüşme bekliyor. Hürmüz'den savaş başından beri en büyük petrol hacmi geçti.`},
+    {who:`CBS News (canlı)`, date:`28.09`, url:`https://www.cbsnews.com/live-updates/iran-war-us-trump-talks-strait-of-hormuz/`, txt:`Dolaylı görüşmeler yeniden başladı. Trump yaptırım gevşetmeyi yalanladı, ABD'li yetkili somut ilerlemede açık olduğunu söylüyor.`},
+    {who:`TheStreet`, date:`28.09`, url:`https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-sept-28-2026`, txt:`ABD endeksleri Trump'ın İran teklifini reddi ve %5,2'ye çıkan 10Y faiziyle düştü. Brent +%4,02.`},
+    {who:`Bloomberg HT`, date:`18.09 [[ESKİ]]`, url:`https://www.bloomberght.com/fonlarin-odeme-ve-tasfiye-surecini-belirlendi-3788720`, txt:`131 fonun tasfiye mekanizması: 3 ay süre, ödeme pay oranında, yürütücü bankalar İş Bankası ve Ziraat.`},
+    {who:`CMC Markets`, date:`25.09 [[ESKİ]]`, url:`https://www.cmcmarkets.com/en-ie/news-and-analysis/the-week-ahead-us-pce-jobs-report-micron-earnings`, txt:`Haftalık takvim: PCE, istihdam raporu, Micron ve Nike bilançoları ve beklentiler.`}
+  ],
+  opening: {
+    band: 1, bandText: `Hafif negatif (gerçekleşti)`,
+    basis: [
+      `Gerçekleşen: XU100 **12.516** (-%0,61) açıldı, 10:25'te **12.504** (-%0,71). Banka **+%0,07**, holding **-%1,17**.`,
+      `VİOP Ekim **15.910** (-%0,14) açıldı, spot BIST 30 dünkü kapanışı **15.648,91**.`,
+      `Dayanak olabilecek ama doğrulayamadıklarım: VİOP gece seansı, TUR/ADR, CDS, Asya kapanışları ve ABD vadelileri.`
+    ],
+    pos: [`ETYAT **+%8,41**`, `CMENT **+%8,37**`, `DIRIT **+%7,42**`],
+    neg: [`HEDEF, MARTI, MAGEN, BIGTK, USAK: **-%10,00** (taban)`, `NETGL **-%7,21**`, `ASELS **-%2,11**`]
+  },
+  calendar: [
+    [`10:00`, `Türkiye eylül ekonomik güven endeksi`],
+    [`12:00`, `Euro Bölgesi: sanayi güveni, tüketici güveni, tüketici enflasyon beklentisi`],
+    [`14:00`, `ECB Başkanı Lagarde konuşması`],
+    [`17:00`, `ABD Conference Board tüketici güveni (beklenti 90,10, önceki 89,40)`],
+    [`17:00`, `ABD JOLTS açık iş sayısı (beklenti 7,23 mn, önceki 7,27 mn)`],
+    [`23:30`, `API ham petrol stokları`],
+    [`30.09`, `ABD ağustos PCE, Micron bilançosu, TUPRS temettüsü, ay ve çeyrek sonu`],
+    [`01.10`, `BIST endeks değişiklikleri yürürlükte, İSO imalat PMI, Nike bilançosu`],
+    [`02.10`, `ABD tarım dışı istihdam (beklenti +100 bin, işsizlik %4,2), EKGYO Türksat ihalesi 2. oturum`]
+  ],
+  blind: `Bülten 10:48'de üretildi, sabah 07:30 verisi değil. **Brent**'te üç kaynak birbirini tutmuyor (105,65 / 108,50 / ~99,5), hangisi güncel doğrulanamadı. **DXY, CDS, TR tahvil faizi, ABD vadelileri, Asya, VİOP gece seansı ve TUR/ADR** bulunamadı. **X, Reddit, Investing ve borsa forumlarına** erişemedim, resmi olmayan haber bölümü yalnızca KAP yalanlamaları ve haber ajansı çelişkilerinden oluştu. **KAP**'a doğrudan girmedim, Bloomberg HT, Para Ajansı ve Borsamatik derlemelerini kullandım. EKGYO Kemerburgaz rakamları, bazı geri alım programları ve takvim saatleri bugünkü kurum bültenlerinden geliyor, ikinci kaynakla doğrulanmadı. Sınai endeksi %4,12 düşüşü de aynı kaynaktan. **Fintables bağlantısı hata verdi**, canlı fiyat ve takas yok. **Kurum hedef fiyat ve tavsiye değişiklikleri** taranamadı. Piyasa değerine göre KAP sıralaması yapamadım. **Tarihsel benzetme** yok, zorlama olurdu. Rejim panosu birkaç günlük veriye dayanıyor.`
+};
+
+/* ---------- V10 bülten: veriden sayfa ---------- */
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function md(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\[\[(.+?)\]\]/g,'<span class="tag old">$1</span>').replace(/&lt;br&gt;/g,'<br>')}
+function src(s){return s?'<span class="srcnote">'+esc(s)+'</span>':''}
+var CUR=null, curKapCat='all';
+var CATS=[['all','Hepsi'],['soz','Sözleşme ve ihale'],['pay','Geri alım ve ortak alımı'],['devir','Devir ve birleşme'],['not','Kredi notu'],['fon','Fon ve tedbir'],['temettu','Temettü ve sermaye']];
+var WCLS={'Çok yüksek':'hi','Yüksek':'hi','Orta':'','Küçük':''};
+
+var SECTIONS=[
+ ['s-top','Güne başlamadan',`ilk 5 haber · sebep → sonuç`,function(b){
+   return '<ol class="top5">'+b.top5.map(function(t,i){return '<li><span class="rank">'+(i+1)+'</span><h3>'+md(t.h)+'</h3><div><p>'+md(t.p)+'</p><div class="chain">'+md(t.chain)+'</div><div class="meta">'+src(t.src)+'</div></div></li>'}).join('')+'</ol>'}],
+ ['s-nabiz','Sokağın nabzı',`ana hikâye`,function(b){return '<div class="card prose"><p>'+md(b.story)+'</p></div>'}],
+ ['s-piyasa','Piyasa şeridi',`kapanış 28.09 · sabah 29.09`,function(b){
+   return '<div class="strip">'+b.strip.map(function(t){var cls=t.d==='u'?'up':t.d==='d'?'down':'';return '<div class="tile"><div class="l">'+esc(t.l)+'</div><div class="v">'+esc(t.v)+'</div><div class="c '+cls+'">'+(t.c?esc(t.c):'&nbsp;')+'</div><div class="n">'+esc(t.n)+'</div></div>'}).join('')+'</div><p class="small" style="margin-top:8px">'+md(b.stripNote)+'</p>'}],
+ ['s-yurt','Yurtiçi ve yurtdışı',`Destek düzeni`,function(b){
+   return '<div class="grid2"><div class="card"><div class="colh"><h3>Yurtiçi</h3></div><ul class="bl">'+b.dom.map(function(x){return '<li>'+md(x)+'</li>'}).join('')+'</ul></div><div class="card"><div class="colh"><h3>Yurtdışı</h3></div><ul class="bl">'+b.glob.map(function(x){return '<li>'+md(x)+'</li>'}).join('')+'</ul></div></div>'}],
+ ['s-rejim','Rejim panosu',`bültendeki tüm yorumların referansı`,function(b){
+   return '<div class="tw"><table><thead><tr><th>İlişki</th><th>Ekranda ne oldu</th><th>Bugünkü yoruma etkisi</th></tr></thead><tbody>'+b.regime.map(function(r){return '<tr><td class="nw"><b>'+esc(r[0])+'</b></td><td>'+md(r[1])+'</td><td>'+md(r[2])+'</td></tr>'}).join('')+'</tbody></table></div><p class="small" style="margin-top:8px">'+md(b.regimeNote)+'</p>'}],
+ ['s-iran','ABD–İran hattı',`saat damgalı zaman çizgisi`,function(b){
+   var u=b.usiran;
+   return '<div class="grid2"><div class="card"><ol class="cal">'+u.timeline.map(function(t){return '<li><span class="tm">'+esc(t[0])+'</span><div>'+md(t[1])+'</div></li>'}).join('')+'</ol></div>'
+    +'<div class="card"><div class="colh"><h3>Seyri değiştiren gelişme</h3><span class="tag '+(u.verdict==='VAR'?'hi':'')+'">'+esc(u.verdict)+'</span></div><p style="margin:0 0 10px">'+md(u.why)+'</p>'
+    +'<h4 class="mh">Barış sinyali</h4><ul class="bl">'+u.peace.map(function(x){return '<li>'+md(x)+'</li>'}).join('')+'</ul><h4 class="mh" style="margin-top:12px">Tırmanma sinyali</h4><ul class="bl">'+u.esc.map(function(x){return '<li>'+md(x)+'</li>'}).join('')+'</ul></div></div>'
+    +'<div class="expect" style="margin-top:12px">'+md(u.impact)+'</div>'}],
+ ['s-news','Masadaki haberler',`haber → sebep-sonuç → hisse → fiyatlanma`,function(b){
+   return '<div class="kap">'+b.news.map(function(n){return '<div class="card"><h3 style="font-size:15px">'+md(n.h)+'</h3><div class="small" style="margin-top:2px">'+esc(n.ts)+' · '+esc(n.src)+'</div><p style="margin:8px 0 0;font-size:13.5px"><b>Zincir:</b> '+md(n.chain)+'</p><p style="margin:4px 0 0;font-size:13.5px"><b>Etkilenen:</b> '+md(n.who)+'</p><p style="margin:4px 0 0;font-size:13.5px"><b>Fiyatlanma:</b> '+md(n.priced)+'</p></div>'}).join('')+'</div>'}],
+ ['s-kap','KAP ve şirket haberleri',`İnfo düzeni · büyüklüğe göre`,function(b){
+   return '<div class="chips" id="chips" role="group" aria-label="Kategori filtresi">'+CATS.map(function(c,i){return '<button class="chip" type="button" data-c="'+c[0]+'" aria-pressed="'+(c[0]===curKapCat)+'">'+c[1]+'</button>'}).join('')+'</div><div class="kap" id="kap"></div>'}],
+ ['s-geri','Pay geri alımı ve ortak alımı',`İnfo düzeni`,function(b){
+   return '<div class="tw"><table><thead><tr><th>Hisse</th><th>Tutar</th><th>Süre</th><th>Not</th><th>Kaynak</th></tr></thead><tbody>'+b.buybacks.map(function(g){return '<tr><td class="tk">'+esc(g[0])+'</td><td>'+esc(g[1])+'</td><td class="nw">'+esc(g[2])+'</td><td>'+esc(g[3])+'</td><td class="small">'+esc(g[4])+'</td></tr>'}).join('')+'</tbody></table></div>'}],
+ ['s-bilanco','Bilançolar',`gerçekleşen vs konsensüs`,function(b){return '<div class="card prose"><p>'+md(b.earnings)+'</p></div>'}],
+ ['s-resmi','Resmi olmayan haberler',`🔸SÖYLENTİ · kaynak + teyit`,function(b){
+   return '<div class="grid2">'+b.rumors.map(function(r){return '<div class="rumor"><div class="top"><span class="rtag">🔸SÖYLENTİ</span><span class="status '+r.sc+'">'+esc(r.st)+'</span></div><b>'+md(r.h)+'</b><p style="margin:4px 0 0;font-size:13px">'+md(r.b)+'</p><div class="small" style="margin-top:6px">Kaynak: '+esc(r.s)+'</div></div>'}).join('')+'</div>'
+   +'<h3 style="font-size:15px;margin:18px 0 8px">Canlı tarama şablonu</h3><div class="grid2">'+['X','Borsa forumları','Reddit','Investing yorumları'].map(function(p){return '<div class="rumor skel"><div class="top"><span class="rtag">'+p+'</span><span class="status s-idle">bugün boş</span></div><div class="small">hesap veya başlık · saat · iddia · etkilenen hisse · teyit</div><div class="ph"></div><div class="ph s"></div></div>'}).join('')+'</div>'}],
+ ['s-sektor','Sektör röntgeni',`katalizör · risk · bugünkü yön`,function(b){
+   return '<div class="tw"><table><thead><tr><th>Sektör</th><th>Katalizör</th><th>Risk</th><th>Yön</th></tr></thead><tbody>'+b.sectors.map(function(r){return '<tr><td class="nw"><b>'+esc(r[0])+'</b></td><td>'+md(r[1])+'</td><td>'+md(r[2])+'</td><td class="nw"><span class="tag">'+esc(r[3])+'</span></td></tr>'}).join('')+'</tbody></table></div>'}],
+ ['s-detay','Kimsenin görmediği 3 detay',`veriye dayalı`,function(b){
+   return '<div class="grid2">'+b.hidden3.map(function(d){return '<div class="card"><h3 style="font-size:15px;margin-bottom:6px">'+md(d.h)+'</h3><p style="margin:0;font-size:13.5px">'+md(d.b)+'</p></div>'}).join('')+'</div>'}],
+ ['s-strateji','Yatırım stratejisi',`Destek "Yatırım Stratejimiz" düzeni`,function(b){
+   var s=b.strat;
+   return '<div class="grid2"><div class="card prose"><div class="colh"><h3>Yurtdışı</h3></div><p>'+md(s.glob)+'</p><div class="expect"><b>Beklenti:</b> '+md(s.globExp)+'</div></div><div class="card prose"><div class="colh"><h3>Yurtiçi</h3></div><p>'+md(s.dom)+'</p><div class="expect"><b>Beklenti:</b> '+md(s.domExp)+'</div></div></div>'
+   +'<div class="scen">'+s.scen.map(function(c){return '<div class="'+c.k+'"><h4>'+esc(c.h)+'</h4><div class="small">'+esc(c.d)+'</div><div class="lv">'+md(c.lv)+'</div></div>'}).join('')+'</div><p class="small" style="margin-top:6px">'+md(s.levelNote)+'</p>'
+   +'<h3 style="font-size:16px;margin:22px 0 4px">Hisse fikirleri ve gerekçeleri</h3><p class="small" style="margin:0 0 10px">'+md(b.sniperNote)+'</p>'
+   +'<div class="tw"><table><thead><tr><th>Hisse</th><th>Neden</th><th>Ne bozar</th><th>Güven</th><th></th></tr></thead><tbody>'+b.watch.map(function(f,i){return '<tr><td class="tk">'+esc(f.t)+'</td><td>'+md(f.why)+'</td><td>'+md(f.bad)+'</td><td class="nw"><span class="tag">'+esc(f.conf)+'</span></td><td><button class="btn ghost" type="button" data-fi="'+i+'">Deftere ekle</button></td></tr>'}).join('')+'</tbody></table></div>'
+   +'<p class="small" style="margin-top:8px">'+md(s.avoid)+'</p>'}],
+ ['s-okur','Mürekkep yalamışlar ne diyor?',`yazar, tarih, link`,function(b){
+   return '<div class="tw"><table><thead><tr><th>Kaynak</th><th>Tarih</th><th>Ana fikir</th></tr></thead><tbody>'+b.reads.map(function(r){return '<tr><td class="nw"><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.who)+'</a></td><td class="nw">'+md(r.date)+'</td><td>'+md(r.txt)+'</td></tr>'}).join('')+'</tbody></table></div>'}],
+ ['s-acilis','Açılış',`bantlar promptundaki gibi`,function(b){
+   var o=b.opening, bands=['Negatif','Hafif negatif','Nötr','Hafif pozitif','Pozitif'], lab=['≤ -%1','-%1 / -%0,30','±%0,30','+%0,30 / +%1','≥ +%1'];
+   return '<div class="card"><b>XU100: '+esc(o.bandText)+'</b><div class="gauge">'+bands.map(function(x,i){return '<div'+(i===o.band?' class="on"':'')+'>'+x+'</div>'}).join('')+'</div><div class="gaugel">'+lab.map(function(x){return '<span>'+x+'</span>'}).join('')+'</div>'
+   +'<ul class="bl" style="margin-top:14px">'+o.basis.map(function(x){return '<li>'+md(x)+'</li>'}).join('')+'<li><b>Açılışta öne çıkan yükselenler:</b> '+o.pos.map(md).join(', ')+'</li><li><b>Açılışta öne çıkan düşenler:</b> '+o.neg.map(md).join(', ')+'</li></ul></div>'}],
+ ['s-takvim','Bugünün takvimi',`saatler TSİ`,function(b){
+   return '<div class="card"><ol class="cal">'+b.calendar.map(function(c){return '<li><span class="tm">'+esc(c[0])+'</span><div>'+md(c[1])+'</div></li>'}).join('')+'</ol></div>'}],
+ ['s-kor','Kör noktalar','',function(b){return '<div class="blind">'+md(b.blind)+'</div>'}]
+];
+
+function renderKap(){
+  var b=CUR; if(!b||!$('#kap'))return;
+  $('#kap').innerHTML=b.kap.filter(function(k){return curKapCat==='all'||k.c===curKapCat}).map(function(k){
+    var catName=(CATS.filter(function(c){return c[0]===k.c})[0]||[0,''])[1];
+    return '<div class="kitem"><div class="tkr">'+esc(k.t)+'<small>'+esc(catName)+'</small></div><div><h3>'+md(k.h)+'</h3><p>'+md(k.b)+'</p><div class="why"><b>Tahtaya etkisi:</b> '+md(k.y)+'</div><div class="row">'+src(k.s)+'<span class="tag '+(WCLS[k.w]||'')+'">Önem: '+esc(k.w)+'</span></div></div></div>';
+  }).join('')||'<div class="empty">Bu kategoride haber yok.</div>';
+}
+function renderBulten(b){
+  CUR=b;
+  $('#when').textContent=b.weekday+' '+b.date.split('-').reverse().join('.')+' · veri saati '+b.asOf+' · pencere '+b.windowText;
+  $('#nav').innerHTML=SECTIONS.map(function(s){return '<a href="#'+s[0]+'">'+esc(s[1])+'</a>'}).join('')+'<a href="#s-trade">Trade defteri</a>';
+  $('#srcbar').innerHTML=b.sources.map(function(s){return '<div class="srcchip"><span>'+esc(s.n)+' <small>'+esc(s.k)+'</small></span></div>'}).join('');
+  $('#bnote').textContent=b.note||'';
+  $('#bulten').innerHTML=SECTIONS.map(function(s){
+    return '<section id="'+s[0]+'"><div class="sh"><h2>'+esc(s[1])+'</h2>'+(s[2]?'<span class="idea">'+s[2]+'</span>':'')+'</div>'+s[3](b)+'</section>';
+  }).join('');
+  renderKap();
+}
+document.addEventListener('click',function(e){
+  var c=e.target.closest('#chips .chip'); if(c){curKapCat=c.getAttribute('data-c');document.querySelectorAll('#chips .chip').forEach(function(x){x.setAttribute('aria-pressed',x===c)});renderKap();return}
+  var f=e.target.closest('[data-fi]'); if(f&&CUR){
+    var it=CUR.watch[+f.getAttribute('data-fi')];
+    $('#f-tk').value=it.t; $('#f-side').value='L'; $('#f-why').value=it.why; $('#f-conf').value=it.conf;
+    document.querySelectorAll('.sp').forEach(function(x){x.checked=(x.value==='V')});
+    updRR(); $('#s-trade').scrollIntoView({behavior:'smooth'}); $('#f-en').focus();
+  }
+});
+renderBulten(BULTEN_SEED);
+
+/* gün gezgini: veritabanında kayıtlı günler */
+var dayDocs={};
+async function initDays(db){
+  try{
+    var snap=await db.collection('bulten').get();
+    snap.docs.forEach(function(d){dayDocs[d.id]=d.data()});
+  }catch(e){return}
+  var ids=Object.keys(dayDocs); if(BULTEN_SEED&&ids.indexOf(BULTEN_SEED.date)<0)ids.push(BULTEN_SEED.date);
+  ids.sort().reverse();
+  if(ids.length<2)return;
+  var sel=$('#daysel'); sel.innerHTML=ids.map(function(i){return '<option value="'+i+'">'+i.split('-').reverse().join('.')+'</option>'}).join('');
+  $('#daynav').hidden=false;
+  sel.addEventListener('change',function(){var d=dayDocs[sel.value]||(sel.value===BULTEN_SEED.date?BULTEN_SEED:null); if(d)renderBulten(d)});
+  var latest=ids[0]; if(dayDocs[latest]&&latest!==BULTEN_SEED.date){renderBulten(dayDocs[latest]);sel.value=latest}
+}
+
+/* ---------- trade defteri ---------- */
+var tDB=null,tAssets=null,tDown=null,trades=[],tFilter='all',tGroup='list',delAsk=null,delEnt=null,openId=null,edit=null,drafts={},formFiles=[];
+var STAGES=['Not','Kurulum','Giriş yapıldı','Stop çekildi','Kısmi çıkış','TP1 alındı','TP2 alındı','Tez değişti','Kapandı','Ders'];
+var STAT=['Bekliyor','Açık','TP1','TP2','Stop','İptal','Elle kapandı'];
+var MONTHS=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function num(v){
+  v=String(v==null?'':v).trim(); if(!v)return NaN;
+  if(v.indexOf(',')>-1) v=v.replace(/\./g,'').replace(',','.');
+  return parseFloat(v);
+}
+function fmt(n){return (n==null||isNaN(n))?'—':n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function fdt(iso){try{return new Date(iso).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}catch(e){return iso}}
+function uid(){return 'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function tById(id){return trades.filter(function(x){return x.id===id})[0]}
+function isoWeek(s){var d=new Date(s+'T12:00:00');var day=(d.getDay()+6)%7;d.setDate(d.getDate()-day+3);var y=d.getFullYear();var j=new Date(y,0,4);var w=1+Math.round(((d-j)/86400000-3+((j.getDay()+6)%7))/7);return y+' · Hafta '+('0'+w).slice(-2)}
+function monthLabel(s){var p=String(s).split('-');return MONTHS[(+p[1]||1)-1]+' '+p[0]}
+$('#f-date').value=todayStr();
+
+function rrCalc(side,en,tp,sl){
+  var risk=side==='S'?sl-en:en-sl, rew=side==='S'?en-tp:tp-en;
+  if(!(risk>0)||!(rew>0))return null;
+  return {rr:rew/risk,risk:risk,rew:rew,riskPct:risk/en*100,rewPct:rew/en*100};
+}
+function updRR(){
+  var box=$('#f-rr'), side=$('#f-side').value, en=num($('#f-en').value), tp=num($('#f-tp1').value), sl=num($('#f-sl').value);
+  if(isNaN(en)||isNaN(tp)||isNaN(sl)){box.className='rr';box.textContent='Seviyeleri gir';return}
+  var r=rrCalc(side,en,tp,sl);
+  if(!r){box.className='rr bad';box.textContent='Stop veya TP yanlış tarafta';return}
+  box.className='rr'+(r.rr<1.5?' bad':'');
+  box.textContent='1 : '+r.rr.toFixed(2)+'  (risk %'+r.riskPct.toFixed(2)+', getiri %'+r.rewPct.toFixed(2)+')'+(r.rr<1.5?'  · 1,5 altı':'');
+}
+['f-side','f-en','f-tp1','f-sl'].forEach(function(id){document.getElementById(id).addEventListener('input',updRR)});
+
+function msg(t,bad){['f-msg','t-status'].forEach(function(id){var m=document.getElementById(id);if(m){m.textContent=t;m.style.color=bad?'var(--down)':'var(--muted)'}})}
+
+/* görsel seçimi (form ve her trade için) */
+function draftFor(id){return drafts[id]||(drafts[id]={text:'',stage:'Not',price:'',files:[]})}
+function filesFor(k){return k==='form'?formFiles:draftFor(k).files}
+function addFiles(k,list){
+  var arr=filesFor(k); for(var i=0;i<list.length;i++){var f=list[i]; if(f&&/^image\//.test(f.type))arr.push({file:f,url:URL.createObjectURL(f),cap:''})}
+  if(k==='form')renderPend(); else renderTrades();
+}
+function pickFiles(k){var i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=true;i.onchange=function(){addFiles(k,i.files)};i.click()}
+function pendHTML(files,k){return files.map(function(f,i){return '<div class="pi"><img alt="" src="'+f.url+'"><input class="pi-cap" data-k="'+esc(k)+'" data-i="'+i+'" placeholder="Bu görsel için açıklama" value="'+esc(f.cap)+'" aria-label="Görsel açıklaması"><button type="button" class="btn ghost" data-act="pi-rm" data-k="'+esc(k)+'" data-i="'+i+'">Kaldır</button></div>'}).join('')}
+function renderPend(){$('#pend').innerHTML=pendHTML(formFiles,'form')}
+async function uploadAll(files){
+  if(!files.length)return [];
+  if(!tAssets)throw new Error('Görsel yükleme bu görünümde yok');
+  var out=[]; for(var i=0;i<files.length;i++){var up=await tAssets.upload(files[i].file); out.push({id:up.id,caption:files[i].cap||''})}
+  return out;
+}
+function dropAsset(id){if(tAssets&&id){try{return tAssets.delete(id).catch(function(){})}catch(e){}}}
+function resetForm(){
+  $('#tf').reset(); $('#f-date').value=todayStr();
+  formFiles.forEach(function(f){URL.revokeObjectURL(f.url)}); formFiles=[]; renderPend(); updRR();
+}
+$('#f-clear').addEventListener('click',resetForm);
+document.addEventListener('paste',function(e){
+  var it=(e.clipboardData&&e.clipboardData.items)||[], fs=[];
+  for(var i=0;i<it.length;i++){if(it[i].type.indexOf('image/')===0){var f=it[i].getAsFile();if(f)fs.push(f)}}
+  if(!fs.length)return;
+  var card=e.target.closest&&e.target.closest('.trade');
+  if(card){addFiles(card.getAttribute('data-id'),fs)}
+  else if(document.getElementById('s-trade').getBoundingClientRect().top<window.innerHeight){addFiles('form',fs)}
+});
+$('#s-trade').addEventListener('dragover',function(e){if(e.target.closest('.dz'))e.preventDefault()});
+$('#s-trade').addEventListener('drop',function(e){var z=e.target.closest('.dz');if(!z)return;e.preventDefault();addFiles(z.getAttribute('data-k'),e.dataTransfer.files)});
+
+function mkEntry(stage,text,price,images,auto){return {uid:uid(),ts:new Date().toISOString(),stage:stage,text:text||'',price:(price==null||isNaN(price))?null:price,images:images||[],auto:!!auto}}
+async function patchTrade(t,patch){await tDB.collection('trades').doc(t.id).update(patch)}
+function withEntry(t,en){return (t.updates||[]).concat([en])}
+
+/* yeni trade */
+$('#tf').addEventListener('submit',async function(e){
+  e.preventDefault();
+  if(!tDB){msg('Kayıt açık değil, bu görünümde kaydedemiyorum.',true);return}
+  var side=$('#f-side').value, en=num($('#f-en').value), tp1=num($('#f-tp1').value), tp2=num($('#f-tp2').value), sl=num($('#f-sl').value);
+  if(isNaN(en)||isNaN(tp1)||isNaN(sl)){msg('Giriş, TP1 ve stop sayı olmalı.',true);return}
+  if(!rrCalc(side,en,tp1,sl)){msg('Stop ve TP1, girişe göre doğru tarafta olmalı.',true);return}
+  var btn=$('#f-save'); btn.disabled=true; msg('Kaydediliyor');
+  try{
+    var imgs=await uploadAll(formFiles);
+    var srcs=[].slice.call(document.querySelectorAll('.sp:checked')).map(function(c){return c.value}).join('');
+    await tDB.collection('trades').add({
+      date:$('#f-date').value, ticker:$('#f-tk').value.trim().toUpperCase(), side:side,
+      entry:en, tp1:tp1, tp2:isNaN(tp2)?null:tp2, stop:sl,
+      why:$('#f-why').value.trim(), cond:$('#f-cond').value.trim(), srcs:srcs, conf:$('#f-conf').value,
+      status:'Bekliyor', exit:null, updates:imgs.length?[mkEntry('Kurulum','',NaN,imgs,false)]:[], createdAt:new Date().toISOString()
+    });
+    resetForm(); msg('Kaydedildi.');
+  }catch(err){msg('Kaydedilemedi: '+(err&&err.message?err.message:'bilinmeyen hata'),true)}
+  btn.disabled=false;
+});
+
+function stClass(s){return s==='TP1'||s==='TP2'?'win':s==='Stop'?'loss':s==='Açık'?'open':''}
+function realR(t){
+  if(t.exit==null||isNaN(t.exit))return null;
+  var risk=t.side==='S'?t.stop-t.entry:t.entry-t.stop; if(!(risk>0))return null;
+  var pnl=t.side==='S'?t.entry-t.exit:t.exit-t.entry; return pnl/risk;
+}
+function statsOf(arr){
+  var closed=arr.filter(function(t){return t.status==='TP1'||t.status==='TP2'||t.status==='Stop'});
+  var wins=closed.filter(function(t){return t.status!=='Stop'}).length;
+  var rs=arr.map(realR).filter(function(x){return x!==null});
+  var avg=rs.length?rs.reduce(function(a,b){return a+b},0)/rs.length:null;
+  return {n:arr.length,closed:closed.length,wins:wins,avg:avg,
+    txt:closed.length?('isabet %'+Math.round(wins/closed.length*100)+' ('+wins+'/'+closed.length+')'+(avg==null?'':' · ort. '+(avg>=0?'+':'')+avg.toFixed(2)+' R')):'kapanan yok'};
+}
+function ladder(t){
+  var pts=[['s',t.stop,'Stop'],['e',t.entry,'Giriş'],['t',t.tp1,'TP1']]; if(t.tp2!=null)pts.push(['t',t.tp2,'TP2']);
+  var vals=pts.map(function(p){return p[1]}), lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals), span=(hi-lo)||1;
+  return '<div class="ladder" aria-label="Seviye şeridi"><div class="trk"></div>'+pts.map(function(p,i){
+    var x=(p[1]-lo)/span*84+8;
+    return '<div class="mk '+p[0]+'" style="left:'+x+'%"></div><div class="lb '+(i%2?'top':'bot')+'" style="left:'+x+'%">'+p[2]+' '+fmt(p[1])+'</div>';
+  }).join('')+'</div>';
+}
+function renderStats(){
+  var s=statsOf(trades), open=trades.filter(function(t){return t.status==='Bekliyor'||t.status==='Açık'}).length;
+  var items=[['Toplam kayıt',trades.length],['Bekleyen / açık',open],['İsabet (TP / TP+Stop)',s.closed?('%'+Math.round(s.wins/s.closed*100)+' · '+s.wins+'/'+s.closed):'—'],['Ort. gerçekleşen R',s.avg==null?'—':(s.avg>=0?'+':'')+s.avg.toFixed(2)+' R']];
+  $('#tstats').innerHTML=items.map(function(i){return '<div class="tile"><div class="l">'+i[0]+'</div><div class="v">'+i[1]+'</div></div>'}).join('');
+}
+function allImgs(t){var a=[];(t.updates||[]).forEach(function(u){(u.images||[]).forEach(function(im){a.push(im)})});return a}
+function figs(imgs){
+  return imgs.length?'<div class="figs">'+imgs.map(function(im){return '<figure class="fig"><img class="thumb" alt="'+esc(im.caption||'grafik')+'" src="/_blob/'+esc(im.id)+'" data-full="/_blob/'+esc(im.id)+'" data-cap="'+esc(im.caption||'')+'"><figcaption>'+esc(im.caption||'')+'</figcaption></figure>'}).join('')+'</div>':'';
+}
+function stageOpts(sel){return STAGES.map(function(s){return '<option'+(s===sel?' selected':'')+'>'+s+'</option>'}).join('')}
+function entryHTML(t,u){
+  if(edit&&edit.tid===t.id&&edit.uid===u.uid){
+    return '<li class="te"><div class="addbox"><div style="display:flex;gap:8px;flex-wrap:wrap"><select class="ctl" style="width:auto" data-role="ed-stage" aria-label="Aşama">'+stageOpts(edit.stage)+'</select><input class="ctl num" style="width:130px" data-role="ed-price" inputmode="decimal" placeholder="Fiyat" value="'+esc(edit.price)+'"></div>'
+      +'<textarea class="ctl" data-role="ed-text" rows="3" aria-label="Not">'+esc(edit.text)+'</textarea>'
+      +edit.imgs.map(function(im,i){return '<div class="pi"><img alt="" src="/_blob/'+esc(im.id)+'"><input class="pi-cap" data-role="ed-cap" data-i="'+i+'" value="'+esc(im.caption)+'" placeholder="Açıklama" aria-label="Görsel açıklaması"><button class="btn ghost" type="button" data-act="ed-imrm" data-i="'+i+'">Kaldır</button></div>'}).join('')
+      +'<div style="display:flex;gap:8px"><button class="btn" type="button" data-act="ed-save">Kaydet</button><button class="btn ghost" type="button" data-act="ed-cancel">Vazgeç</button></div></div></li>';
+  }
+  return '<li class="te'+(u.auto?' auto':'')+'"><div class="th"><span class="tag'+(u.auto?' old':'')+'">'+esc(u.stage)+'</span><span class="num">'+fdt(u.ts)+'</span>'+(u.price!=null?'<span class="num">fiyat '+fmt(u.price)+'</span>':'')+(u.auto?'<span>otomatik</span>':'')
+    +(delEnt===u.uid?'<span>Silinsin mi?</span><button class="btn warn" type="button" data-act="ent-del2" data-u="'+u.uid+'">Evet</button><button class="btn ghost" type="button" data-act="no">Vazgeç</button>':'<button class="btn ghost" type="button" data-act="ent-edit" data-u="'+u.uid+'">Düzenle</button><button class="btn ghost" type="button" data-act="ent-del" data-u="'+u.uid+'">Sil</button>')
+    +'</div>'+(u.text?'<div class="tx">'+esc(u.text)+'</div>':'')+figs(u.images||[])+'</li>';
+}
+function moreHTML(t){
+  var d=draftFor(t.id), ents=(t.updates||[]).slice().sort(function(a,b){return a.ts<b.ts?-1:a.ts>b.ts?1:0});
+  var lvs=[['en','Giriş',t.entry],['tp1','TP1',t.tp1],['tp2','TP2',t.tp2],['sl','Stop',t.stop]].map(function(x){return '<div class="f"><label>'+x[1]+'</label><input class="ctl num" data-role="lv-'+x[0]+'" inputmode="decimal" value="'+(x[2]!=null?String(x[2]).replace('.',','):'')+'"></div>'}).join('');
+  return '<div class="more">'
+    +'<div><h4 class="mh">Seviyeler</h4><div class="lvform">'+lvs+'<div class="f"><label>&nbsp;</label><button class="btn ghost" type="button" data-act="lv-save">Güncelle</button></div></div><div class="small" style="margin-top:4px">Değişiklik zaman çizgisine otomatik yazılır.</div></div>'
+    +'<div><h4 class="mh">Zaman çizgisi</h4>'+(ents.length?'<ol class="tl">'+ents.map(function(u){return entryHTML(t,u)}).join('')+'</ol>':'<div class="small">Henüz aşama yok. Aşağıdan ilk notu ekle.</div>')+'</div>'
+    +'<div class="addbox"><h4 class="mh" style="margin:0">Yeni aşama</h4><div style="display:flex;gap:8px;flex-wrap:wrap"><select class="ctl" style="width:auto" data-role="d-stage" aria-label="Aşama">'+stageOpts(d.stage)+'</select><input class="ctl num" style="width:150px" data-role="d-price" inputmode="decimal" placeholder="Fiyat (isteğe bağlı)" value="'+esc(d.price)+'"></div>'
+    +'<textarea class="ctl" data-role="d-text" rows="3" placeholder="Ne oldu, ne düşünüyorsun, sıradaki adım ne" aria-label="Not">'+esc(d.text)+'</textarea>'
+    +'<div class="dz" data-act="pick" data-k="'+esc(t.id)+'" data-k2="" tabindex="0">Görsel ekle: sürükle, yapıştır (Ctrl+V) ya da tıkla</div><div class="pend">'+pendHTML(d.files,t.id)+'</div>'
+    +'<div><button class="btn" type="button" data-act="add-ent">Aşamayı ekle</button></div></div></div>';
+}
+function cardHTML(t){
+  var r=t.tp1!=null?rrCalc(t.side,t.entry,t.tp1,t.stop):null, rr=realR(t), imgs=allImgs(t), cover=imgs[0], open=openId===t.id, ups=t.updates||[];
+  var notes=ups.filter(function(u){return !u.auto&&u.text}).sort(function(a,b){return a.ts<b.ts?1:-1}), last=notes[0];
+  var srcs=(t.srcs||'').replace('K','').split('').filter(Boolean).join('');
+  return '<article class="trade" data-id="'+esc(t.id)+'"><div>'
+    +'<div class="hd"><span class="tkr">'+esc(t.ticker)+'</span><span class="side '+(t.side==='S'?'s':'l')+'">'+(t.side==='S'?'SAT':'AL')+'</span><span class="small num">'+esc(t.date)+'</span><span class="st '+stClass(t.status)+'">'+esc(t.status)+'</span>'+((t.srcs||'').indexOf('V')>-1?'<span class="tag">V10 bülten</span>':'')+((t.srcs||'').indexOf('K')>-1?'<span class="tag">Kendi fikrim</span>':'')+'<span class="tag">Güven: '+esc(t.conf||'—')+'</span><span class="small">'+ups.length+' aşama · '+imgs.length+' görsel</span></div>'
+    +'<div class="tlv"><span><small>Giriş</small>'+fmt(t.entry)+'</span><span><small>TP1</small>'+fmt(t.tp1)+'</span><span><small>TP2</small>'+fmt(t.tp2)+'</span><span><small>Stop</small>'+fmt(t.stop)+'</span><span><small>R/R</small>'+(r?'1:'+r.rr.toFixed(2):'—')+'</span>'+(t.exit!=null?'<span><small>Çıkış</small>'+fmt(t.exit)+(rr!=null?' ('+(rr>=0?'+':'')+rr.toFixed(2)+' R)':'')+'</span>':'')+'</div>'
+    +ladder(t)
+    +(t.why?'<div class="small" style="margin-top:6px"><b style="color:var(--ink)">Gerekçe:</b> '+esc(t.why)+'</div>':'')
+    +(t.cond?'<div class="small" style="margin-top:3px"><b style="color:var(--ink)">Koşul / iptal:</b> '+esc(t.cond)+'</div>':'')
+    +(last&&!open?'<div class="small" style="margin-top:3px"><b style="color:var(--ink)">Son not ('+fdt(last.ts)+'):</b> '+esc(last.text.length>140?last.text.slice(0,140)+'…':last.text)+'</div>':'')
+    +'<div class="tctl"><select data-role="st" aria-label="Durum">'+STAT.map(function(s){return '<option'+(s===t.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select>'
+    +'<input data-role="ex" inputmode="decimal" placeholder="Çıkış" value="'+(t.exit!=null?String(t.exit).replace('.',','):'')+'" aria-label="Çıkış fiyatı">'
+    +'<button class="btn" type="button" data-act="open">'+(open?'Detayı kapat':'Detay ve zaman çizgisi')+'</button>'
+    +(delAsk===t.id?'<span class="small">Tüm kayıt silinsin mi?</span><button class="btn warn" type="button" data-act="del2">Evet, sil</button><button class="btn ghost" type="button" data-act="no">Vazgeç</button>':'<button class="btn ghost" type="button" data-act="del">Sil</button>')
+    +'</div></div>'
+    +'<div>'+(cover?'<img class="thumb" alt="'+esc(t.ticker)+' grafiği" src="/_blob/'+esc(cover.id)+'" data-full="/_blob/'+esc(cover.id)+'" data-cap="'+esc(cover.caption||'')+'">':'<div class="small" style="border:1.5px dashed var(--line);border-radius:6px;padding:18px 8px;text-align:center">Grafik yok</div>')+'</div>'
+    +(open?moreHTML(t):'')+'</article>';
+}
+function renderTrades(){
+  renderStats();
+  var q=$('#t-q').value.trim().toUpperCase();
+  var list=trades.filter(function(t){
+    var okS=tFilter==='all'||(tFilter==='live'?(t.status==='Bekliyor'||t.status==='Açık'):tFilter==='win'?(t.status==='TP1'||t.status==='TP2'):tFilter==='loss'?t.status==='Stop':t.status==='İptal'||t.status==='Elle kapandı');
+    return okS&&(!q||String(t.ticker).indexOf(q)>-1);
+  }).sort(function(a,b){return (b.date+(b.createdAt||'')).localeCompare(a.date+(a.createdAt||''))});
+  if(!list.length){
+    $('#tlist').innerHTML='<div class="empty">'+(trades.length?'Bu filtreyle kayıt yok.':'Henüz kayıt yok. Yukarıdaki formdan ilk trade\'i ekle ya da strateji tablosunda "Deftere ekle"ye bas.')+'</div>';return;
+  }
+  var html;
+  if(tGroup==='list'){html=list.map(cardHTML).join('')}
+  else{
+    var order=[],map={};
+    list.forEach(function(t){var k=tGroup==='week'?isoWeek(t.date):monthLabel(t.date); if(!map[k]){map[k]=[];order.push(k)} map[k].push(t)});
+    html=order.map(function(k){return '<div class="grp"><h4>'+k+'</h4><span class="small num">'+map[k].length+' trade · '+statsOf(map[k]).txt+'</span></div>'+map[k].map(cardHTML).join('')}).join('');
+  }
+  $('#tlist').innerHTML=html;
+}
+$('#tchips').innerHTML=[['all','Hepsi'],['live','Bekleyen / açık'],['win','TP'],['loss','Stop'],['x','İptal / elle']].map(function(c,i){return '<button class="chip" type="button" data-f="'+c[0]+'" aria-pressed="'+(i===0)+'">'+c[1]+'</button>'}).join('');
+$('#tchips').addEventListener('click',function(e){
+  var b=e.target.closest('.chip'); if(!b)return; tFilter=b.getAttribute('data-f');
+  document.querySelectorAll('#tchips .chip').forEach(function(x){x.setAttribute('aria-pressed',x===b)}); renderTrades();
+});
+$('#tgroup').innerHTML=[['list','Liste'],['week','Haftalık'],['month','Aylık']].map(function(c,i){return '<button class="chip" type="button" data-g="'+c[0]+'" aria-pressed="'+(i===0)+'">'+c[1]+'</button>'}).join('');
+$('#tgroup').addEventListener('click',function(e){
+  var b=e.target.closest('.chip'); if(!b)return; tGroup=b.getAttribute('data-g');
+  document.querySelectorAll('#tgroup .chip').forEach(function(x){x.setAttribute('aria-pressed',x===b)}); renderTrades();
+});
+$('#t-q').addEventListener('input',renderTrades);
+
+function lightbox(img){
+  var lb=document.createElement('div'); lb.className='lightbox';
+  lb.innerHTML='<div style="max-width:100%;max-height:100%;display:grid;gap:8px;justify-items:center"><img alt="" src="'+esc(img.getAttribute('data-full'))+'" style="max-height:82vh"><div style="color:#e6edf6;font-size:14px;text-align:center">'+esc(img.getAttribute('data-cap')||'')+'</div></div>';
+  lb.addEventListener('click',function(){lb.remove()}); document.body.appendChild(lb);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var l=document.querySelector('.lightbox');if(l)l.remove()}});
+
+/* etkileşimler */
+$('#s-trade').addEventListener('input',function(e){
+  var el=e.target, r=el.getAttribute('data-role'), card=el.closest('.trade'), id=card&&card.getAttribute('data-id');
+  if(el.classList.contains('pi-cap')&&!r){var k=el.getAttribute('data-k'), a=filesFor(k); if(a[+el.getAttribute('data-i')])a[+el.getAttribute('data-i')].cap=el.value; return}
+  if(r==='d-text')draftFor(id).text=el.value;
+  else if(r==='d-price')draftFor(id).price=el.value;
+  else if(edit&&r==='ed-text')edit.text=el.value;
+  else if(edit&&r==='ed-price')edit.price=el.value;
+  else if(edit&&r==='ed-cap')edit.imgs[+el.getAttribute('data-i')].caption=el.value;
+});
+$('#s-trade').addEventListener('change',function(e){
+  var el=e.target, r=el.getAttribute('data-role'), card=el.closest('.trade'), id=card&&card.getAttribute('data-id'); if(!r)return;
+  if(r==='d-stage'){draftFor(id).stage=el.value;return}
+  if(r==='ed-stage'&&edit){edit.stage=el.value;return}
+  var t=id&&tById(id); if(!t||!tDB)return;
+  (async function(){try{
+    if(r==='st'){
+      var s=el.value, ex=t.exit;
+      if(s==='TP1')ex=t.tp1; else if(s==='TP2'&&t.tp2!=null)ex=t.tp2; else if(s==='Stop')ex=t.stop;
+      var en=mkEntry('Durum','Durum: '+t.status+' → '+s+((ex!=null&&ex!==t.exit)?' · çıkış '+fmt(ex):''),NaN,[],true);
+      await patchTrade(t,{status:s,exit:ex==null?null:ex,updates:withEntry(t,en)});
+    }else if(r==='ex'){
+      var v=num(el.value); if(isNaN(v))v=null; if(v===t.exit)return;
+      var en2=mkEntry('Durum',v==null?'Çıkış fiyatı silindi':'Çıkış fiyatı: '+fmt(v),NaN,[],true);
+      await patchTrade(t,{exit:v,updates:withEntry(t,en2)});
+    }
+  }catch(err){msg('Güncellenemedi: '+(err&&err.message||''),true)}})();
+});
+$('#s-trade').addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');
+  if(!el){var im=e.target.closest('.thumb'); if(im)lightbox(im); return}
+  var act=el.getAttribute('data-act'), card=el.closest('.trade'), id=card?card.getAttribute('data-id'):null, t=id?tById(id):null;
+  if(act==='pick'){pickFiles(el.getAttribute('data-k'));return}
+  if(act==='pi-rm'){var k=el.getAttribute('data-k'), i=+el.getAttribute('data-i'), arr=filesFor(k); if(arr[i])URL.revokeObjectURL(arr[i].url); arr.splice(i,1); if(k==='form')renderPend(); else renderTrades(); return}
+  if(act==='open'){openId=openId===id?null:id;edit=null;renderTrades();return}
+  if(act==='del'){delAsk=id;renderTrades();return}
+  if(act==='no'){delAsk=null;delEnt=null;renderTrades();return}
+  if(act==='ent-del'){delEnt=el.getAttribute('data-u');renderTrades();return}
+  if(act==='ent-edit'&&t){
+    var u=(t.updates||[]).filter(function(x){return x.uid===el.getAttribute('data-u')})[0]; if(!u)return;
+    edit={tid:t.id,uid:u.uid,text:u.text||'',stage:u.stage||'Not',price:u.price!=null?String(u.price).replace('.',','):'',imgs:(u.images||[]).map(function(im){return {id:im.id,caption:im.caption||''}}),removed:[]}; renderTrades(); return;
+  }
+  if(act==='ed-cancel'){edit=null;renderTrades();return}
+  if(act==='ed-imrm'&&edit){var j=+el.getAttribute('data-i'); edit.removed.push(edit.imgs[j].id); edit.imgs.splice(j,1); renderTrades(); return}
+  if(!tDB){msg('Kayıt açık değil.',true);return}
+  (async function(){try{
+    if(act==='del2'&&t){delAsk=null; var ids=allImgs(t).map(function(x){return x.id}); await tDB.collection('trades').doc(t.id).delete(); ids.forEach(dropAsset); if(openId===t.id)openId=null; return}
+    if(act==='ent-del2'&&t){
+      var uu=el.getAttribute('data-u'), gone=(t.updates||[]).filter(function(x){return x.uid===uu})[0]; delEnt=null;
+      await patchTrade(t,{updates:(t.updates||[]).filter(function(x){return x.uid!==uu})}); if(gone)(gone.images||[]).forEach(function(im){dropAsset(im.id)}); return;
+    }
+    if(act==='ed-save'&&edit&&t){
+      var pv=num(edit.price), ed=edit; edit=null;
+      var ups=(t.updates||[]).map(function(x){return x.uid===ed.uid?Object.assign({},x,{text:ed.text.trim(),stage:ed.stage,price:isNaN(pv)?null:pv,images:ed.imgs.map(function(im){return {id:im.id,caption:im.caption}})}):x});
+      await patchTrade(t,{updates:ups}); ed.removed.forEach(dropAsset); msg('Aşama güncellendi.'); return;
+    }
+    if(act==='add-ent'&&t){
+      var d=draftFor(t.id); if(!d.text.trim()&&!d.files.length){msg('Not yaz ya da görsel ekle.',true);return}
+      el.disabled=true; msg('Ekleniyor');
+      var imgs=await uploadAll(d.files); d.files.forEach(function(f){URL.revokeObjectURL(f.url)});
+      await patchTrade(t,{updates:withEntry(t,mkEntry(d.stage,d.text.trim(),num(d.price),imgs,false))});
+      drafts[t.id]={text:'',stage:'Not',price:'',files:[]}; msg('Aşama eklendi.'); return;
+    }
+    if(act==='lv-save'&&t){
+      var g=function(n){return num(card.querySelector('[data-role="lv-'+n+'"]').value)};
+      var en=g('en'), tp1=g('tp1'), tp2=g('tp2'), sl=g('sl');
+      if(isNaN(en)||isNaN(tp1)||isNaN(sl)){msg('Giriş, TP1 ve stop sayı olmalı.',true);return}
+      if(!rrCalc(t.side,en,tp1,sl)){msg('Stop ve TP1 girişe göre doğru tarafta olmalı.',true);return}
+      var tp2v=isNaN(tp2)?null:tp2, ch=[];
+      if(en!==t.entry)ch.push('Giriş '+fmt(t.entry)+' → '+fmt(en));
+      if(tp1!==t.tp1)ch.push('TP1 '+fmt(t.tp1)+' → '+fmt(tp1));
+      if(tp2v!==(t.tp2==null?null:t.tp2))ch.push('TP2 '+fmt(t.tp2)+' → '+fmt(tp2v));
+      if(sl!==t.stop)ch.push('Stop '+fmt(t.stop)+' → '+fmt(sl));
+      if(!ch.length){msg('Değişiklik yok.');return}
+      await patchTrade(t,{entry:en,tp1:tp1,tp2:tp2v,stop:sl,updates:withEntry(t,mkEntry('Tez değişti','Seviye güncellendi: '+ch.join(' · '),NaN,[],true))}); msg('Seviyeler güncellendi.'); return;
+    }
+  }catch(err){msg('İşlem başarısız: '+(err&&err.message||''),true)}})();
+});
+
+/* dışa aktarma */
+function csvCell(v){v=v==null?'':String(v);return /[";\n,]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function sortedTrades(){return trades.slice().sort(function(a,b){return a.date.localeCompare(b.date)})}
+async function saveFile(name,data){
+  if(!tDown)return;
+  try{await tDown.save({filename:name,data:data}); msg('Dosya kaydedildi.')}catch(e){msg(e&&e.code==='declined'?'Kaydetmekten vazgeçildi.':'Dosya kaydedilemedi.',true)}
+}
+$('#x-csv').addEventListener('click',function(){
+  var cols=['date','ticker','side','entry','tp1','tp2','stop','status','exit','conf','srcs','why','cond'];
+  var lines=[cols.concat(['asama_sayisi','gorsel_sayisi']).join(';')].concat(sortedTrades().map(function(r){
+    return cols.map(function(c){var v=r[c]; return csvCell(typeof v==='number'?String(v).replace('.',','):v)}).concat([(r.updates||[]).length,allImgs(r).length]).join(';');
+  }));
+  saveFile('trade-defteri-'+todayStr()+'.csv','﻿'+lines.join('\n'));
+});
+$('#x-json').addEventListener('click',function(){saveFile('trade-defteri-'+todayStr()+'.json',JSON.stringify(sortedTrades(),null,2))});
+
+/* yetenekleri bağla */
+function noDb(){$('#dbnote').hidden=false;$('#tlist').innerHTML='<div class="empty">Arşiv bu görünümde açılamadı.</div>';renderStats()}
+(async function initCaps(){
+  var tries=0;
+  while(!(window.claude&&window.claude.use)&&tries<10){await new Promise(function(r){setTimeout(r,400)});tries++}
+  if(!(window.claude&&window.claude.use)){noDb();return}
+  try{
+    tDB=await window.claude.use('db');
+    if(!tDB){noDb();return}
+    initDays(tDB);
+    tDB.collection('trades').onSnapshot(function(s){
+      trades=s.docs.map(function(d){var x=d.data()||{};x.id=d.id;return x});
+      renderTrades();
+    },function(){noDb()});
+  }catch(e){noDb();return}
+  try{tAssets=await window.claude.use('assets')}catch(e){tAssets=null}
+  try{tDown=await window.claude.use('downloads')}catch(e){tDown=null}
+  if(tDown){$('#x-csv').hidden=false;$('#x-json').hidden=false}
+})();
+renderStats();
+
+</script>
+
+</body></html>
