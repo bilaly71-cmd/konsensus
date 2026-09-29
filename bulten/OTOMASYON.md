@@ -2,7 +2,9 @@
 
 Bülteni Bilal'in bilgisayarında çalışan "V10 Sabah Bülteni (06:30)" rutini üretir; siteye gitmesi için rutinin **son adımı** aşağıdaki gibi olmalı.
 
-## Rutinin prompt'una eklenecek son bölüm (olduğu gibi yapıştır)
+**Güncel prompt: `bulten/PROMPT-v4.md` (sosyal medya taramalı, TESLİM 4. adım siteye gönderimi içerir).** Rutinin prompt'unu bununla değiştir. Aşağıdaki blok yalnızca eski v3 prompt'a eklemek içindir.
+
+## (v3 için) Rutinin prompt'una eklenecek son bölüm
 
 ```
 SON ADIM — SİTEYE GÖNDER

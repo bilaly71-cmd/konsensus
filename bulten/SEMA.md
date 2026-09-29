@@ -9,3 +9,8 @@ news[{h,ts,src,chain,who,priced}], kap[{t,c(soz/pay/devir/not/fon/temettu),w(Ço
 buybacks[[hisse,tutar,süre,not,kaynak]], earnings, rumors[{st,sc(s-no/s-wait/s-idle),h,b,s}], sectors[[sektör,katalizör,risk,yön]],
 hidden3[{h,b}], sniperNote, watch[{t,conf,why,bad}], strat{glob,globExp,dom,domExp,scen[{k(up-h/dn-h/bz-h),h,d,lv}],levelNote,avoid},
 reads[{who,url,date,txt}], opening{band(0-4),bandText,basis[],pos[],neg[]}, calendar[[saat,metin]], blind.
+
+### Sosyal medya nabzı (v4, isteğe bağlı ama v4 prompt'ta zorunlu)
+`sosyal`: { hava (etiketlerin genel havası, 2-3 cümle; aşırı tek yönlülükte kontrarian uyarı), tarama (kaç X sorgusu / YouTube videosu tarandı, hangisi başarısız — tek satır),
+konular[{k (konu/hisse), ton, hacim (hacim/etkileşim), dogrulama (doğrulandı/doğrulanamadı/söylenti), piyasa (piyasa karşılığı)}],
+youtube[{kanal, saat, arguman}], anormal[{kod, not}] }
