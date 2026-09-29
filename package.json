@@ -11,7 +11,9 @@
 		"preview": "astro preview",
 		"astro": "astro",
 		"deploy": "astro build && wrangler deploy -c dist/server/wrangler.json",
-		"tek-dosya": "node scripts/ozkaynak-tek-dosya.mjs"
+		"tek-dosya": "node scripts/ozkaynak-tek-dosya.mjs",
+		"bulten:kontrol": "node scripts/bulten-kontrol.mjs",
+		"bulten:yayinla": "node scripts/bulten-yayinla.mjs"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^14.3.3",
