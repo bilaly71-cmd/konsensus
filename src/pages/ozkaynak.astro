@@ -10,6 +10,23 @@ import Rozet from '../components/Rozet.astro';
 	</SayfaBasligi>
 
 	<div class="oz">
+		<div class="sticky" id="sticky" aria-live="polite"></div>
+
+		<section class="kart komut">
+			<label for="cmd" class="komut-l">Hızlı komut <span class="kucuk">(Enter ile çalışır · / tuşu buraya odaklar)</span></label>
+			<input id="cmd" autocomplete="off" placeholder="örn.  KCHOL 5000 sat   ·   EREGL 10000 çek   ·   öde 500k   ·   al THYAO 2m 312,5   ·   hedef 40   ·   plan   ·   geri" />
+			<div class="kucuk" id="cmd-sonuc"></div>
+			<details class="kucuk"><summary>Komut listesi</summary>
+				<ul class="komut-liste">
+					<li><b>KOD 5000 sat</b> — 5.000 adet sat (tutar için: <b>KOD 2m tl sat</b>; <b>hepsi</b> yazarsan tümü). Serbestteyse satış parasıyla kredi ödenir (T+2).</li>
+					<li><b>KOD 5000 çek</b> — serbest depodan teminata · <b>KOD 5000 serbest</b> — teminattan serbeste</li>
+					<li><b>öde 500k</b> — nakitle kredi öde (boşa düşenler serbeste) · <b>al KOD 2m 312,5</b> — 2 mio TL kredili alım (fiyat 312,5)</li>
+					<li><b>hedef 40</b> · <b>fiyat KOD 12,5</b> · <b>plan</b> (planı uygula) · <b>geri</b> · <b>başa</b> (başlangıca dön)</li>
+					<li>Sayılar: <b>500k</b> = 500 bin, <b>2m</b> = 2 milyon, <b>2,5m</b>, <b>1.250.000</b></li>
+				</ul>
+			</details>
+		</section>
+
 		<section class="kart param">
 			<div class="f"><label for="p-kredi">Kredi borcu (TL)</label><input id="p-kredi" class="n" inputmode="decimal" placeholder="0" /></div>
 			<div class="f"><label for="p-faiz">Birikmiş faiz + BSMV (TL)</label><input id="p-faiz" class="n" inputmode="decimal" placeholder="0" /></div>
@@ -17,8 +34,10 @@ import Rozet from '../components/Rozet.astro';
 			<div class="f"><label for="p-min">Alt sınır / çağrı (%)</label><input id="p-min" class="n" inputmode="decimal" /></div>
 			<div class="aksiyon">
 				<button class="btn ghost" type="button" id="b-ornek">Örnek yükle</button>
+				<button class="btn ghost" type="button" id="b-basa">Başlangıca dön</button>
 				<button class="btn ghost" type="button" id="b-sifirla">Sıfırla</button>
 			</div>
+			<div class="hedef-cipler" id="hedef-cipler" role="group" aria-label="Hedef özkaynak"></div>
 		</section>
 
 		<details class="kart ice" id="ice">
@@ -31,6 +50,10 @@ import Rozet from '../components/Rozet.astro';
 		<section class="metrikler" id="metrik" aria-live="polite"></section>
 
 		<section class="kart" id="kapasite" aria-live="polite"></section>
+
+		<section class="kart" id="nakit"></section>
+
+		<section class="kart" id="uyari"></section>
 
 		<section class="kart" id="kredili">
 			<h2>Kredili alım</h2>
@@ -55,6 +78,31 @@ import Rozet from '../components/Rozet.astro';
 		<section class="depolar" id="depolar"></section>
 
 		<section class="kart" id="oneri"></section>
+
+		<section class="kart" id="stres"></section>
+
+		<section class="kart" id="ozet"></section>
+
+		<section class="kart" id="senaryo"></section>
+
+		<details class="kart" id="araclar">
+			<summary>Araçlar: toplu fiyat, oran listesi</summary>
+			<div class="arac-grid">
+				<div>
+					<h3>Toplu fiyat güncelle</h3>
+					<p class="kucuk">Her satıra “KOD fiyat” yaz (ör. THYAO 312,5). Listedeki hisselerin fiyatı güncellenir, hafızada tutulur.</p>
+					<textarea id="tf-metin" rows="5" placeholder="THYAO 312,5&#10;EREGL 25,4"></textarea>
+					<div class="aksiyon"><button class="btn" type="button" id="tf-btn">Fiyatları güncelle</button><span class="kucuk" id="tf-sonuc"></span></div>
+				</div>
+				<div>
+					<h3>Oran listesini güncelle</h3>
+					<p class="kucuk" id="oran-durum"></p>
+					<p class="kucuk">Kurumun Excel dosyasını (“Hisse Kodu” ve “Özkaynak Değerleme Oranı” sütunlu sayfa) seç; oranlar bu tarayıcıda saklanır.</p>
+					<div class="aksiyon"><input type="file" id="oran-dosya" accept=".xlsx" /><button class="btn ghost" type="button" id="oran-sifirla">Varsayılana dön</button></div>
+					<span class="kucuk" id="oran-sonuc"></span>
+				</div>
+			</div>
+		</details>
 
 		<section class="kart" id="gecmis-kart" hidden>
 			<div class="baslik-satir"><h2>Plan adımları</h2><button class="btn ghost" type="button" id="b-geri">Son adımı geri al</button></div>
@@ -146,13 +194,16 @@ import Rozet from '../components/Rozet.astro';
 			var Vo = Math.min(serbestGelir, n.kredi + n.faiz);
 			if (Vo >= 1) { var z = odeZinciri(n, Vo); n = z.s; }
 		} else if (op.t === 'pay') {
-			var V = Math.max(0, Math.min(op.tutar, n.kredi + n.faiz)); n.nakit.t0 -= V;
+			var V = Math.max(0, Math.min(op.tutar, n.kredi + n.faiz)); nakitDus(n, V);
 			var k2 = Math.min(n.kredi, V); n.kredi -= k2; if (n.limit > 0) n.limit += k2; n.faiz -= Math.min(n.faiz, V - k2);
 			var sirali = n.depo.kredi.slice().sort(function (a, b) { return oran(b.kod) - oran(a.kod); }), kalan = k2;
 			sirali.forEach(function (r) { var pp = px(n, r.kod); if (pp <= 0 || kalan <= 0 || r.adet <= 0) return; var q = Math.min(r.adet, Math.floor(kalan / pp)); if (q <= 0) return; n = uygula(n, { t: 'move', kod: r.kod, from: 'kredi', to: 'serbest', adet: q }); kalan -= q * pp; });
 		} else if (op.t === 'buy') { n.fiyat[op.kod] = op.fiyat; ekle(n, 'kredi', op.kod, op.adet, null); n.kredi += op.adet * op.fiyat; if (n.limit) n.limit = Math.max(0, n.limit - op.adet * op.fiyat); }
 		return n;
 	}
+	function cumNakit(s, k) { var n = s.nakit || {}, a = [n.t0 || 0, n.t1 || 0, n.t2 || 0, n.t3 || 0], t = 0; for (var i = 0; i <= k; i++) t += a[i]; return t; }
+	/* nakitten V düş: önce bugünkü (t0) artı bakiyeden, sonra t1, t2, t3; yetmezse t0 eksiye gider */
+	function nakitDus(n, V) { ['t0', 't1', 't2', 't3'].forEach(function (k) { var v = n.nakit[k] || 0; if (V > 0 && v > 0) { var al = Math.min(v, V); n.nakit[k] = v - al; V -= al; } }); if (V > 0) n.nakit.t0 = (n.nakit.t0 || 0) - V; }
 	function serbestFark(a, b) { var out = []; b.depo.serbest.forEach(function (r) { var x = bul(a, 'serbest', r.kod), d = r.adet - (x ? x.adet : 0); if (d > 0) out.push({ kod: r.kod, adet: d }); }); return out; }
 	function opYazi(op) {
 		var l = { serbest: 'serbest depo', kredi: 'kredi depo', teminat: 'teminat depo' };
@@ -175,7 +226,7 @@ import Rozet from '../components/Rozet.astro';
 	}
 	/* serbest hisseyi sat → nakitle krediyi öde → boşa düşenleri teminata çek */
 	function satZinciri(s, kod, q) {
-		var op = { t: 'sell', kod: kod, adet: q }, n = uygula(s, op), ops = [op], V = Math.max(0, Math.min(n.nakit.t0, n.kredi));
+		var op = { t: 'sell', kod: kod, adet: q }, n = uygula(s, op), ops = [op], V = Math.max(0, Math.min(cumNakit(n, 2), n.kredi));
 		if (V >= 1) { var z = odeZinciri(n, Math.floor(V)); n = z.s; ops = ops.concat(z.ops); }
 		return { s: n, ops: ops };
 	}
@@ -191,8 +242,8 @@ import Rozet from '../components/Rozet.astro';
 				if (q > 0) uy([{ t: 'move', kod: r.kod, from: 'serbest', to: 'teminat', adet: q }]);
 			});
 			/* 2) serbest nakitle krediyi öde, kredi depoda boşa düşen hisseleri teminata al */
-			if (!esik(s, e) && s.nakit.t0 >= 1 && s.kredi >= 1) {
-				var maxV = Math.floor(Math.min(s.nakit.t0, s.kredi)), V = enAz(maxV, function (q) { return esik(odeZinciri(s, q).s, e); });
+			if (!esik(s, e) && cumNakit(s, 2) >= 1 && s.kredi >= 1) {
+				var maxV = Math.floor(Math.min(cumNakit(s, 2), s.kredi)), V = enAz(maxV, function (q) { return esik(odeZinciri(s, q).s, e); });
 				if (V >= 1) uy(odeZinciri(s, V).ops);
 			}
 			/* 3) serbestte kalan hisseleri sat → nakit → öde → teminata çek (oranı düşük olan önce) */
@@ -337,7 +388,10 @@ import Rozet from '../components/Rozet.astro';
 		$('#p-kredi').value = S.kredi ? String(Math.round(S.kredi)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
 		$('#p-faiz').value = S.faiz ? String(Math.round(S.faiz)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
 		$('#p-hedef').value = String(S.hedef).replace('.', ','); $('#p-min').value = String(S.min).replace('.', ',');
-		renderMetrik(); renderKapasite(); renderDepolar(); renderOneri(); renderGecmis();
+		renderHepsi();
+	}
+	function renderHepsi() {
+		renderMetrik(); renderKapasite(); renderNakit(); renderUyari(); renderDepolar(); renderOneri(); renderStres(); renderOzet(); renderSenaryo(); renderGecmis(); renderSticky(); renderCipler(); renderOranDurum();
 	}
 
 	/* ---- diyalog ---- */
@@ -391,7 +445,7 @@ import Rozet from '../components/Rozet.astro';
 		S.kredi = isNaN(k) ? 0 : Math.max(0, k); S.faiz = isNaN(f) ? 0 : Math.max(0, f);
 		if (!isNaN(h) && h > 0 && h < 95) S.hedef = h; if (!isNaN(mn) && mn > 0 && mn < 95) S.min = mn;
 		if (!HIST.length) BASE = clone(S);
-		kaydet(); renderMetrik(); renderKapasite(); renderDepolar(); renderOneri();
+		kaydet(); renderHepsi();
 	}
 	['p-kredi', 'p-faiz', 'p-hedef', 'p-min'].forEach(function (id) { $('#' + id).addEventListener('input', parametre); });
 	$('#b-sifirla').addEventListener('click', function () { if (confirm('Tüm depolar ve girdiler silinsin mi?')) { S = bos(); BASE = clone(S); HIST = []; kaydet(); render(); } });
@@ -417,20 +471,21 @@ import Rozet from '../components/Rozet.astro';
 		var op = { t: 'pay', tutar: t }, fr = serbestFark(S, uygula(S, op)); adim(op, uygula(S, op)); $('#o-tutar').value = '';
 		toast('Kredi ödendi.' + (fr.length ? ' Boşa düşen hisseler serbest depoda: ' + fr.map(function (x) { return x.kod + ' ' + tl(x.adet); }).join(', ') + '.' : ''));
 	});
-	$('#b-geri').addEventListener('click', function () { var h = HIST.pop(); if (h) { S = h.s; kaydet(); render(); } });
+	function geriAl() { var h = HIST.pop(); if (h) { S = h.s; kaydet(); render(); return true; } return false; }
+	$('#b-geri').addEventListener('click', geriAl);
 
 	document.addEventListener('submit', function (e) {
 		var f = e.target.closest('[data-ekle]'); if (!f) return; e.preventDefault();
 		var d = f.getAttribute('data-ekle'), kod = f.kod.value.trim().toUpperCase(), adet = Math.floor(num(f.adet.value)), fy = num(f.fiyat.value);
 		if (!kod || !(adet > 0)) { toast('Hisse ve adet gir.'); return; }
-		if (!isNaN(fy) && fy > 0) S.fiyat[kod] = fy;
+		if (!isNaN(fy) && fy > 0) { S.fiyat[kod] = fy; fiyatYaz(kod, fy); } else if (!S.fiyat[kod] && fiyatHafiza()[kod]) S.fiyat[kod] = fiyatHafiza()[kod];
 		if (!S.fiyat[kod]) toast(kod + ' için fiyat girmedin; değer 0 görünür.');
 		ekle(S, d, kod, adet); if (d === 'kredi') { toast('Kredi depoya doğrudan eklendi; kredi borcunu ayrıca girmeyi unutma.'); }
 		if (!HIST.length) BASE = clone(S);
 		kaydet(); render();
 	});
 	document.addEventListener('change', function (e) {
-		if (e.target.matches('[data-fy]')) { var v = num(e.target.value), k = e.target.getAttribute('data-fy'); S.fiyat[k] = isNaN(v) ? 0 : Math.max(0, v); BASE.fiyat[k] = S.fiyat[k]; kaydet(); render(); }
+		if (e.target.matches('[data-fy]')) { var v = num(e.target.value), k = e.target.getAttribute('data-fy'); S.fiyat[k] = isNaN(v) ? 0 : Math.max(0, v); BASE.fiyat[k] = S.fiyat[k]; if (v > 0) fiyatYaz(k, v); kaydet(); render(); }
 	});
 	document.addEventListener('click', function (e) {
 		var t = e.target.closest('[data-tasi]'); if (t) { var p = t.getAttribute('data-tasi').split('|'); dlgAc(p[0], p[1], null); return; }
@@ -478,7 +533,7 @@ import Rozet from '../components/Rozet.astro';
 			if (/^[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9]{2,5}$/.test(tk[0])) {
 				var rest = tk.slice(1); if (rest.length && isNaN(trnum(rest[0]))) rest = rest.slice(1); /* Tip: ESKI */
 				var ns2 = rest.map(trnum).filter(function (x) { return !isNaN(x); });
-				if (ns2.length >= 6) { var bg = Math.trunc(ns2[0]), t2 = Math.trunc(ns2[2]); if (bg !== 0 || t2 !== 0) bekleyen.push({ kod: tk[0], bugun: bg, adet: t2, fy: ns2[5] }); }
+				if (ns2.length >= 6) { var bg = Math.trunc(ns2[0]), t2 = Math.trunc(ns2[2]); if (bg !== 0 || t2 !== 0 || Math.trunc(ns2[1]) !== 0) bekleyen.push({ kod: tk[0], bugun: bg, t1: Math.trunc(ns2[1]), adet: t2, t3: Math.trunc(ns2[3]), fy: ns2[5] }); }
 			}
 		}
 		if (bekleyen.length) sonuc.uyari.push(bekleyen.length + ' satır “Serbest/Kredi/Teminat Depo” toplam satırı görülmediği için alınmadı. Depo satırlarını da kopyaladığından emin ol.');
@@ -489,25 +544,284 @@ import Rozet from '../components/Rozet.astro';
 		if (!adetSay && r.kredi == null) { $('#ice-sonuc').textContent = 'Tablo tanınamadı. Hisse satırlarını ve depo toplam satırlarını kopyala.'; return; }
 		if (HIST.length === 0 && (S.depo.serbest.length + S.depo.kredi.length + S.depo.teminat.length) && !confirm('Mevcut depolar bu tabloyla değiştirilsin mi?')) return;
 		var n = bos(); n.hedef = S.hedef; n.min = S.min;
-		['serbest', 'kredi', 'teminat'].forEach(function (d) { r.depo[d].forEach(function (x) { if (x.fy > 0) n.fiyat[x.kod] = x.fy; n.depo[d].push({ kod: x.kod, adet: x.adet, bugun: x.bugun }); }); });
+		['serbest', 'kredi', 'teminat'].forEach(function (d) { r.depo[d].forEach(function (x) { if (x.fy > 0) n.fiyat[x.kod] = x.fy; n.depo[d].push({ kod: x.kod, adet: x.adet, bugun: x.bugun, t1: x.t1, t3: x.t3 }); }); });
 		if (r.kredi != null) n.kredi = r.kredi; if (r.faiz != null) n.faiz = r.faiz; if (r.limit != null) n.limit = r.limit; if (r.nakit) n.nakit = r.nakit;
+		n.akis = akisHesapla(n);
 		S = n; HIST = []; BASE = clone(S); kaydet(); render();
 		var bil = r.depo.teminat.concat(r.depo.serbest).filter(function (x) { return !ORAN[x.kod]; }).map(function (x) { return x.kod; });
 		$('#ice-sonuc').textContent = 'Aktarıldı: serbest ' + r.depo.serbest.length + ', kredi ' + r.depo.kredi.length + ', teminat ' + r.depo.teminat.length + ' hisse.' + (bil.length ? ' Oran listesinde olmayan: ' + bil.join(', ') + ' (oran 0 sayıldı).' : '') + ' ' + r.uyari.join(' ');
 		$('#ice').open = true;
 	});
 
+	/* =========================================================
+	   Nakit takvimi (T0 / T+1 / T+2 / T+3)
+	   TL satırı: her sütun o gün gelecek/çıkacak nakit akışı, net pozisyon = toplamları.
+	   Hisse satırlarında: bir satış T+2'de biter → T+2 adedi düşer; dün yapılan satış T+1'de düşer.
+	   ========================================================= */
+	function akisHesapla(n) {
+		var m = {};
+		['serbest', 'kredi', 'teminat'].forEach(function (d) { n.depo[d].forEach(function (r) {
+			if (r.bugun == null) return; var x = m[r.kod] || (m[r.kod] = { kod: r.kod, d1: 0, d2: 0, d3: 0 });
+			x.d1 += (r.bugun || 0) - (r.t1 != null ? r.t1 : r.bugun); x.d2 += (r.t1 != null ? r.t1 : r.bugun) - r.adet; x.d3 += r.adet - (r.t3 != null ? r.t3 : r.adet);
+		}); });
+		var k = Object.keys(m).map(function (c) { var x = m[c], p = n.fiyat[c] || 0; x.v1 = x.d1 * p; x.v2 = x.d2 * p; x.v3 = x.d3 * p; return x; }).filter(function (x) { return x.d1 || x.d2 || x.d3; });
+		return { a1: k.reduce(function (t, x) { return t + x.v1; }, 0), a2: k.reduce(function (t, x) { return t + x.v2; }, 0), a3: k.reduce(function (t, x) { return t + x.v3; }, 0), kalem: k };
+	}
+	function renderNakit() {
+		var el = $('#nakit'), n = S.nakit || { t0: 0, t1: 0, t2: 0, t3: 0 }, ak = S.akis || { a1: 0, a2: 0, a3: 0, kalem: [] };
+		var c = [cumNakit(S, 0), cumNakit(S, 1), cumNakit(S, 2), cumNakit(S, 3)], ac = ['Bugün (T0, serbest)', 'T+1', 'T+2', 'T+3'], k = ['t0', 't1', 't2', 't3'];
+		function ren(v) { return '<span class="' + (v > 0.5 ? 'yuk' : v < -0.5 ? 'dusus' : '') + '">' + (v > 0.5 ? '▲ ' : v < -0.5 ? '▼ ' : '') + tl2(v) + '</span>'; }
+		var kalemler = ak.kalem.filter(function (x) { return Math.abs(x.d1) + Math.abs(x.d2) + Math.abs(x.d3) > 0; }).map(function (x) {
+			var p = [];
+			if (x.d1) p.push('T+1: ' + (x.d1 > 0 ? 'satış ' : 'alış ') + tl(Math.abs(x.d1)) + ' adet (≈' + tl(Math.abs(x.v1)) + ' TL)');
+			if (x.d2) p.push('T+2: ' + (x.d2 > 0 ? 'satış ' : 'alış ') + tl(Math.abs(x.d2)) + ' adet (≈' + tl(Math.abs(x.v2)) + ' TL)');
+			if (x.d3) p.push('T+3: ' + (x.d3 > 0 ? 'satış ' : 'alış ') + tl(Math.abs(x.d3)) + ' adet (≈' + tl(Math.abs(x.v3)) + ' TL)');
+			return '<li><b class="tk">' + esc(x.kod) + '</b> ' + p.join(' · ') + '</li>';
+		}).join('');
+		var kullan = Math.max(0, c[2]), borc = S.kredi + S.faiz, odenebilir = Math.min(kullan, S.kredi + S.faiz);
+		var oz = ''; if (odenebilir >= 1) { var son = uygula(S, { t: 'pay', tutar: odenebilir }), a = metr(S), b = metr(son); oz = '<div class="aksiyon"><button class="btn" type="button" id="nk-ode">T+2 nakitle krediyi öde (' + tl(odenebilir) + ' TL)</button><span class="kucuk">Özkaynak ' + pct(a.e) + ' → ' + pct(b.e) + '; boşa düşen kredi depo hisseleri serbeste geçer.</span></div>'; }
+		var uyar = c[0] < -0.5 ? '<p class="kucuk dusus">▼ Serbest nakit eksi (' + tl2(c[0]) + ' TL): faiz işler, gün içinde kapatmayı düşün.</p>' : '';
+		el.innerHTML = '<h2>Nakit takvimi</h2><p class="kucuk">Ekrandaki TL satırının Serbest / T+1 / T+2 / T+3 değerleri (elle de düzenleyebilirsin). Satışlar T+2’de nakde döner; dün yapılan satış T+1’de.</p>'
+			+ '<div class="tw"><table><thead><tr><th></th>' + ac.map(function (a) { return '<th class="r">' + a + '</th>'; }).join('') + '</tr></thead><tbody>'
+			+ '<tr><td>O gün gelen / giden</td>' + k.map(function (kk) { return '<td class="r"><input class="n nk-in" data-nk="' + kk + '" inputmode="decimal" value="' + String(n[kk] || 0).replace('.', ',') + '" aria-label="' + kk + ' nakit"></td>'; }).join('') + '</tr>'
+			+ '<tr><td>Toplam nakit (kümülatif)</td>' + c.map(function (v) { return '<td class="r deger">' + ren(v) + '</td>'; }).join('') + '</tr>'
+			+ (ak.kalem.length ? '<tr><td>Hisse hareketlerinden tahmin</td><td class="r kucuk">—</td><td class="r">' + ren(ak.a1) + '</td><td class="r">' + ren(ak.a2) + '</td><td class="r">' + ren(ak.a3) + '</td></tr>' : '') + '</tbody></table></div>'
+			+ '<p class="nk-cumle">2 gün sonra (T+2) toplam nakit: <b>' + tl2(c[2]) + ' TL</b>' + (S.kredi + S.faiz > 0 ? ' · borç ' + tl(borc) : '') + '.</p>' + uyar + oz
+			+ (kalemler ? '<details class="kucuk"><summary>Hisse hareketleri (satış/alış, kapanış fiyatıyla tahmin)</summary><ul class="komut-liste">' + kalemler + '</ul><p class="kucuk">Tahmin, kapanış fiyatıyla hesaplanır; gerçek işlem fiyatı ve masraflar nedeniyle TL satırından biraz farklı çıkabilir.</p></details>' : '');
+	}
+	document.addEventListener('change', function (e) {
+		if (e.target.matches('.nk-in')) { var v = trnum(e.target.value); S.nakit[e.target.getAttribute('data-nk')] = isNaN(v) ? 0 : v; if (!HIST.length) { BASE = clone(S); } kaydet(); renderHepsi(); }
+	});
+	document.addEventListener('click', function (e) {
+		if (e.target.id === 'nk-ode') { var o = Math.min(Math.max(0, cumNakit(S, 2)), S.kredi + S.faiz), op = { t: 'pay', tutar: o }, fr = serbestFark(S, uygula(S, op)); adim(op, uygula(S, op)); toast('Kredi ödendi.' + (fr.length ? ' Boşa düşen: ' + fr.map(function (x) { return x.kod + ' ' + tl(x.adet); }).join(', ') : '')); }
+	});
+
+	/* =========================================================
+	   Fiyat düşüş testi
+	   ========================================================= */
+	var STRES = 10;
+	function dus(s, x, kod) { var n = clone(s); Object.keys(n.fiyat).forEach(function (k) { if (!kod || k === kod) n.fiyat[k] = n.fiyat[k] * (1 - x); }); return n; }
+	/* tüm hisseler aynı oranda düşerse özkaynak e'ye ne zaman iner: C(1-x) = D / (1-e) */
+	function esikDusus(s, e) { var m = metr(s); if (!(m.D > 0) || !(m.C > 0)) return null; return 1 - m.D / ((1 - e) * m.C); }
+	function renderStres() {
+		var el = $('#stres'), m = metr(S);
+		if (!(m.C > 0)) { el.innerHTML = '<h2>Fiyat düşüş testi</h2><p class="kucuk">Depoları doldurunca “hisseler düşerse özkaynak ne olur?” burada çıkar.</p>'; return; }
+		var x = STRES / 100, sn = dus(S, x), mm = metr(sn), e35 = esikDusus(S, S.min / 100), eh = esikDusus(S, S.hedef / 100);
+		var satirlar = [5, 10, 15, 20, 25, 30, 40].map(function (d) { var r = metr(dus(S, d / 100)); return '<tr><td>−%' + d + '</td><td class="r deger">' + pct(r.e) + '</td><td class="r">' + tl(r.C) + '</td><td class="r">' + tl(alimLimiti(dus(S, d / 100))) + '</td><td>' + (r.e < S.min / 100 ? '<span class="rozet kotu">çağrı</span>' : r.e < S.hedef / 100 ? '<span class="rozet uyari">hedef altı</span>' : '<span class="rozet">ok</span>') + '</td></tr>'; }).join('');
+		var tekil = []; var toplamC = m.C;
+		['kredi', 'teminat'].forEach(function (d) { S.depo[d].forEach(function (r) { if (r.adet > 0) { var v = r.adet * px(S, r.kod) * rate(r.kod, d), y = tekil.filter(function (t) { return t.kod === r.kod; })[0]; if (y) y.v += v; else tekil.push({ kod: r.kod, v: v }); } }); });
+		tekil.sort(function (a, b) { return b.v - a.v; });
+		var tk = tekil.slice(0, 5).map(function (t) { var r = metr(dus(S, x, t.kod)); return '<tr><td class="tk">' + esc(t.kod) + '</td><td class="r">' + pct(t.v / toplamC) + '</td><td class="r deger">' + pct(r.e) + '</td></tr>'; }).join('');
+		var cumle = e35 == null ? '' : (e35 <= 0 ? '<span class="dusus">▼ Özkaynak zaten alt sınırın (%' + S.min + ') altında.</span>' : 'Tüm hisseler ortalama <b>%' + (e35 * 100).toFixed(1).replace('.', ',') + '</b> düşerse özkaynak %' + S.min + '’e iner (çağrı bölgesi)' + (eh > 0 ? '; hedef %' + S.hedef + '’ın altına <b>%' + (eh * 100).toFixed(1).replace('.', ',') + '</b> düşüşte iner' : '') + '.');
+		el.innerHTML = '<h2>Fiyat düşüş testi</h2><p class="kucuk">Kredi ve teminat depodaki tüm hisselerin fiyatı aynı oranda düşerse (borç sabit). Serbest depo özkaynağa girmez ama alım limitini etkiler.</p>'
+			+ '<div class="kayd"><label for="st-kayd">Düşüş: <b id="st-deger">−%' + STRES + '</b></label><input type="range" id="st-kayd" min="0" max="50" step="1" value="' + STRES + '"></div>'
+			+ '<div class="kap-grid"><div class="kap-ana"><div class="l">Özkaynak ' + pct(m.e) + ' → </div><div class="v" style="color:' + (mm.e < S.min / 100 ? '#ff8f85' : mm.e < S.hedef / 100 ? '#e9a23b' : '#6fe0a8') + '">' + pct(mm.e) + '</div><div class="n">Teminat ' + tl(m.C) + ' → ' + tl(mm.C) + ' · alım limiti ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(sn)) + '</div></div>'
+			+ '<div class="kap-yan"><div class="t"><div class="l">Bu düşüşte hedefe dönmek için</div><div class="vv">' + (mm.e >= S.hedef / 100 ? 'gerek yok' : tl(Math.max(0, gerek(sn, S.hedef / 100))) + ' TL teminat değeri') + '</div></div></div></div>'
+			+ '<p class="nk-cumle">' + cumle + '</p>'
+			+ '<div class="tw"><table><thead><tr><th>Düşüş</th><th class="r">Özkaynak</th><th class="r">Teminat</th><th class="r">Alım limiti</th><th></th></tr></thead><tbody>' + satirlar + '</tbody></table></div>'
+			+ (tk ? '<h3 style="margin-top:14px">Tek hisse düşerse (−%' + STRES + ')</h3><div class="tw"><table><thead><tr><th>Hisse</th><th class="r">Teminattaki payı</th><th class="r">Özkaynak</th></tr></thead><tbody>' + tk + '</tbody></table></div>' : '');
+	}
+	document.addEventListener('input', function (e) { if (e.target.id === 'st-kayd') { STRES = +e.target.value; renderStres(); var k = $('#st-kayd'); k.focus(); } });
+
+	/* =========================================================
+	   Uyarılar / kontrol paneli
+	   ========================================================= */
+	function uyarilar() {
+		var u = [], m = metr(S), e = m.e, tumler = [];
+		if (e != null && e < S.min / 100) u.push(['kotu', 'Özkaynak %' + (e * 100).toFixed(1).replace('.', ',') + ', alt sınır %' + S.min + ' altında: çağrı bölgesi. Aşağıdaki plana bak.']);
+		else if (e != null && e < S.hedef / 100) u.push(['uyari', 'Özkaynak hedefin (%' + S.hedef + ') altında.']);
+		var fyok = {}, listedisi = {}, tedbir = {}, oran0 = {}, kredik = {};
+		['serbest', 'kredi', 'teminat'].forEach(function (d) { S.depo[d].forEach(function (r) {
+			if (!(px(S, r.kod) > 0) && r.adet > 0) fyok[r.kod] = 1;
+			if (d !== 'kredi' && !ORAN[r.kod]) listedisi[r.kod] = 1;
+			if (d !== 'kredi' && ORAN[r.kod] && ORAN[r.kod].a && /tedbir/i.test(ORAN[r.kod].a)) tedbir[r.kod] = ORAN[r.kod].a;
+			if (d === 'teminat' && ORAN[r.kod] && ORAN[r.kod].o === 0 && r.adet > 0) oran0[r.kod] = 1;
+			if (r.adet < 0 && d === 'serbest') u.push(['uyari', r.kod + ': serbest depoda ' + tl(r.adet) + ' (açık) — bu adet kredi/teminat depodan düşer.']);
+			if (r.bugun != null && r.adet < r.bugun && r.adet >= 0) u.push(['bilgi', r.kod + ' (' + d + '): T+2 adedi bugünkünden ' + tl(r.bugun - r.adet) + ' az, satılmış.']);
+		}); });
+		if (Object.keys(fyok).length) u.push(['uyari', 'Fiyatı girilmemiş (değer 0): ' + Object.keys(fyok).join(', ') + '. “Toplu fiyat” ile güncelle.']);
+		if (Object.keys(listedisi).length) u.push(['uyari', 'Oran listesinde yok (oran 0 sayıldı): ' + Object.keys(listedisi).join(', ') + '.']);
+		Object.keys(tedbir).forEach(function (k) { u.push(['uyari', k + ': tedbir notu — ' + tedbir[k]]); });
+		if (Object.keys(oran0).length) u.push(['bilgi', 'Oranı 0 olan hisse teminat depoda: ' + Object.keys(oran0).join(', ') + ' — teminata katkısı yok.']);
+		var kd = depoDeger(S, 'kredi'); if (kd > 0) { var top = null; S.depo.kredi.forEach(function (r) { var v = r.adet * px(S, r.kod); if (!top || v > top.v) top = { kod: r.kod, v: v }; }); if (top && top.v / kd > 0.8 && S.depo.kredi.length >= 1) u.push(['bilgi', 'Kredi depoda ağırlık tek hissede (' + top.kod + ', %' + Math.round(top.v / kd * 100) + '). Tek hissede kredi taşırsan kurum daha yüksek özkaynak (%50) isteyebilir.']); }
+		if (cumNakit(S, 0) < -0.5) u.push(['uyari', 'Serbest nakit eksi (' + tl2(cumNakit(S, 0)) + ' TL).']);
+		if (S.akis && S.akis.kalem.length && Math.abs(S.akis.a1 + S.akis.a2 + S.akis.a3 - (S.nakit.t1 + S.nakit.t2 + S.nakit.t3)) > Math.max(1000, 0.1 * Math.abs(S.akis.a1 + S.akis.a2 + S.akis.a3))) u.push(['bilgi', 'Hisse hareketlerinden tahmin edilen nakit (' + tl(S.akis.a1 + S.akis.a2 + S.akis.a3) + ' TL) ile TL satırı (' + tl(S.nakit.t1 + S.nakit.t2 + S.nakit.t3) + ' TL) farklı: fiyat/masraf farkı ya da eksik satır olabilir.']);
+		return u;
+	}
+	function renderUyari() {
+		var u = uyarilar(), el = $('#uyari');
+		if (!u.length) { el.innerHTML = '<h2>Kontrol</h2><p class="uy-ok">▲ Her şey yolunda görünüyor: uyarı yok.</p>'; return; }
+		var ik = { kotu: '▼', uyari: '▲', bilgi: '•' };
+		el.innerHTML = '<h2>Kontrol <span class="rozet ' + (u.some(function (x) { return x[0] === 'kotu'; }) ? 'kotu' : 'uyari') + '">' + u.length + '</span></h2><ul class="uy">' + u.map(function (x) { return '<li class="' + x[0] + '"><span>' + (x[0] === 'kotu' ? '⚠' : x[0] === 'uyari' ? '!' : 'i') + '</span>' + esc(x[1]) + '</li>'; }).join('') + '</ul>';
+	}
+
+	/* =========================================================
+	   Yapışkan özet çubuğu + hedef çipleri
+	   ========================================================= */
+	function renderSticky() {
+		var m = metr(S), e = m.e, cls = ok(e), pl = planla(S, S.hedef), al = alimLimiti(S);
+		$('#sticky').innerHTML = '<div class="sk"><span class="sk-l">Özkaynak</span><b class="sk-v ' + cls + '">' + pct(e) + '</b></div>'
+			+ '<div class="sk"><span class="sk-l">Hedef</span><b>%' + S.hedef + '</b></div>'
+			+ '<div class="sk hide-m"><span class="sk-l">Alım limiti</span><b>' + tl(al) + '</b></div>'
+			+ '<div class="sk hide-m"><span class="sk-l">Nakit T+2</span><b>' + tl(cumNakit(S, 2)) + '</b></div>'
+			+ '<div class="sk-b">' + (pl.steps.length ? '<button class="btn" type="button" id="sk-plan">Planı uygula (' + pl.steps.length + ')</button>' : '') + (HIST.length ? '<button class="btn ghost" type="button" id="sk-geri">Geri al</button>' : '') + '</div>';
+	}
+	function renderCipler() { $('#hedef-cipler').innerHTML = '<span class="kucuk">Hızlı hedef:</span>' + [35, 36, 40, 50].map(function (h) { return '<button type="button" class="chip" data-hedef="' + h + '" aria-pressed="' + (S.hedef === h) + '">%' + h + '</button>'; }).join(''); }
+	document.addEventListener('click', function (e) {
+		var h = e.target.closest('[data-hedef]'); if (h) { S.hedef = +h.getAttribute('data-hedef'); kaydet(); render(); return; }
+		if (e.target.id === 'sk-plan') { $('#b-plan') ? $('#b-plan').click() : planUygula(); return; }
+		if (e.target.id === 'sk-geri') geriAl();
+	});
+	function planUygula() { var pl = planla(S, S.hedef); if (!pl.steps.length) { toast('Uygulanacak adım yok.'); return; } HIST.push({ s: clone(S), yazi: 'Plan uygulandı: ' + pl.steps.map(opYazi).join(' · ') }); S = pl.son; kaydet(); render(); toast('Plan uygulandı. Geri almak için Ctrl+Z ya da “Geri al”.'); }
+
+	/* =========================================================
+	   Müşteri özeti (kopyalanabilir metin)
+	   ========================================================= */
+	function ozetMetni() {
+		var m = metr(S), pl = planla(S, S.hedef), x = maxAlim(S, S.hedef / 100), al = alimLimiti(S), lim = S.limit > 0 ? S.limit : Infinity, alinabilir = Math.min(x, al, lim), e35 = esikDusus(S, S.min / 100);
+		var t = ['Özkaynak özeti (simülasyon, T+2 görünümü)', '', 'Özkaynak: ' + pct(m.e) + ' (hedef %' + S.hedef + ', alt sınır %' + S.min + ')', 'Toplam teminat: ' + tl(m.C) + ' TL · Borç (kredi + faiz): ' + tl(m.D) + ' TL', 'Serbest depo alım limiti: ' + tl(al) + ' TL', 'Nakit: bugün ' + tl(cumNakit(S, 0)) + ' · T+1 ' + tl(cumNakit(S, 1)) + ' · T+2 ' + tl(cumNakit(S, 2)) + ' TL'];
+		t.push('Yeni alım kapasitesi: en fazla ' + tl(alinabilir) + ' TL (%' + S.hedef + ' özkaynağa göre)');
+		if (pl.durum === 'fazla' && pl.steps.length) t.push('', 'Fazla teminat: aşağıdaki hisseler serbest depoya alınabilir:'), pl.steps.forEach(function (o, i) { t.push((i + 1) + ') ' + opYazi(o)); });
+		else if ((pl.durum === 'acik' || pl.durum === 'yetmez') && pl.steps.length) { t.push('', '%' + S.hedef + ' özkaynak için yapılacaklar:'); pl.steps.forEach(function (o, i) { t.push((i + 1) + ') ' + opYazi(o)); }); if (pl.durum === 'yetmez') t.push('Not: eldeki hisselerle hedefe tam ulaşılamıyor.'); }
+		else if (pl.durum === 'ok') t.push('', 'Özkaynak hedefte, işlem gerekmiyor.');
+		if (e35 != null && e35 > 0) t.push('', 'Fiyat riski: hisseler ortalama %' + (e35 * 100).toFixed(1).replace('.', ',') + ' düşerse özkaynak %' + S.min + '’e iner.');
+		t.push('', 'Bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.');
+		return t.join('\n');
+	}
+	function renderOzet() {
+		var m = metr(S); if (!(m.C > 0 || m.D > 0)) { $('#ozet').innerHTML = '<h2>Müşteri özeti</h2><p class="kucuk">Hesabı doldurunca WhatsApp’a yapıştırılabilir özet çıkar.</p>'; return; }
+		$('#ozet').innerHTML = '<div class="baslik-satir"><h2>Müşteri özeti</h2><div class="aksiyon"><button class="btn" type="button" id="oz-kopya">Kopyala</button>' + (navigator.share ? '<button class="btn ghost" type="button" id="oz-paylas">Paylaş</button>' : '') + '</div></div><pre class="ozet-metin" id="oz-metin">' + esc(ozetMetni()) + '</pre>';
+	}
+	document.addEventListener('click', function (e) {
+		if (e.target.id === 'oz-kopya') { var t = $('#oz-metin').textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('Özet kopyalandı.'); }, function () { var r = document.createRange(); r.selectNodeContents($('#oz-metin')); var sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); toast('Metin seçildi, Ctrl+C ile kopyala.'); }); }
+		if (e.target.id === 'oz-paylas') navigator.share({ text: $('#oz-metin').textContent }).catch(function () {});
+	});
+
+	/* =========================================================
+	   Kayıtlı senaryolar (hesap yok: hepsi simülasyon)
+	   ========================================================= */
+	var SKEY = 'ozkaynak-senaryolar-v1';
+	function senaryolar() { try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch (e) { return {}; } }
+	function senaryoYaz(o) { try { localStorage.setItem(SKEY, JSON.stringify(o)); } catch (e) { toast('Kaydedilemedi (tarayıcı depolaması dolu ya da kapalı).'); } }
+	function renderSenaryo() {
+		var o = senaryolar(), ad = Object.keys(o).sort(function (a, b) { return (o[b].tarih || '').localeCompare(o[a].tarih || ''); });
+		$('#senaryo').innerHTML = '<h2>Senaryolar</h2><p class="kucuk">Hesap numarası yok, hepsi simülasyon. Adlandırıp kaydet, sonra tek tıkla geri yükle.</p>'
+			+ '<div class="satir"><div class="f"><label for="sn-ad">Senaryo adı</label><input id="sn-ad" placeholder="örn. Müşteri A — kredili alım"></div><button class="btn" type="button" id="sn-kaydet">Kaydet</button><button class="btn ghost" type="button" id="sn-disa">Yedeği indir</button><label class="btn ghost dosya-btn">Yedeği yükle<input type="file" id="sn-ice" accept=".json" hidden></label></div>'
+			+ (ad.length ? '<ul class="sn-liste">' + ad.map(function (a) { var m = metr(o[a].S); return '<li><div><b>' + esc(a) + '</b><span class="kucuk"> · ' + esc((o[a].tarih || '').replace('T', ' ').slice(0, 16)) + ' · özkaynak ' + pct(m.e) + '</span></div><div class="aksiyon"><button class="btn ghost kucuk-b" data-sn-yukle="' + esc(a) + '">Yükle</button><button class="btn ghost kucuk-b" data-sn-sil="' + esc(a) + '">Sil</button></div></li>'; }).join('') + '</ul>' : '<p class="kucuk">Henüz kayıtlı senaryo yok.</p>');
+	}
+	document.addEventListener('click', function (e) {
+		if (e.target.id === 'sn-kaydet') { var ad = ($('#sn-ad').value || '').trim(); if (!ad) { toast('Senaryoya bir ad ver.'); return; } var o = senaryolar(); o[ad] = { S: clone(S), tarih: new Date().toISOString() }; senaryoYaz(o); renderSenaryo(); toast('Senaryo kaydedildi: ' + ad); return; }
+		var y = e.target.closest('[data-sn-yukle]'); if (y) { var o2 = senaryolar(), a = y.getAttribute('data-sn-yukle'); if (o2[a]) { S = o2[a].S; if (!S.nakit) S.nakit = { t0: 0, t1: 0, t2: 0, t3: 0 }; BASE = clone(S); HIST = []; kaydet(); render(); toast('Yüklendi: ' + a); } return; }
+		var d = e.target.closest('[data-sn-sil]'); if (d) { if (confirm('Senaryo silinsin mi?')) { var o3 = senaryolar(); delete o3[d.getAttribute('data-sn-sil')]; senaryoYaz(o3); renderSenaryo(); } return; }
+		if (e.target.id === 'sn-disa') { var blob = new Blob([JSON.stringify(senaryolar(), null, 1)], { type: 'application/json' }), a2 = document.createElement('a'); a2.href = URL.createObjectURL(blob); a2.download = 'ozkaynak-senaryolar.json'; a2.click(); }
+	});
+	document.addEventListener('change', function (e) {
+		if (e.target.id !== 'sn-ice' || !e.target.files[0]) return;
+		var fr = new FileReader(); fr.onload = function () { try { var j = JSON.parse(fr.result), o = senaryolar(), n = 0; Object.keys(j).forEach(function (k) { if (j[k] && j[k].S && j[k].S.depo) { o[k] = j[k]; n++; } }); senaryoYaz(o); renderSenaryo(); toast(n + ' senaryo içe aktarıldı.'); } catch (x) { toast('Dosya okunamadı.'); } }; fr.readAsText(e.target.files[0]);
+	});
+
+	/* =========================================================
+	   Araçlar: toplu fiyat, oran listesi (Excel yükleme)
+	   ========================================================= */
+	var FYKEY = 'ozkaynak-fiyat-v1', OKEY = 'ozkaynak-oranlar-v1', ORAN_KAYNAK = 'Varsayılan liste';
+	function fiyatHafiza() { try { return JSON.parse(localStorage.getItem(FYKEY)) || {}; } catch (e) { return {}; } }
+	function fiyatYaz(k, v) { try { var h = fiyatHafiza(); h[k] = v; localStorage.setItem(FYKEY, JSON.stringify(h)); } catch (e) {} }
+	$('#tf-btn').addEventListener('click', function () {
+		var say = 0, yok = [];
+		String($('#tf-metin').value).split('\n').forEach(function (l) { l = l.trim(); if (!l) return; var m = l.match(/^([A-Za-zÇĞİÖŞÜçğıöşü0-9]{2,8})[\s;:=,\t]+([\d.,]+)/); if (!m) { yok.push(l); return; } var k = m[1].toUpperCase(), v = trnum(m[2]); if (isNaN(v) || v <= 0) { yok.push(l); return; } S.fiyat[k] = v; if (BASE) BASE.fiyat[k] = v; fiyatYaz(k, v); say++; });
+		kaydet(); renderHepsi(); $('#tf-sonuc').textContent = say + ' fiyat güncellendi.' + (yok.length ? ' Okunamayan satır: ' + yok.length : '');
+	});
+	function oranUygula(a, kaynak) { ORAN = {}; a.forEach(function (x) { ORAN[x.k] = x; }); ORAN_KAYNAK = kaynak; $('#hisseler').innerHTML = a.map(function (x) { return '<option value="' + esc(x.k) + '">'; }).join(''); }
+	function renderOranDurum() { $('#oran-durum').innerHTML = '<b>Kullanılan liste:</b> ' + esc(ORAN_KAYNAK) + ' · ' + Object.keys(ORAN).length + ' hisse'; }
+	async function xlsxOku(buf) {
+		var u8 = new Uint8Array(buf), dv = new DataView(buf), i = u8.length - 22; while (i >= 0 && dv.getUint32(i, true) !== 0x06054b50) i--;
+		if (i < 0) throw new Error('xlsx değil'); var n = dv.getUint16(i + 10, true), off = dv.getUint32(i + 16, true), files = {}, dec = new TextDecoder();
+		for (var k = 0; k < n; k++) { if (dv.getUint32(off, true) !== 0x02014b50) break; var mth = dv.getUint16(off + 10, true), cs = dv.getUint32(off + 20, true), nl = dv.getUint16(off + 28, true), el = dv.getUint16(off + 30, true), cl = dv.getUint16(off + 32, true), lho = dv.getUint32(off + 42, true), name = dec.decode(u8.subarray(off + 46, off + 46 + nl)), ln = dv.getUint16(lho + 26, true), le = dv.getUint16(lho + 28, true); files[name] = { m: mth, d: u8.subarray(lho + 30 + ln + le, lho + 30 + ln + le + cs) }; off += 46 + nl + el + cl; }
+		async function al(name) { var f = files[name]; if (!f) return null; if (f.m === 0) return dec.decode(f.d); var ds = new DecompressionStream('deflate-raw'), w = ds.writable.getWriter(); w.write(f.d); w.close(); return dec.decode(await new Response(ds.readable).arrayBuffer()); }
+		var P = new DOMParser(), ss = [], sx = await al('xl/sharedStrings.xml');
+		if (sx) P.parseFromString(sx, 'application/xml').querySelectorAll('si').forEach(function (si) { ss.push(Array.prototype.map.call(si.querySelectorAll('t'), function (t) { return t.textContent; }).join('')); });
+		var wb = P.parseFromString(await al('xl/workbook.xml'), 'application/xml'), rels = P.parseFromString(await al('xl/_rels/workbook.xml.rels'), 'application/xml'), rmap = {};
+		rels.querySelectorAll('Relationship').forEach(function (r) { rmap[r.getAttribute('Id')] = r.getAttribute('Target'); });
+		var sheets = []; wb.querySelectorAll('sheet').forEach(function (sh) { var rid = sh.getAttribute('r:id') || sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id'), t = rmap[rid] || ''; sheets.push({ ad: sh.getAttribute('name'), yol: t.indexOf('/') === 0 ? t.slice(1) : 'xl/' + t }); });
+		function kolon(r) { var h = r.replace(/\d/g, ''), c = 0; for (var q = 0; q < h.length; q++) c = c * 26 + h.charCodeAt(q) - 64; return c - 1; }
+		var out = [];
+		for (var si = 0; si < sheets.length; si++) {
+			var xm = await al(sheets[si].yol); if (!xm) continue; var rows = [];
+			P.parseFromString(xm, 'application/xml').querySelectorAll('sheetData > row').forEach(function (row) { var arr = []; row.querySelectorAll('c').forEach(function (c) { var v = c.querySelector('v'), t = c.getAttribute('t'), val = null; if (t === 'inlineStr') val = (c.querySelector('t') || {}).textContent; else if (v) val = t === 's' ? ss[+v.textContent] : (t === 'str' || t === 'b' || t === 'e' ? v.textContent : parseFloat(v.textContent)); arr[kolon(c.getAttribute('r'))] = val; }); rows.push(arr); });
+			out.push({ ad: sheets[si].ad, rows: rows });
+		}
+		return out;
+	}
+	function norm(t) { return String(t == null ? '' : t).toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim(); }
+	function oranListesiCikar(sayfalar) {
+		for (var i = 0; i < sayfalar.length; i++) {
+			var rows = sayfalar[i].rows, hi = -1, ix = {};
+			for (var r = 0; r < Math.min(rows.length, 10); r++) { var h = (rows[r] || []).map(norm); var k = h.findIndex(function (x) { return x.indexOf('hisse kodu') === 0; }); if (k > -1) { hi = r; ix.k = k; ix.o = h.findIndex(function (x) { return x.indexOf('özkaynak') > -1 || x.indexOf('ozkaynak') > -1; }); ix.g = h.findIndex(function (x) { return x === 'grup'; }); ix.e = h.findIndex(function (x) { return x === 'endeks'; }); ix.p = h.findIndex(function (x) { return x === 'pazar'; }); ix.y = h.findIndex(function (x) { return x.indexOf('yo') === 0 && x.indexOf('oran') > -1; }); ix.a = h.findIndex(function (x) { return x.indexOf('açıklama') > -1 || x.indexOf('aciklama') > -1; }); break; } }
+			if (hi < 0 || ix.o < 0) continue;
+			var liste = []; for (var q = hi + 1; q < rows.length; q++) { var rw = rows[q] || [], kod = rw[ix.k]; if (!kod) continue; var o = rw[ix.o]; if (typeof o !== 'number') o = trnum(o); if (isNaN(o)) o = 0; if (o > 1) o = o / 100; var y = ix.y > -1 ? rw[ix.y] : null; liste.push({ k: String(kod).trim().toUpperCase(), g: ix.g > -1 ? rw[ix.g] : null, e: ix.e > -1 ? rw[ix.e] : null, p: ix.p > -1 ? rw[ix.p] : null, o: o, y: typeof y === 'number' ? y : null, a: ix.a > -1 && rw[ix.a] && rw[ix.a] !== '-' ? String(rw[ix.a]).trim() : '' }); }
+			if (liste.length) return liste;
+		}
+		return null;
+	}
+	$('#oran-dosya').addEventListener('change', async function (e) {
+		var f = e.target.files[0]; if (!f) return; var son = $('#oran-sonuc');
+		try {
+			if (typeof DecompressionStream === 'undefined') throw new Error('Bu tarayıcı Excel okumayı desteklemiyor, güncel Chrome/Safari kullan.');
+			var liste = oranListesiCikar(await xlsxOku(await f.arrayBuffer())); if (!liste) throw new Error('“Hisse Kodu” ve “Özkaynak Değerleme Oranı” sütunlu sayfa bulunamadı.');
+			localStorage.setItem(OKEY, JSON.stringify({ ad: f.name, tarih: new Date().toISOString(), liste: liste })); oranUygula(liste, f.name + ' (' + new Date().toLocaleDateString('tr-TR') + ')'); son.textContent = liste.length + ' hisse yüklendi.'; renderHepsi();
+		} catch (x) { son.textContent = 'Yüklenemedi: ' + x.message; }
+	});
+	$('#oran-sifirla').addEventListener('click', function () { try { localStorage.removeItem(OKEY); } catch (e) {} fetch('/veri/oranlar.json').then(function (r) { return r.json(); }).then(function (a) { oranUygula(a, 'Varsayılan liste'); $('#oran-sonuc').textContent = 'Varsayılana dönüldü.'; renderHepsi(); }); });
+
+	/* =========================================================
+	   Hızlı komut satırı
+	   ========================================================= */
+	function sayi(t) {
+		t = String(t).toLocaleLowerCase('tr').replace(/\s+/g, ''); var m = t.match(/^([\d.,]+)(k|bin|m|mn|milyon)?$/); if (!m) return NaN; var v = trnum(m[1]); if (isNaN(v)) return NaN; var c = m[2]; return c === 'k' || c === 'bin' ? v * 1e3 : (c === 'm' || c === 'mn' || c === 'milyon') ? v * 1e6 : v;
+	}
+	function komut(metin) {
+		var t = String(metin).trim(); if (!t) return null; var tok = t.replace(/[,;]+$/, '').split(/\s+/), low = tok.map(function (x) { return x.toLocaleLowerCase('tr'); }), ilk = low[0];
+		function hata(m) { return { hata: m }; }
+		if (['geri', 'undo'].indexOf(ilk) > -1) return geriAl() ? { ok: 'Son adım geri alındı.' } : hata('Geri alınacak adım yok.');
+		if (['basa', 'başa', 'başlangıç', 'baslangic'].indexOf(ilk) > -1) { S = clone(BASE); HIST = []; kaydet(); render(); return { ok: 'Başlangıca dönüldü.' }; }
+		if (['plan', 'uygula'].indexOf(ilk) > -1) { planUygula(); return { ok: 'Plan uygulandı.' }; }
+		if (ilk === 'hedef') { var h = sayi(tok[1]); if (!(h > 0 && h < 95)) return hata('Örnek: hedef 40'); S.hedef = h; kaydet(); render(); return { ok: 'Hedef %' + h + '.' }; }
+		if (ilk === 'fiyat') { var k0 = (tok[1] || '').toUpperCase(), f0 = sayi(tok[2]); if (!k0 || !(f0 > 0)) return hata('Örnek: fiyat THYAO 312,5'); S.fiyat[k0] = f0; if (BASE) BASE.fiyat[k0] = f0; fiyatYaz(k0, f0); kaydet(); render(); return { ok: k0 + ' fiyatı ' + tl2(f0) + '.' }; }
+		if (['öde', 'ode'].indexOf(ilk) > -1) { var tu = sayi(tok[1]); if (!(tu > 0)) return hata('Örnek: öde 500k'); var op = { t: 'pay', tutar: tu }; adim(op, uygula(S, op)); return { ok: 'Kredi ödendi: ' + tl(Math.min(tu, S.kredi + S.faiz + tu)) + ' TL.' }; }
+		if (['al', 'alım', 'alim'].indexOf(ilk) > -1) {
+			var kod = null, sayilar = []; tok.slice(1).forEach(function (x) { if (isNaN(sayi(x))) kod = x.toUpperCase(); else sayilar.push(sayi(x)); });
+			if (!kod || sayilar.length < 2) return hata('Örnek: al THYAO 2m 312,5 (tutar sonra fiyat)'); var tutar = sayilar[0], fy = sayilar[1], adet = Math.floor(tutar / fy); if (adet < 1) return hata('Tutar tek lota yetmiyor.');
+			var ob = { t: 'buy', kod: kod, adet: adet, fiyat: fy }; adim(ob, uygula(S, ob)); return { ok: kod + ': ' + tl(adet) + ' adet kredili alım.' };
+		}
+		var kd = tok[0].toUpperCase(), fiil = low[low.length - 1]; if (!/^[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9]{2,5}$/.test(kd)) return hata('Anlaşılamadı. Örnek: THYAO 5000 sat');
+		var fiillar = { sat: 'sat', çek: 'cek', cek: 'cek', teminata: 'cek', serbest: 'serbest', serbeste: 'serbest', bırak: 'serbest', birak: 'serbest' }; var f = fiillar[fiil]; if (!f) return hata('Sonunda sat / çek / serbest yaz. Örnek: ' + kd + ' 5000 sat');
+		var orta = low.slice(1, -1).join(' '), tlMi = /\btl\b/.test(orta); orta = orta.replace(/\btl\b/, '').trim(); var hepsi = /hepsi|tümü|tumu/.test(orta), q = hepsi ? Infinity : sayi(orta.split(' ')[0]); if (isNaN(q) || q <= 0) return hata('Adet/tutar yaz. Örnek: ' + kd + ' 5000 sat');
+		var p = px(S, kd); if (tlMi) { if (!(p > 0)) return hata(kd + ' için önce fiyat gir (fiyat ' + kd + ' 12,5).'); q = Math.floor(q / p); }
+		if (f === 'sat') { var mx = toplamAdet(S, kd); if (mx <= 0) return hata(kd + ' depolarda yok.'); if (!(p > 0)) return hata(kd + ' için önce fiyat gir.'); q = Math.min(q, mx); if (q < 1) return hata('Adet 1’den az.'); var os = satOp(kd, q); adim(os, uygula(S, os)); return { ok: kd + ': ' + tl(q) + ' adet satıldı' + (os.t === 'satOde' ? ' (serbest kısmın parasıyla kredi ödendi)' : '') + '.' }; }
+		var from = f === 'cek' ? 'serbest' : 'teminat', to = f === 'cek' ? 'teminat' : 'serbest', row = bul(S, from, kd); if (!row || row.adet <= 0) return hata(kd + ' ' + (from === 'serbest' ? 'serbest' : 'teminat') + ' depoda yok.');
+		q = Math.min(q, row.adet); var om = { t: 'move', kod: kd, from: from, to: to, adet: q }; adim(om, uygula(S, om)); return { ok: kd + ': ' + tl(q) + ' adet ' + from + ' → ' + to + '.' };
+	}
+	$('#cmd').addEventListener('keydown', function (e) { if (e.key !== 'Enter') return; var r = komut(this.value); var el = $('#cmd-sonuc'); if (!r) return; el.textContent = r.hata || r.ok; el.className = 'kucuk ' + (r.hata ? 'dusus' : 'yuk'); if (!r.hata) this.value = ''; });
+	document.addEventListener('keydown', function (e) {
+		var hedef = e.target, yaz = hedef && /^(INPUT|TEXTAREA|SELECT)$/.test(hedef.tagName);
+		if (e.key === '/' && !yaz && !e.ctrlKey && !e.metaKey && document.activeElement === document.body && !$('#dlg').open) { e.preventDefault(); $('#cmd').focus(); return; }
+		if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !yaz) { e.preventDefault(); if (!geriAl()) toast('Geri alınacak adım yok.'); }
+	});
+	$('#b-basa').addEventListener('click', function () { S = clone(BASE); HIST = []; kaydet(); render(); toast('Başlangıç durumuna dönüldü.'); });
+
 	/* başlat */
 	fetch('/veri/oranlar.json').then(function (r) { return r.json(); }).then(function (a) {
-		a.forEach(function (x) { ORAN[x.k] = x; });
-		$('#hisseler').innerHTML = a.map(function (x) { return '<option value="' + esc(x.k) + '">'; }).join('');
+		var ov = null; try { ov = JSON.parse(localStorage.getItem(OKEY)); } catch (e) {}
+		if (ov && ov.liste && ov.liste.length) oranUygula(ov.liste, ov.ad + ' (' + new Date(ov.tarih).toLocaleDateString('tr-TR') + ')'); else oranUygula(a, 'Varsayılan liste (Excel, 29.09.2026)');
 		if (!yukle()) { S = bos(); BASE = clone(S); }
+		var fh = fiyatHafiza(); Object.keys(fh).forEach(function (k) { if (!S.fiyat[k]) S.fiyat[k] = fh[k]; });
 		render();
 	}).catch(function () { S = bos(); BASE = clone(S); render(); toast('Oran listesi yüklenemedi.'); });
 </script>
 
 <style is:global>
-	.oz { margin-top: 20px; display: grid; gap: 16px; font-size: 14px; }
+	.oz { margin-top: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; font-size: 14px; }
+	.oz > * { min-width: 0; }
 	.oz h2 { font-size: 22px; } .oz h3 { font-size: 18px; }
 	.oz .kart { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 16px; padding: 18px; }
 	.oz .param { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 12px; align-items: end; }
@@ -563,6 +877,26 @@ import Rozet from '../components/Rozet.astro';
 	.oz .tw { overflow-x: auto; border: 1px solid var(--kenarlik); border-radius: 12px; } .oz table { border-collapse: collapse; width: 100%; font-size: 13px; }
 	.oz th, .oz td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--cizgi); } .oz th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); background: #faf8f3; } .oz .r { text-align: right; }
 	.oz .adimlar { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 13px; }
+	.oz .sticky { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; background: var(--koyu); color: #fff; border-radius: 14px; padding: 8px 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, .18); }
+	.oz .sk { display: flex; flex-direction: column; line-height: 1.15; } .oz .sk-l { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; opacity: .7; } .oz .sk b { font-family: var(--font-mono); font-size: 17px; }
+	.oz .sk-v.iyi { color: #6fe0a8; } .oz .sk-v.uyari { color: var(--kehribar); } .oz .sk-v.kotu { color: #ff8f85; }
+	.oz .sk-b { margin-left: auto; display: flex; gap: 8px; } .oz .sk-b .btn { min-height: 38px; padding: 6px 12px; background: var(--kehribar); border-color: var(--kehribar); color: var(--koyu); } .oz .sk-b .btn.ghost { background: transparent; color: #fff; border-color: #ffffff66; }
+	@media (max-width: 700px) { .oz .hide-m { display: none; } }
+	.oz .komut-l { font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; } .oz .komut input { font-family: var(--font-mono); font-size: 14px; }
+	.oz .komut-liste { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+	.oz .hedef-cipler { grid-column: 1 / -1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+	.oz .chip { font: inherit; font-size: 12.5px; font-weight: 600; padding: 8px 14px; min-height: 40px; border-radius: 999px; border: 1px solid var(--kenarlik); background: var(--kart); cursor: pointer; } .oz .chip[aria-pressed='true'] { background: var(--koyu); color: #fff; border-color: var(--koyu); }
+	.oz .nk-in { width: 130px; text-align: right; min-height: 36px !important; padding: 6px 8px !important; } .oz td.r, .oz th.r { text-align: right; }
+	.oz .nk-cumle { margin: 12px 0 0; padding: 10px 12px; background: #f3f3fd; border-radius: 12px; font-size: 14px; }
+	.oz .kayd { display: grid; gap: 4px; margin: 10px 0; } .oz .kayd input[type='range'] { width: 100%; padding: 0; min-height: 32px; accent-color: var(--marka); }
+	.oz .uy { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; } .oz .uy li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border-radius: 10px; background: #faf8f3; font-size: 13.5px; }
+	.oz .uy li span { font-weight: 700; width: 18px; text-align: center; } .oz .uy li.kotu { background: #fbe4e2; color: var(--dusus); } .oz .uy li.uyari { background: #fbf0d9; color: #7a4705; } .oz .uy-ok { color: var(--yukselis); font-weight: 600; }
+	.oz .ozet-metin { white-space: pre-wrap; background: #faf8f3; border: 1px solid var(--kenarlik); border-radius: 12px; padding: 12px; font: 13px/1.5 var(--font-mono); margin: 8px 0 0; }
+	.oz .sn-liste { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; } .oz .sn-liste li { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 12px; background: #faf8f3; border: 1px solid var(--kenarlik); border-radius: 12px; }
+	.oz .dosya-btn { display: inline-flex; align-items: center; cursor: pointer; }
+	.oz .arac-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; } @media (max-width: 800px) { .oz .arac-grid { grid-template-columns: 1fr; } }
+	.oz .arac-grid textarea { width: 100%; font: 12.5px var(--font-mono); padding: 10px; border: 1px solid var(--kenarlik); border-radius: 10px; background: #faf8f3; margin: 6px 0; }
+	.oz details.kart > summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
 	.oz .yasal { font-size: 11.5px; color: var(--metin-ikincil); border-top: 1px solid var(--kenarlik); padding-top: 12px; }
 	.oz .kap-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin-top: 10px; }
 	@media (max-width: 800px) { .oz .kap-grid { grid-template-columns: 1fr; } }
