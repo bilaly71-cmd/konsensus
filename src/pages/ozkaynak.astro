@@ -278,11 +278,17 @@ import Rozet from '../components/Rozet.astro';
 	/* ---- hedef planı ---- */
 	function gerek(s, e) { var m = metr(s); return m.D / (1 - e) - m.C; } /* + : teminat değeri lazım, − : fazla */
 	function esik(s, e) { var m = metr(s); return m.C > 0 ? (m.C - m.D) / m.C >= e - 1e-9 : m.D <= 0; }
+	/* SPK kuralı: serbest nakit (T0) eksideyse serbest depoda en az o kadar TL'lik (piyasa değeri) hisse bulunmalı */
+	function serbestGerek(s) { return Math.max(0, -((s.nakit && s.nakit.t0) || 0)); }
+	function serbestYeterli(s) { var R = serbestGerek(s); return R <= 0 || depoPiyasa(s, 'serbest') >= R - 0.5; }
+	/* f(q) doğru→yanlış giden monoton işlevde en büyük doğru q (0..maxq) */
+	function enCok(maxq, f) { maxq = Math.floor(maxq); if (maxq < 1) return 0; if (f(maxq)) return maxq; if (!f(1)) return 0; var lo = 1, hi = maxq; while (lo < hi) { var mid = Math.ceil((lo + hi) / 2); if (f(mid)) lo = mid; else hi = mid - 1; } return lo; }
 	function enAz(maxq, f) { maxq = Math.floor(maxq); if (maxq < 1) return 0; if (!f(maxq)) return maxq; var lo = 1, hi = maxq; while (lo < hi) { var mid = Math.floor((lo + hi) / 2); if (f(mid)) hi = mid; else lo = mid + 1; } return lo; }
 	/* kredi öde + boşa düşen (oranı olan) hisseleri teminata çek */
 	function odeZinciri(s, tutar) {
 		var op = { t: 'pay', tutar: tutar }, n = uygula(s, op), ops = [op];
-		serbestFark(s, n).forEach(function (x) { if (oran(x.kod) > 0) { var m = { t: 'move', kod: x.kod, from: 'serbest', to: 'teminat', adet: x.adet }; n = uygula(n, m); ops.push(m); } });
+		/* boşa düşenleri teminata çek: oranı yüksek olan önce; SPK serbest depo gereği bozulacaksa serbestte bırak */
+		serbestFark(s, n).filter(function (x) { return oran(x.kod) > 0; }).sort(function (a, b) { return oran(b.kod) - oran(a.kod); }).forEach(function (x) { var m = { t: 'move', kod: x.kod, from: 'serbest', to: 'teminat', adet: x.adet }, y = uygula(n, m); if (serbestYeterli(y) || !serbestYeterli(n)) { n = y; ops.push(m); } });
 		return { s: n, ops: ops };
 	}
 	/* serbest hisseyi sat → nakitle krediyi öde → boşa düşenleri teminata çek */
@@ -297,11 +303,19 @@ import Rozet from '../components/Rozet.astro';
 		var e = hedefPct / 100, s = clone(s0), steps = [], m0 = metr(s), durum;
 		if (m0.D <= 0 && m0.C <= 0) return { durum: 'bos', steps: [], son: s, kalan: 0 };
 		function uy(ops) { ops.forEach(function (o) { s = uygula(s, o); steps.push(o); }); }
+		/* 0) SPK: serbest nakit eksideyse serbest depoda o kadar TL'lik hisse olmalı; yoksa teminat depodan, teminatı (oranı) en düşük hisseden serbeste çık */
+		if (!serbestYeterli(s)) {
+			ef(s).depo.teminat.filter(function (x) { return x.adet > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(a.kod) - oran(b.kod); }).forEach(function (r0) {
+				var eksik = serbestGerek(s) - depoPiyasa(s, 'serbest'); if (eksik <= 0.5) return;
+				var q = Math.min(r0.adet, Math.ceil(eksik / px(s, r0.kod))); if (q > 0) uy([{ t: 'move', kod: r0.kod, from: 'teminat', to: 'serbest', adet: q }]);
+			});
+		}
 		if (!esik(s, e)) {
 			/* 1) serbest depodan teminata çek: oranı yüksek olan önce */
 			s.depo.serbest.filter(function (x) { return x.adet > 0 && oran(x.kod) > 0 && px(s, x.kod) > 0; }).sort(function (a, b) { return oran(b.kod) - oran(a.kod); }).forEach(function (r0) {
 				if (esik(s, e)) return; var r = bul(s, 'serbest', r0.kod); if (!r || r.adet <= 0) return;
 				var q = enAz(r.adet, function (q) { return esik(uygula(s, { t: 'move', kod: r.kod, from: 'serbest', to: 'teminat', adet: q }), e); });
+				q = Math.min(q, enCok(r.adet, function (q) { return serbestYeterli(uygula(s, { t: 'move', kod: r.kod, from: 'serbest', to: 'teminat', adet: q })); }));
 				if (q > 0) uy([{ t: 'move', kod: r.kod, from: 'serbest', to: 'teminat', adet: q }]);
 			});
 			/* 2) satışlar: her turda özkaynağa en çok katkı yapan hisseyi sat (nakitle kredi ödemesi en sonda tek adımda yapılır) */
@@ -311,7 +325,7 @@ import Rozet from '../components/Rozet.astro';
 				var Es = ef(s), kodlar = {}; DEPO_SIRA.forEach(function (d) { Es.depo[d].forEach(function (r) { if (r.adet > 0 && px(s, r.kod) > 0) kodlar[r.kod] = 1; }); });
 				var en = null, e0 = metr(odeSonrasiTum(s)).e;
 				Object.keys(kodlar).forEach(function (kod) {
-					var mx = toplamAdet(s, kod); if (mx < 1) return; var qq = Math.min(mx, Math.max(1, Math.ceil(TEST / px(s, kod))));
+					var mx = Math.min(toplamAdet(s, kod), enCok(toplamAdet(s, kod), function (q) { return serbestYeterli(uygula(s, { t: 'sell', kod: kod, adet: q })); })); if (mx < 1) return; var qq = Math.min(mx, Math.max(1, Math.ceil(TEST / px(s, kod))));
 					var g = (metr(odeSonrasiTum(uygula(s, { t: 'sell', kod: kod, adet: qq }))).e - e0) / (qq * px(s, kod)); if (g > 1e-15 && (!en || g > en.g)) en = { kod: kod, g: g, mx: mx };
 				});
 				if (!en) break;
@@ -459,7 +473,10 @@ import Rozet from '../components/Rozet.astro';
 				for (var q = i; q < j; q++) cur = uygula(cur, pl.steps[q]); i = j; continue;
 			}
 			var tutar = op.adet * px(S, op.kod);
-			if (op.t === 'move') rows.push({ tur: 'tasi', kod: op.kod, adet: op.adet, tutar: tutar, yon: op.to === 'teminat' ? 'Serbest → teminat' : 'Teminat → serbest' });
+			if (op.t === 'move') {
+				var yon = op.to === 'teminat' ? 'Serbest → teminat' : 'Teminat → serbest', ayni = rows.filter(function (r) { return r.tur === 'tasi' && r.kod === op.kod && r.yon === yon; })[0];
+				if (ayni) { ayni.adet += op.adet; ayni.tutar += tutar; } else rows.push({ tur: 'tasi', kod: op.kod, adet: op.adet, tutar: tutar, yon: yon });
+			}
 			else rows.push({ tur: 'sat', kod: op.kod, adet: op.adet, tutar: tutar, segs: satSegmentleri(cur, op.kod, op.adet) });
 			cur = uygula(cur, op); i++;
 		}
@@ -484,6 +501,7 @@ import Rozet from '../components/Rozet.astro';
 		else if (pl.durum === 'acik') bas = 'Özkaynak ' + pct(e) + ' → hedef %' + h + '. Plan sonrası (T+2) özkaynak ' + pct(son.e) + '.';
 		else bas = 'Eldeki hisselerle hedefe ulaşılamıyor. Plan sonrası özkaynak ' + pct(son.e) + ', hâlâ ' + tl(pl.kalan) + ' TL teminat değeri eksik. Fiyatları ve depoları kontrol et.';
 		var nakitEksi = cumNakit(S, 2) < -0.5 ? '<p class="kucuk dusus">Serbest nakit eksi (' + tl(cumNakit(S, 2)) + ' TL): serbestten satış parası önce bunu kapatır; kredi ödemesi ancak nakit artıya geçince yapılır.</p>' : '';
+		var spkSatir = serbestGerek(S) > 0.5 ? '<p class="kucuk">SPK kuralı (serbest nakit ' + tl2(-serbestGerek(S)) + ' TL eksi): serbest depoda en az ' + tl(serbestGerek(S)) + ' TL hisse tutulur; teminatı en düşük hisseden serbeste çıkarılır. Serbest depo: ' + tl(depoPiyasa(S, 'serbest')) + ' → ' + tl(depoPiyasa(pl.son, 'serbest')) + ' TL.</p>' : '';
 		var limitSatir = pl.steps.length ? '<p class="kucuk">Plan sonrası alım limiti (' + limitEtiket(S) + '): ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(pl.son)) + ' TL</p>' : '';
 		var pr = planSatirlari(pl), satisToplam = pr.reduce(function (t, r) { return t + (r.tur === 'sat' ? r.tutar : 0); }, 0);
 		var rows = pr.map(function (r, i) {
@@ -495,7 +513,7 @@ import Rozet from '../components/Rozet.astro';
 		el.innerHTML = '<div class="baslik-satir"><h2>Hedefe ulaşmak için</h2>' + (pl.steps.length ? '<div class="aksiyon"><button class="btn ghost" type="button" id="emir-kopya">Emir listesini kopyala</button><button class="btn" type="button" id="b-plan">Planı uygula</button></div>' : '') + '</div><p class="oz-ozet">' + bas + '</p>' + ozetSatir
 			+ (pl.steps.length ? '<div class="tw"><table><thead><tr><th>#</th><th>Hisse</th><th>İşlem</th><th class="r">Adet</th><th class="r">Tutar</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '')
 			+ (pl.steps.length && pl.durum !== 'fazla' ? '<p class="kucuk">Sıra: serbestten teminata çek → nakitle kredi öde → her turda özkaynağa en çok katkı yapan hisseyi sat (gerekirse parayla kredi öde). Satış önce serbest depoya yazılır, yetmeyen kısım serbestte eksi lot olarak görünür ve T+2’de kredi (önce), sonra teminat depodan kapanır. Plan T+2 durumunu gösterir.</p>' : '')
-			+ nakitEksi + limitSatir + (pl.durum === 'fazla' && pl.steps.length ? '<p class="kucuk">Serbest depoya alınacak hisse seçiminde varsayım: oranı düşük olan önce (aynı teminat gevşemesiyle daha çok piyasa değeri serbest kalır). Farklı sıra istersen hisseyi elle sürükle.</p>' : '');
+			+ nakitEksi + spkSatir + limitSatir + (pl.durum === 'fazla' && pl.steps.length ? '<p class="kucuk">Serbest depoya alınacak hisse seçiminde varsayım: oranı düşük olan önce (aynı teminat gevşemesiyle daha çok piyasa değeri serbest kalır). Farklı sıra istersen hisseyi elle sürükle.</p>' : '');
 	}
 	document.addEventListener('click', function (e) {
 		if (e.target.id === 'emir-kopya') { var t = emirMetni(planla(S, S.hedef)); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('Emir listesi kopyalandı.'); }, function () { toast('Kopyalanamadı; Özet sekmesinden metni seç.'); }); }
@@ -555,7 +573,8 @@ import Rozet from '../components/Rozet.astro';
 		if (!op) { el.textContent = 'Adet gir.'; return; }
 		if ((op.t === 'sell' || op.t === 'satOde') && px(S, op.kod) <= 0) { el.textContent = 'Önce bu hissenin fiyatını gir.'; return; }
 		var n = uygula(S, op), a = metr(S), b = metr(n);
-		var nakitNot = (op.t === 'satOde' || op.t === 'sell') && cumNakit(S, 2) < -0.5 && satSegmentleri(S, op.kod, op.adet).some(function (g) { return g.d === 'serbest'; }) ? '<br><span class="kucuk dusus">Serbest nakit eksi (' + tl(cumNakit(S, 2)) + ' TL): satış parası önce bunu kapatır; kredi ancak nakit artıya geçince ödenir.</span>' : '';
+		var spkNot = (serbestGerek(S) > 0.5 && !serbestYeterli(uygula(S, op))) ? '<br><span class="kucuk dusus">SPK kuralı: serbest nakit eksi (' + tl(-serbestGerek(S)) + ' TL) olduğu için serbest depoda en az bu kadar TL hisse kalmalı; bu işlemle ' + tl(depoPiyasa(uygula(S, op), 'serbest')) + ' TL kalıyor.</span>' : '';
+		var nakitNot = spkNot + ((op.t === 'satOde' || op.t === 'sell') && cumNakit(S, 2) < -0.5 && satSegmentleri(S, op.kod, op.adet).some(function (g) { return g.d === 'serbest'; }) ? '<br><span class="kucuk dusus">Serbest nakit eksi (' + tl(cumNakit(S, 2)) + ' TL): satış parası önce bunu kapatır; kredi ancak nakit artıya geçince ödenir.</span>' : '');
 		var seg = nakitNot + ((op.t === 'sell' || op.t === 'satOde') ? '<br><span class="kucuk">Satış dağılımı: ' + satSegmentleri(S, op.kod, op.adet).map(function (g) { return g.d === 'serbest' ? 'serbest ' + tl(g.q) + ' (para serbest nakde gelir, önce nakit eksisini kapatır)' : (g.d === 'kredi' ? 'kredi depo ' + tl(g.q) + ' (T+2\u2019de kredi otomatik ödenir, kredi depodan düşer)' : 'teminat depo ' + tl(g.q) + ' (para nakde gelir, teminat depodaki hisse azalır)'); }).join(' · ') + '</span>' : '');
 		el.innerHTML = 'Özkaynak <b>' + pct(a.e) + '</b> → <b class="' + ok2(b.e) + '">' + pct(b.e) + '</b>' + (b.e != null && a.e != null ? (b.e > a.e ? ' ▲' : b.e < a.e ? ' ▼' : '') : '') + seg + '<br><span class="kucuk">Teminat ' + tl(a.C) + ' → ' + tl(b.C) + ' · borç ' + tl(a.D) + ' → ' + tl(b.D) + ' · T+2 nakit ' + tl(cumNakit(S, 2)) + ' → ' + tl(cumNakit(n, 2)) + ' · alım limiti ' + tl(alimLimiti(S)) + ' → ' + tl(alimLimiti(n)) + ' · serbest depo ' + tl(depoPiyasa(S, 'serbest')) + ' → ' + tl(depoPiyasa(n, 'serbest')) + ' TL</span>';
 	}
@@ -703,7 +722,8 @@ import Rozet from '../components/Rozet.astro';
 		}).join('');
 		var kullan = Math.max(0, c[2]), borc = S.kredi + S.faiz, odenebilir = Math.min(kullan, S.kredi + S.faiz);
 		var oz = ''; if (odenebilir >= 1) { var son = uygula(S, { t: 'pay', tutar: odenebilir }), a = metr(S), b = metr(son); oz = '<div class="aksiyon"><button class="btn" type="button" id="nk-ode">T+2 nakitle krediyi öde (' + tl(odenebilir) + ' TL)</button><span class="kucuk">Özkaynak ' + pct(a.e) + ' → ' + pct(b.e) + '; boşa düşen kredi depo hisseleri serbeste geçer.</span></div>'; }
-		var uyar = c[0] < -0.5 ? '<p class="kucuk dusus">▼ Serbest nakit eksi (' + tl2(c[0]) + ' TL): faiz işler, gün içinde kapatmayı düşün.</p>' : '';
+		var spk = serbestGerek(S) > 0.5 ? '<p class="kucuk ' + (serbestYeterli(S) ? '' : 'dusus') + '">SPK kuralı: serbest nakit eksi (' + tl(-serbestGerek(S)) + ' TL) → serbest depoda en az bu kadar TL hisse gerekir. Şu an ' + tl(depoPiyasa(S, 'serbest')) + ' TL' + (serbestYeterli(S) ? ' (yeterli).' : ' (' + tl(serbestGerek(S) - depoPiyasa(S, 'serbest')) + ' TL eksik).') + '</p>' : '';
+		var uyar = spk + (c[0] < -0.5 ? '<p class="kucuk dusus">▼ Serbest nakit eksi (' + tl2(c[0]) + ' TL): faiz işler, gün içinde kapatmayı düşün.</p>' : '');
 		el.innerHTML = '<h2>Nakit takvimi</h2><p class="kucuk">Ekrandaki TL satırının Serbest / T+1 / T+2 / T+3 değerleri (elle de düzenleyebilirsin). Satışlar T+2’de nakde döner; dün yapılan satış T+1’de.</p>'
 			+ '<div class="tw"><table><thead><tr><th></th>' + ac.map(function (a) { return '<th class="r">' + a + '</th>'; }).join('') + '</tr></thead><tbody>'
 			+ '<tr><td>O gün gelen / giden</td>' + k.map(function (kk) { return '<td class="r"><input class="n nk-in" data-nk="' + kk + '" inputmode="decimal" value="' + String(n[kk] || 0).replace('.', ',') + '" aria-label="' + kk + ' nakit"></td>'; }).join('') + '</tr>'
@@ -769,6 +789,7 @@ import Rozet from '../components/Rozet.astro';
 		if (Object.keys(oran0).length) u.push(['bilgi', 'Oranı 0 olan hisse teminat depoda: ' + Object.keys(oran0).join(', ') + ' — teminata katkısı yok.']);
 		var kd = depoDeger(S, 'kredi'); if (kd > 0) { var top = null; S.depo.kredi.forEach(function (r) { var v = r.adet * px(S, r.kod); if (!top || v > top.v) top = { kod: r.kod, v: v }; }); if (top && top.v / kd > 0.8 && S.depo.kredi.length >= 1) u.push(['bilgi', 'Kredi depoda ağırlık tek hissede (' + top.kod + ', %' + Math.round(top.v / kd * 100) + '). Tek hissede kredi taşırsan kurum daha yüksek özkaynak (%50) isteyebilir.']); }
 		if (cumNakit(S, 0) < -0.5) u.push(['uyari', 'Serbest nakit eksi (' + tl2(cumNakit(S, 0)) + ' TL).']);
+		if (serbestGerek(S) > 0.5) u.push([serbestYeterli(S) ? 'bilgi' : 'kotu', 'SPK kuralı: serbest nakit ' + tl2(-serbestGerek(S)) + ' TL eksi olduğu için serbest depoda en az ' + tl(serbestGerek(S)) + ' TL değerinde hisse olmalı. Şu an ' + tl(depoPiyasa(S, 'serbest')) + ' TL' + (serbestYeterli(S) ? ' (yeterli).' : ': ' + tl(serbestGerek(S) - depoPiyasa(S, 'serbest')) + ' TL eksik. Planlayıcı teminatı en düşük hisseden serbeste çıkarır.')]);
 		if (S.akis && S.akis.kalem.length && Math.abs(S.akis.a1 + S.akis.a2 + S.akis.a3 - (S.nakit.t1 + S.nakit.t2 + S.nakit.t3)) > Math.max(1000, 0.1 * Math.abs(S.akis.a1 + S.akis.a2 + S.akis.a3))) u.push(['bilgi', 'Hisse hareketlerinden tahmin edilen nakit (' + tl(S.akis.a1 + S.akis.a2 + S.akis.a3) + ' TL) ile TL satırı (' + tl(S.nakit.t1 + S.nakit.t2 + S.nakit.t3) + ' TL) farklı: fiyat/masraf farkı ya da eksik satır olabilir.']);
 		return u;
 	}
@@ -820,6 +841,7 @@ import Rozet from '../components/Rozet.astro';
 	function ozetMetni() {
 		var m = metr(S), pl = planla(S, S.hedef), x = maxAlim(S, S.hedef / 100), al = alimLimiti(S), lim = S.limit > 0 ? S.limit : Infinity, alinabilir = Math.min(x, al, lim), e35 = esikDusus(S, S.min / 100);
 		var t = ['Özkaynak özeti (simülasyon, T+2 görünümü)', '', 'Özkaynak: ' + pct(m.e) + ' (hedef %' + S.hedef + ', alt sınır %' + S.min + ')', 'Toplam teminat: ' + tl(m.C) + ' TL · Borç (kredi + faiz): ' + tl(m.D) + ' TL', 'Alım limiti (' + limitEtiket(S) + '): ' + tl(al) + ' TL', 'Nakit: bugün ' + tl(cumNakit(S, 0)) + ' · T+1 ' + tl(cumNakit(S, 1)) + ' · T+2 ' + tl(cumNakit(S, 2)) + ' TL'];
+		if (serbestGerek(S) > 0.5) t.push('SPK: serbest nakit ' + tl(-serbestGerek(S)) + ' TL eksi → serbest depoda en az ' + tl(serbestGerek(S)) + ' TL hisse gerekli (şu an ' + tl(depoPiyasa(S, 'serbest')) + ' TL)');
 		if (S.satisToplam > 0.5) t.push('Plan/simülasyon satışı: toplam ' + tl(S.satisToplam) + ' TL (T+2’de nakde döner)');
 		t.push('Yeni alım kapasitesi: en fazla ' + tl(alinabilir) + ' TL (%' + S.hedef + ' özkaynağa göre)');
 		if (pl.durum === 'fazla' && pl.steps.length) t.push('', 'Fazla teminat: aşağıdaki hisseler serbest depoya alınabilir:'), pl.steps.forEach(function (o, i) { t.push((i + 1) + ') ' + opYazi(o)); });
