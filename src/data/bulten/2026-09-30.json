@@ -1,0 +1,613 @@
+{
+  "date": "2026-09-30",
+  "weekday": "Çarşamba",
+  "asOf": "07:44",
+  "windowText": "29.09 18:00 → 30.09 07:44 (TSİ)",
+  "note": "Girdi klasörü (aracı kurum bülteni vb.) boş; rakamlar web haberleri ve X taramasının kesişiminden derlendi. Piyasa henüz açılmadı, bu bülten açılış ÖNCESİ hazırlandı.",
+  "sources": [
+    {
+      "n": "AA, Anadolu Ajansı (BIST kapanış)",
+      "k": "Birincil"
+    },
+    {
+      "n": "Yetkin Report, Cumhuriyet, Diken, Evrensel (fon skandalı)",
+      "k": "Haber/Köşe"
+    },
+    {
+      "n": "Uzmanpara/Milliyet, Sözcü (fon zirvesi kararları)",
+      "k": "Haber"
+    },
+    {
+      "n": "Investrade, Cappnotes, CNBC/BNN Bloomberg (ABD kapanışı)",
+      "k": "Veri/Haber"
+    },
+    {
+      "n": "energyintel.com (SPR açıklaması)",
+      "k": "Haber"
+    },
+    {
+      "n": "X (gundem.py taraması, 41 sorgu, 30.09 00:19)",
+      "k": "Sosyal"
+    }
+  ],
+  "top5": [
+    {
+      "h": "BIST 100, fon skandalıyla %2,40 kaybetti: 12.290,58",
+      "p": "Endeks 29.09'u **-%2,40** (-302,18 puan) kayıpla **12.290,58**'de kapattı, hacim **108,8 mlr TL** (AA, 18:26). En kötü sektör finansal kiralama/faktoring **-%8,20**, en iyisi ulaştırma **+%0,59**. Taban kapatanlar: HEDEF, MARTI, MAGEN, BIGTK, USAK (-%10,00).",
+      "chain": "Sebep: SPK'nın 131 fonu tasfiye kararı + manipülasyon soruşturması → güven krizi → likit hisselerde satış → endeks. Bankacılık **+%0,10** ile göreli dirençli, holding **-%2,05** ile en çok yara alan grup.",
+      "src": "AA 29.09 18:26 · halktv.com.tr"
+    },
+    {
+      "h": "Fon zirvesi: İş Bankası ve Ziraat Bankası görevlendirildi, 1 milyon TL altına öncelikli ödeme",
+      "p": "Erdoğan başkanlığında ~3 saat süren zirveye (Cevdet Yılmaz, Mehmet Şimşek, BDDK Başkanı Kavcıoğlu, SPK ve Borsa İstanbul katıldı) sonunda **Tera Portföy'ün tasfiyesi İş Bankası'na**, diğer **6 portföy şirketinin kayıt eşleştirmesi Ziraat Bankası'na** verildi; **1 milyon TL altındaki yatırımcılara öncelikli ödeme** kararı alındı.",
+      "chain": "Zirve → belirsizlik kısmen azaldı → ama \"ne zaman ödenir\" hâlâ yok → likit hisselerdeki nakit ihtiyacı sürebilir. Bugünkü açılışta bu haberin tepkisi ilk kez görülecek.",
+      "src": "Uzmanpara/Milliyet 29.09 · Sözcü 29.09"
+    },
+    {
+      "h": "DDK Başkanı Tanrıkulu, çıkar çatışması iddiasının ardından Borsa İstanbul'dan istifa etti",
+      "p": "25 Eylül'de ekonomist Yalçın Karatepe, DDK Başkanı Salih Tanrıkulu'nun aynı zamanda **Borsa İstanbul Yönetim Kurulu Başkan Vekili** olduğunu, bunun bağımsız denetimi imkânsız kıldığını yazmıştı. 29 Eylül akşamı Tanrıkulu bu görevden **istifa etti**.",
+      "chain": "Çıkar çatışması ortadan kalktı → denetimin bağımsızlığına güven sinyali → ama yönetim boşluğu riski de var. Henüz fiyatlanmadı (haber akşam geldi).",
+      "src": "Cumhuriyet 25.09 10:32 · X (çoklu bağımsız hesap) 29.09 19:09-19:38"
+    },
+    {
+      "h": "ABD 10 yıllık faiz %5,28 ile 2007'den beri zirvede, ABD'den 40 milyon varil ek SPR arzı",
+      "p": "ABD kapanışı 29.09: S&P 500 **7.670,84 (-%0,2)**, Dow **51.349,92 (-%0,25)**, Nasdaq **26.797,54 (-%0,1)** — üç bağımsız kaynakla teyitli. 10Y **%5,28**, 30Y **%5,61-5,62** (2002'den beri zirve). Aynı gün ABD, İran/Hürmüz gerekçesiyle SPR'den **40 milyon varil daha** açıklaması yaptı; Brent SPR sonrası **~$102**'ye geriledi, WTI **-%3,48 ($89,38)**.",
+      "chain": "Zincir: Tahvil getirisi zirvede → risk iştahı sınırlı → ama petrol arzı rahatlıyor → TÜPRAŞ/havayolu maliyet tarafı için potansiyel pozitif, henüz BIST'te görülmedi.",
+      "src": "Investrade/Cappnotes 29.09 · energyintel.com 29.09"
+    },
+    {
+      "h": "BIST Katılım Endeksi'nden Destek Finans Faktoring ve Katılımevim (KTLEV) çıkarıldı",
+      "p": "Borsa İstanbul'un 1 Ekim 2026-30 Nisan 2027 dönemsel değişikliğinde, manipülasyon soruşturmasında adı geçen **Destek Finans Faktoring** ve **Katılımevim Tasarruf Finansman (KTLEV)** BIST 30/100 katılım endekslerinden çıkarıldı.",
+      "chain": "Soruşturma → endeks metodolojisi kirli isimleri temizliyor → 1 Ekim'de pasif fon rebalansı satış baskısı yaratabilir, henüz fiyatlanmadı.",
+      "src": "Borsa İstanbul resmi duyurusu, X'te çoklu bağımsız hesap 29.09"
+    }
+  ],
+  "story": "**Endeksi ezen:** güven çöküşü, fiyat değil. BIST 100 **%2,40** kayıpla **12.290,58**'e indi, son bir ayda dolar bazında **%14-21 arası eridiği** iddia ediliyor (🔸hesaplama, resmi teyit yok ama yön kapanışlarla tutarlı). Kriz Pusula Portföy'de görünür oldu (28 Ağustos sonrası **~132,7 mlr TL** çıkış, 15 Eylül temerrüt), SPK 17 Eylül'de **131 fonun tasfiyesine** karar verdi, Tera Portföy de temerrüde düştü. Ayrı bir bacakta KTLEV/Destek Holding/Hedef Holding'de manipülasyon soruşturması var (14 gözaltı). 29 Eylül'de tutuklu sayısı **56**'ya çıktı, aynı gün Erdoğan'ın zirvesinde İş Bankası ve Ziraat Bankası'na tasfiye görevi verildi. **Endeksi tutan:** bankacılığın göreli direnci (**+%0,10**) ve zirvenin somut adım atmış olması. Tarihsel benzetme yapmıyorum: **USD/TRY sakin** (~49 civarı, kur şoku yok), bu kez tetik döviz değil kurumsal güven/denetim.",
+  "strip": [
+    {
+      "l": "BIST 100",
+      "v": "12.290,58",
+      "c": "-%2,40",
+      "d": "d",
+      "n": "29.09 18:26 · AA kapanış"
+    },
+    {
+      "l": "VİOP Ekim (BIST30)",
+      "v": "15.572",
+      "c": "≈-%0,19",
+      "d": "d",
+      "n": "29.09 gece seansı, normal seans kapanışı 15.602 · X"
+    },
+    {
+      "l": "USD/TRY",
+      "v": "≈49,00",
+      "c": "",
+      "d": "n",
+      "n": "[[ESKİ 25.09, GCM Yatırım]] + altın çapraz hesap"
+    },
+    {
+      "l": "Gram altın",
+      "v": "6.637,48",
+      "c": "+%1,10",
+      "d": "u",
+      "n": "X (parafinans1) 30.09 00:00"
+    },
+    {
+      "l": "Ons altın",
+      "v": "4.179,70",
+      "c": "+%0,3",
+      "d": "u",
+      "n": "Investrade, 29.09 kapanış"
+    },
+    {
+      "l": "Brent",
+      "v": "≈102",
+      "c": "",
+      "d": "d",
+      "n": "SPR açıklaması sonrası geriledi, tam rakam kaynaklar arası çelişkili"
+    },
+    {
+      "l": "WTI",
+      "v": "89,38",
+      "c": "-%3,48",
+      "d": "d",
+      "n": "Investrade, 29.09 kapanış"
+    },
+    {
+      "l": "ABD 10Y",
+      "v": "%5,28",
+      "c": "",
+      "d": "u",
+      "n": "2007'den beri zirve · 3 kaynak teyitli"
+    },
+    {
+      "l": "ABD 30Y",
+      "v": "%5,61",
+      "c": "",
+      "d": "u",
+      "n": "2002'den beri zirve"
+    },
+    {
+      "l": "S&P 500",
+      "v": "7.670,84",
+      "c": "-%0,2",
+      "d": "d",
+      "n": "29.09 kapanış · 3 kaynak teyitli"
+    },
+    {
+      "l": "Nasdaq",
+      "v": "26.797,54",
+      "c": "-%0,1",
+      "d": "d",
+      "n": "29.09 kapanış"
+    },
+    {
+      "l": "Dow Jones",
+      "v": "51.349,92",
+      "c": "-%0,25",
+      "d": "d",
+      "n": "29.09 kapanış"
+    },
+    {
+      "l": "DXY",
+      "v": "101,50",
+      "c": "+%0,3",
+      "d": "u",
+      "n": "Investrade, tek kaynak"
+    },
+    {
+      "l": "CDS 5Y",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı; Eylül başı 217-220 bp idi [[ESKİ]])"
+    },
+    {
+      "l": "VIX",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı, kaynaklar tutarsız)"
+    }
+  ],
+  "stripNote": "Gümüşte kaynaklar arası **~%4** fark var ($58,9 vs $61,2), hangisi doğru net değil — stripe eklemedim. Brent'te tek net rakam yok, sadece SPR haberinin ardından **gerilediği** yönü teyitli (Investrade $102 civarı, X kaynaklı @berna_gulpinar da aynı yönü doğruluyor). USD/TRY 5 günlük eski veriden çapraz hesapla türetildi, gerçek zamanlı değil.",
+  "dom": [
+    "BIST 100 dün **12.290,58**'e indi (**-%2,40**), hacim **108,8 mlr TL**. En kötü sektör finansal kiralama/faktoring **-%8,20**, en iyisi ulaştırma **+%0,59**.",
+    "En çok yükselenler: **ETYAT +%8,41, CMENT +%8,37, DIRIT +%7,42**. Taban kapatanlar: **HEDEF, MARTI, MAGEN, BIGTK, USAK (-%10,00)**.",
+    "Fon zirvesi (~17:00) sonunda **İş Bankası** Tera Portföy tasfiyesini, **Ziraat Bankası** diğer 6 portföy şirketinin kayıt eşleştirmesini yürütecek; **1 milyon TL altı yatırımcıya öncelikli ödeme** kararı alındı.",
+    "DDK Başkanı Salih Tanrıkulu, Borsa İstanbul Yönetim Kurulu Başkan Vekilliği görevinden **istifa etti** (29.09 akşamı).",
+    "BIST Katılım Endeksi'nin 1 Ekim-30 Nisan döneminde **Destek Finans Faktoring** ve **Katılımevim (KTLEV)** endeksten çıkarıldı — soruşturmayla bağlantılı.",
+    "USD/TRY **~49** civarında, kur tarafında olağan dışı hareket görünmüyor [[ESKİ 25.09 veri]]."
+  ],
+  "glob": [
+    "ABD dün hafif geriledi: **S&P 500 7.670,84 (-%0,2)**, **Dow 51.349,92 (-%0,25)**, **Nasdaq 26.797,54 (-%0,1)**. Aylık bazda teknoloji **+%4,4** güçlü, Finansal/Gayrimenkul/Tüketici Seçmeli en zayıf.",
+    "**ABD 10Y %5,28** (2007'den beri zirve), **30Y %5,61-5,62** (2002'den beri zirve) — Cappelleri: \"kazançlar değil, tahvil getirisi piyasayı yönetiyor\".",
+    "Tüketici güveni **81,9** (2014'ten beri en düşük), JOLTS iş ilanları beklentinin altında.",
+    "Şirket gündemi: **AMD**, Fei-Fei Li'nin **World Labs**'ini **$8,2 milyara** aldı; **Anthropic** IPO taslağı **$2 trilyon** değerleme hedefliyor; **OpenAI** güvenlik kaygısıyla bir modeli rafa kaldırdı; **Goldman Sachs**'ta CEO değişikliği konuşuluyor.",
+    "ABD, İran/Hürmüz gerekçesiyle SPR'den **40 milyon varil** daha açıkladı; Brent **~$102**'ye geriledi, WTI **-%3,48**.",
+    "Bugün: ABD Ağustos **PCE** (çekirdek YoY beklenti **%3,7**), **ADP istihdam** (beklenti +70 bin), akşam **Micron** FY26 4Ç bilançosu (EPS beklenti **$31,49**, gelir **~$50,9 mlr**)."
+  ],
+  "regime": [
+    [
+      "Altın ↔ jeopolitik gerilim",
+      "Zayıf pozitif — ons altın $4.100-4.215 bandında, Fed faiz belirsizliği de katkı veriyor.",
+      "Tek nedene bağlama; hem jeopolitik hem faiz hedge'i."
+    ],
+    [
+      "Brent ↔ jeopolitik gerilim",
+      "Zayıflıyor — ABD'nin 40M varil ek SPR kararı sonrası Brent geriledi, WTI **-%3,48**.",
+      "Arz güvencesi mesajı savaş retoriğinden daha güçlü fiyatlanıyor."
+    ],
+    [
+      "BIST ↔ Brent",
+      "Kopuk — BIST'in düşüşü petrolden değil iç fon skandalından.",
+      "Petrol gerilemesini BIST'e otomatik pozitif okuma, rejim ayrı."
+    ],
+    [
+      "BIST ↔ USDTRY ve CDS",
+      "USDTRY ~49 sakin [[ESKİ]], CDS Eylül başı 217-220 bp'ye gerilemişti, güncel değer yok.",
+      "Kur/CDS henüz kriz fiyatlamıyor gibi ama veri eski, temkinli ol."
+    ],
+    [
+      "Bankalar ↔ tahvil faizi/TCMB",
+      "XBANK dün **+%0,10**, holding **-%2,05**; TCMB politika faizi **%37**'de sabit.",
+      "Bankalar fon skandalından nispeten izole, güvenli liman gibi davranıyor."
+    ],
+    [
+      "BIST ↔ EEM ve DXY",
+      "DXY dün **+%0,3** ile **101,50** (tek kaynak) — dolar güçlü.",
+      "Global dolar gücü + yerel skandal aynı yönde negatif üst üste biniyor."
+    ],
+    [
+      "ABD endeksleri ↔ ABD 10Y",
+      "Net negatif korelasyon — 10Y zirvedeyken S&P/Dow hafif geriledi (3 kaynakla teyitli).",
+      "\"Getiri piyasayı yönetiyor\" tezini baz alıyorum."
+    ],
+    [
+      "Sosyal ton ↔ ertesi gün fiyat",
+      "Aşırı kötümser/öfkeli, #XU100/#BIST100 etiketlerinde iyimser ses neredeyse yok.",
+      "Kontrarian uyarı ama karşı kanıt (net alım sinyali) yok, bahse girmiyorum."
+    ]
+  ],
+  "regimeNote": "Elimde gerçek 5-10 günlük kapanış serisi yok; dayanaklar tek tek günlerin haberlerinden ve X taramasından geliyor. Otomasyonda bu tablo gerçek fiyat serisinden çıkarılmalı.",
+  "usiran": {
+    "timeline": [
+      [
+        "25.09",
+        "BM'de İran Dışişleri Bakanı Araghchi, kararın ABD'de olduğunu söyleyerek Hürmüz'ü **7 gün içinde** yeniden açabileceklerini duyurdu."
+      ],
+      [
+        "29.09 ~13:32",
+        "ABD yönetimi, İran savaşı/Hürmüz gerekçesiyle stratejik petrol rezervinden **40 milyon varil daha** piyasaya sürme kararı aldı (energyintel.com teyitli; Mart'ta zaten 172M varillik büyük paket açıklanmıştı, bu yeni bir araç değil)."
+      ],
+      [
+        "29.09 akşam",
+        "**İsveç, Almanya, Norveç, Finlandiya, Danimarka, İtalya, Fransa** vatandaşlarına İran'ı terk etme çağrısı yaptı — yıl içinde tekrarlanan bir refleks, ilk kez değil."
+      ],
+      [
+        "29.09 ~15:03",
+        "Trump (X'te çoklu bağımsız hesap aktarımı): \"İran savaşta çok kötü durumda, çok yakında bitecek, petrol fiyatları düşecek\" dedi — Kasım ara seçimlerine bağlı tekrarlanan söylem, yeni değil."
+      ],
+      [
+        "29.09 20:13",
+        "🔸SÖYLENTİ (tek X kaynağı, @islamidavet): Devrim Muhafızları'nın Hürmüz'de kurallara uymayan gemilere füze attığı iddiası — AA/Reuters ile teyit edemedim."
+      ]
+    ],
+    "verdict": "YOK",
+    "why": "Hürmüz krizi 28 Şubat 2026'dan beri süren kronik bir gerilim rejimi; yedi aydır aynı retorik döngüsü (yakında biter / vatandaş çıkışı / SPR musluğu) tekrarlanıyor. Bugün pozisyon değiştiren yeni bir gelişme yok.",
+    "peace": [
+      "Araghçi'nin 7 gün içinde açma teklifi (25.09)",
+      "ABD'nin SPR ile arz güvencesi vermesi"
+    ],
+    "esc": [
+      "Avrupa ülkelerinin tekrar tahliye çağrısı",
+      "🔸Hürmüz'de füze iddiası (teyitsiz)"
+    ],
+    "impact": "Rejim panosuna göre: **Brent** SPR haberine tepki verip geriledi (piyasa tırmanmayı değil arz güvencesini fiyatlıyor), **altın** hem jeopolitik hem faiz kanalından besleniyor, **BIST**'te asıl sürücü zaten yurt içi — İran hattının etkisi dolaylı ve küçük."
+  },
+  "news": [
+    {
+      "h": "Fon zirvesi kararları: İş Bankası/Ziraat Bankası görevlendirmesi, öncelikli ödeme",
+      "ts": "29.09 ~17:00",
+      "src": "Uzmanpara/Milliyet · Sözcü",
+      "chain": "Zirve → somut görev dağılımı → belirsizlik kısmen azaldı → ama ödeme takvimi hâlâ yok → likit hisselerde nakit ihtiyacı sürebilir.",
+      "who": "Holdingler, fon bağlantılı küçük hisseler (HEDEF, MARTI, MAGEN, BIGTK, USAK).",
+      "priced": "Kısmen: haber zirve sonrası geldi, bugünkü açılışta ilk tepki görülecek."
+    },
+    {
+      "h": "DDK Başkanı Tanrıkulu'nun Borsa İstanbul'dan istifası",
+      "ts": "29.09 akşam",
+      "src": "Cumhuriyet 25.09 (arka plan) · X çoklu hesap 29.09",
+      "chain": "Çıkar çatışması iddiası → istifa → denetimin bağımsızlığına güven sinyali, ama yönetim boşluğu riski.",
+      "who": "Genel piyasa güveni, Borsa İstanbul kurumsal itibarı.",
+      "priced": "Henüz değil, haber akşam geldi."
+    },
+    {
+      "h": "56 tutuklu: soruşturma derinleşiyor",
+      "ts": "29.09",
+      "src": "Yetkin Report 26.09 · haber akışı 29.09",
+      "chain": "5 yeni tutuklama → soruşturma kapsamı büyüyor → hangi şirketlerin ismi çıkacağı belirsiz → negatif headline riski sürüyor.",
+      "who": "Fonlarla bağlantısı çıkabilecek her hisse.",
+      "priced": "Fiyatlanmamış risk, her yeni isim ayrı şok yaratabilir."
+    },
+    {
+      "h": "ABD SPR'den 40 milyon varil ek arz, Brent geriledi",
+      "ts": "29.09",
+      "src": "energyintel.com · X (@turkdegs, @berna_gulpinar)",
+      "chain": "SPR açıklaması → arz güvencesi → Brent geriledi (~$102) → TÜPRAŞ/havayolu maliyet tarafı için potansiyel pozitif.",
+      "who": "TUPRS, THYAO/havayolu grubu.",
+      "priced": "Brent tarafında oldu, BIST'te henüz görülmedi çünkü gündem fon skandalı."
+    },
+    {
+      "h": "ABD 30 yıllık tahvil getirisi 2002'den beri zirvede",
+      "ts": "29.09",
+      "src": "CNBC/BNN Bloomberg · Cappnotes",
+      "chain": "Getiri zirvesi → küresel risk iştahı sınırlı → gelişen piyasa/TL varlıklara sirayet riski.",
+      "who": "TL varlıklar, BIST'te yabancı payı yüksek hisseler.",
+      "priced": "ABD tarafında fiyatlandı (hafif negatif kapanış), TL varlıklara sirayeti bugün/yarın izlenmeli."
+    }
+  ],
+  "kap": [
+    {
+      "t": "ASTOR",
+      "c": "fon",
+      "w": "Orta",
+      "s": "KAP 29.09",
+      "h": "YK Başkanı Feridun Geçgel'den kamuoyu açıklaması",
+      "b": "Hakkında kamuoyuna yansıyan iddialara ilişkin açıklama yapıldı; hisse fon soruşturması gündeminde sosyal medyada adı geçen isimler arasında dolaştı. Açıklamanın tam içeriği doğrulanamadı.",
+      "y": "İçerik net değil — kör nokta. Sosyal medyadaki adı geçme, doğrudan suçlama anlamına gelmiyor."
+    },
+    {
+      "t": "KTLEV / Destek Finans Faktoring",
+      "c": "fon",
+      "w": "Yüksek",
+      "s": "Borsa İstanbul resmi duyurusu, 29.09",
+      "h": "BIST Katılım Endeksi'nden çıkarıldı (1 Ekim 2026-30 Nisan 2027 dönemi)",
+      "b": "Katılımevim Tasarruf Finansman (KTLEV) ve Destek Finans Faktoring, manipülasyon soruşturmasında adı geçtiği için BIST 30/100 katılım endekslerinden çıkarıldı.",
+      "y": "1 Ekim'de pasif endeks fonlarının satışı (rebalans) beklenebilir, henüz fiyatlanmadı."
+    },
+    {
+      "t": "HEDEF / Destek Holding",
+      "c": "fon",
+      "w": "Yüksek",
+      "s": "medyascope.tv, evrensel.net (Eylül ortası) [[ESKİ]]",
+      "h": "Manipülasyon soruşturması: KTLEV, Destek Holding, Hedef Holding hisseleri",
+      "b": "SPK'nın manipülasyon tespiti sonucu 14 kişi gözaltına alındı. HEDEF hissesi 29.09'da **%10 taban** kapattı.",
+      "y": "Soruşturmanın doğrudan öznesi; SPK/savcılıktan yeni açıklama gelene kadar fiyat baskısı sürebilir."
+    }
+  ],
+  "buybacks": [],
+  "earnings": "BIST'te pencere içinde öne çıkan bir çeyrek bilançosu tespit edilmedi (3Ç sezonu Ekim sonu-Kasım'da yoğunlaşıyor). ABD'de **Micron**, bugün (30.09) TSİ akşam saatlerinde FY2026 4. çeyrek sonuçlarını açıklayacak — konsensüs EPS **$31,49** (geçen yıl $3,03), gelir **~$50,9 milyar** (~%350 YoY büyüme beklentisi). Bu, pencerenin dışında (akşam) ama piyasa şimdiden pozisyon alıyor; X'teki \"anormal iyi bilanço bekliyorum\" yorumları **fikirdir, veri değil**.",
+  "rumors": [
+    {
+      "st": "Doğrulanamadı",
+      "sc": "s-wait",
+      "h": "BIST Tüm piyasa değerinde fon krizinden $84 milyar kayıp iddiası",
+      "b": "Tek X hesabından geldi, resmi/haber ajansı teyidi bulunamadı.",
+      "s": "X @hakkiozt6, 29.09 12:03"
+    },
+    {
+      "st": "Tek kaynak",
+      "sc": "s-wait",
+      "h": "Devrim Muhafızları'nın Hürmüz'de kurallara uymayan gemilere füze attığı iddiası",
+      "b": "AA/Reuters gibi bir ajans kaynağı bulunamadı, tek bir X hesabına dayanıyor.",
+      "s": "X @islamidavet, 29.09 20:13"
+    },
+    {
+      "st": "Dayanaksız",
+      "sc": "s-idle",
+      "h": "\"BlackRock Türkiye'ye geldi, tahtaları devraldı\" tarzı spekülasyonlar",
+      "b": "Herhangi bir kaynağa dayanmıyor, komplo niteliğinde paylaşımlar.",
+      "s": "X @karavarcharts, 29.09 19:13"
+    },
+    {
+      "st": "Tek kaynak, yüksek etkileşim",
+      "sc": "s-wait",
+      "h": "Fatma Betül Sayan Kaya ve eşi hakkında 2,2 milyar TL iade iddiası",
+      "b": "Yüksek etkileşimli (♥329) ama tek X hesabından, resmi teyit bulunamadı.",
+      "s": "X @Knowledge_ilker, 29.09 10:44"
+    },
+    {
+      "st": "Teyitsiz",
+      "sc": "s-idle",
+      "h": "Bitcoin ETF'lerine 28 Eylül'de $31 milyon net giriş iddiası",
+      "b": "Tek X hesabından, çapraz doğrulama yapılamadı.",
+      "s": "X @gorkeuu, 29.09 21:09"
+    }
+  ],
+  "sectors": [
+    [
+      "Bankacılık",
+      "Fon skandalından nispeten izole, dün **+%0,10**.",
+      "TCMB faiz duruşu (%37 sabit) belirsizliği, mevduat/fon güveni sarsıntısı yayılabilir.",
+      "Nötr-hafif pozitif"
+    ],
+    [
+      "Holding",
+      "Dün **-%2,05**, fon skandalına en yakın grup.",
+      "Hangi holdingin fonlarla bağı olduğu netleşmedi.",
+      "Hafif negatif"
+    ],
+    [
+      "Ulaştırma",
+      "Dün en iyi performans (**+%0,59**), petrol geriledi.",
+      "Global talep zayıflığı, THYAO'da özel bir katalizör bulamadım.",
+      "Hafif pozitif"
+    ],
+    [
+      "Finansal Kiralama/Faktoring",
+      "Dün en kötü performans (**-%8,20**) — Destek Finans'ın endeksten çıkarılmasıyla örtüşüyor.",
+      "Doğrudan soruşturma teması, volatil.",
+      "Negatif"
+    ],
+    [
+      "Teknoloji/Savunma",
+      "ABD'de AI/yarı iletken güçlü (aylık +%4,4), yerelde özel haber yok.",
+      "Küresel tahvil getirisi teknoloji çarpanlarını baskılıyor.",
+      "Nötr"
+    ]
+  ],
+  "hidden3": [
+    {
+      "h": "DDK-Borsa İstanbul çakışması haftalarca fark edilmedi",
+      "b": "Tanrıkulu'nun çifte görevi, tam da denetimin en kritik olduğu haftalarda \"denetleyeni kim denetleyecek\" sorusunu doğurdu — kurumsal yönetişim tarafındaki itibar hasarı, skandalın kendisinden bile kalıcı olabilir."
+    },
+    {
+      "h": "Petrol-BIST korelasyonu tamamen kopmuş",
+      "b": "Brent SPR haberiyle gerilerken (havayolu/TÜPRAŞ için pozitif olması beklenirdi) BIST **-%2,40** düştü. Bu ayrışma, piyasanın şu an küresel değil tamamen yerel/kurumsal güven fiyatladığının işareti."
+    },
+    {
+      "h": "Endeksten çıkarılan iki isim doğrudan soruşturma öznesi",
+      "b": "BIST Katılım'dan çıkarılan Destek Finans Faktoring ve Katılımevim, manipülasyon soruşturmasının tam ortasındaki şirketler. 1 Ekim'deki pasif rebalans satışı henüz fiyatlanmamış olabilir."
+    }
+  ],
+  "sniperNote": "**BIST setup: 0/5 tam setup.** Canlı grafik/seviye terminaline erişimim yok, sadece haber kapanış fiyatlarıyla çalıştım — giriş/TP/stop uydurmadım. Aşağıdaki liste yalnızca katalizörlü **izleme listesi**.",
+  "watch": [
+    {
+      "t": "HEDEF",
+      "conf": "Düşük",
+      "why": "Manipülasyon soruşturmasının doğrudan öznesi, 29.09'da %10 taban kapattı.",
+      "bad": "SPK/savcılıktan temize çıkarma ya da yeni işlem yasağı açıklaması gelirse durum tamamen değişir."
+    },
+    {
+      "t": "KTLEV",
+      "conf": "Düşük",
+      "why": "BIST Katılım endeksinden çıkarıldı, 1 Ekim'de pasif satış riski var.",
+      "bad": "Endeks metodolojisi değişirse ya da soruşturma şirketi temize çıkarırsa."
+    },
+    {
+      "t": "THYAO / TUPRS (sektör)",
+      "conf": "Orta",
+      "why": "Petrol SPR açıklaması sonrası geriliyor, ulaştırma sektörü dün BIST genelinde en iyi performans gösteren gruptu.",
+      "bad": "Brent'in Hürmüz'de yeni bir tırmanmayla yeniden $105 üzerine dönmesi."
+    },
+    {
+      "t": "AKBNK / İSCTR / YKBNK (sektör)",
+      "conf": "Orta",
+      "why": "Bankacılık fon skandalından nispeten izole, zirve sonrası \"çözüm bankaları\" (İş Bankası, Ziraat) rolü sektöre ilgi çekebilir.",
+      "bad": "Mevduat/fon güvensizliğinin bankacılığa da sıçraması."
+    }
+  ],
+  "strat": {
+    "glob": "Küresel fiyatlamanın ana değişkeni ABD uzun faizi: 10Y **%5,28** (2007 zirvesi), 30Y **%5,61** (2002 zirvesi). Cappelleri'nin tezi: \"kazançlar değil, tahvil getirisi piyasayı yönetiyor\". Buna karşın Brent, ABD'nin 40M varillik ek SPR açıklamasıyla geriledi (**~$102**), yani arz güvencesi mesajı savaş retoriğinden daha güçlü fiyatlanıyor. Bugün ABD PCE ve Micron bilançosu faizi/risk iştahını oynatabilir.",
+    "globExp": "Faiz %5,28 üstünde kaldıkça küresel risk iştahı zayıf kalır; Brent'te kalıcı düşüş olmadan gelişen piyasalarda rahatlama beklemiyorum.",
+    "dom": "Yerel hikâye faiz ya da kur değil, kurumsal güven ve likidite. BIST 100 dün **12.290,58**'e indi, fon zirvesi somut adımlar üretti (İş/Ziraat Bankası görevlendirmesi, öncelikli ödeme) ama ödeme takvimi hâlâ yok. USD/TRY sakin (~49), 2018 tipi kur şoku hikâyesi yazılmıyor. DDK-Borsa İstanbul çıkar çatışmasının çözülmüş olması güven artırıcı.",
+    "domExp": "İyileşme sinyalleri (zirve kararları, istifa) ile devam eden soruşturma riski (56 tutuklu, yeni isim çıkma ihtimali) birbirini dengeliyor. Net bir yön beklemiyorum, volatilite yüksek kalır.",
+    "scen": [
+      {
+        "k": "up-h",
+        "h": "Yukarı senaryo",
+        "d": "Ödeme takvimi netleşir, yeni tutuklama/kötü haber gelmez.",
+        "lv": "Dünkü kapanışın (12.290) belirgin üzerinde kapanış"
+      },
+      {
+        "k": "bz-h",
+        "h": "Baz senaryo",
+        "d": "Yeni büyük haber yok, piyasa zirve kararlarını sindiriyor.",
+        "lv": "12.290 civarında yatay, geniş bantta oynak seyir"
+      },
+      {
+        "k": "dn-h",
+        "h": "Aşağı senaryo",
+        "d": "Soruşturmada yeni bir büyük isim çıkar veya ödeme takvimi gecikir.",
+        "lv": "12.290 altında yeni dipler"
+      }
+    ],
+    "levelNote": "Bunlar teknik analiz kaynağına dayalı kesin destek/direnç DEĞİL — resmi bir teknik not bulamadım, yalnızca dünkü kapanışı referans alan kaba bir çerçeve. Kesin seviye için Matriks/kurum notuna bakılmalı.",
+    "avoid": "**Dikkatli ol:** HEDEF, MARTI, MAGEN, BIGTK, USAK (taban, soruşturma öznesi), KTLEV ve Destek Finans (endeksten çıkarıldı). Fon soruşturmasıyla anılan her hissede yeni KAP açıklamasını tek tek oku."
+  },
+  "reads": [
+    {
+      "who": "Murat Yetkin (Yetkin Report)",
+      "date": "26.09",
+      "url": "https://yetkinreport.com/2026/09/26/borsa-fon-skandalinda-pusula-dosyasi-acildi-sira-tera-dosyasinda/",
+      "txt": "Pusula dosyası açıldı, sıra Tera dosyasında; faturanın kime kesileceği hâlâ belirsiz."
+    },
+    {
+      "who": "Prof. Dr. Yalçın Karatepe (Cumhuriyet)",
+      "date": "25.09",
+      "url": "https://www.cumhuriyet.com.tr/ekonomi/yalcin-karatepe-den-fon-skandalinda-carpici-degerlendirme-simdi-kim-kimi-denetleyecek-2540875",
+      "txt": "DDK Başkanı'nın aynı zamanda Borsa İstanbul yönetiminde olması bağımsız denetimi imkânsız kılıyor."
+    },
+    {
+      "who": "Diken",
+      "date": "29.09 16:00",
+      "url": "https://www.diken.com.tr/borsa-yilin-dibine-yakin/",
+      "txt": "BIST'in düşüşü SPK'nın 131 fonu tasfiye kararı ve Hedef Holding'in borç ödeyememesiyle ilişkilendiriliyor."
+    },
+    {
+      "who": "Evrensel",
+      "date": "24.09 00:05",
+      "url": "https://www.evrensel.net/yazi/100039/mesele-500-bin-kumarbaz-degil",
+      "txt": "Fon skandalı bireysel yatırımcı hatası değil, sistemik denetim boşluğu; sorumluların gecikmiş müdahalesi eleştiriliyor."
+    },
+    {
+      "who": "Frank Cappelleri (CappNotes)",
+      "date": "29.09",
+      "url": "https://cappnotes.substack.com/p/closing-look-92926",
+      "txt": "ABD'de tahvil getirileri çok yıllık zirvelerde piyasayı yönetiyor, hisseler sadece teknoloji sektörünün baskıyı absorbe etmesiyle ayakta kalıyor."
+    }
+  ],
+  "opening": {
+    "band": 1,
+    "bandText": "Hafif negatif (beklenti, piyasa henüz açılmadı)",
+    "basis": [
+      "VİOP BIST30 Ekim kontratı akşam seansı, normal seans kapanışının (15.602) yaklaşık 30 puan altında, **15.572**'den kapandı (~-%0,19, X kaynaklı, tek teyit).",
+      "Fon zirvesinin somut kararlar üretmiş olması (İş/Ziraat Bankası görevlendirmesi) ve DDK-Borsa İstanbul çıkar çatışmasının çözülmesi belirsizliği azaltıcı.",
+      "Küresel tarafta ABD'de hafif negatif kapanış ve tarihi yüksek tahvil getirileri risk iştahını sınırlıyor, ama petrolün SPR sonrası gerilemesi TL varlıklar için (enerji faturası) hafif rahatlatıcı.",
+      "Dayanak olabilecek ama doğrulayamadıklarım: TUR ETF/ADR, güncel CDS, Asya kapanışları, ABD vadelileri."
+    ],
+    "pos": [
+      "THYAO/TÜPRAŞ (petrol geriledi)",
+      "Bankacılık grubu (AKBNK/İSCTR/YKBNK — göreli dayanıklı)",
+      "Ulaştırma sektörü geneli (dün en iyi performans)"
+    ],
+    "neg": [
+      "HEDEF (soruşturmanın doğrudan öznesi, taban riski sürüyor)",
+      "Finansal Kiralama/Faktoring grubu (dün -%8,20)",
+      "Holding grubu (dün -%2,05, skandalla en çok anılan grup)"
+    ]
+  },
+  "calendar": [
+    [
+      "15:15 (TSİ)",
+      "ABD Eylül ADP istihdam değişimi (beklenti +70 bin)"
+    ],
+    [
+      "15:30 (TSİ)",
+      "ABD Ağustos PCE fiyat endeksi (çekirdek YoY beklenti %3,7) + Ç2 GSYİH 3. tahmini + mal ticareti dengesi"
+    ],
+    [
+      "~23:30 (TSİ)",
+      "Micron (MU) FY2026 4. çeyrek bilançosu (EPS beklenti $31,49, gelir ~$50,9 mlr)"
+    ],
+    [
+      "01.10",
+      "BIST Katılım Endeksi dönemsel değişiklikleri yürürlüğe girecek"
+    ]
+  ],
+  "blind": "YouTube taraması son 30 saatte **0 video** buldu, elle tekrar denenmedi. Sosyal taramada 5 X sorgusu (\"sondakika borsa\" dahil) JSON hatası verdi. **Türkiye 5Y CDS**'nin fon skandalı SONRASI güncel değeri bulunamadı, elimdeki en güncel resmi rakam (217-220 bp) krizin en sıcak evresinden ÖNCEye ait. **USD/TRY** için gerçek zamanlı doğrulanmış rakam yok, ~49 TL sadece 25 Eylül tarihli rapor + altın çapraz hesabıyla türetildi. **VIX** kapanış değeri hiçbir güvenilir kaynaktan doğrulanamadı. **Gümüş**te kaynaklar arası ~%4 fark var. Girdi klasörü tamamen boş — aracı kurum/teknik bülten yok, rakamlar web+X kesişiminden. **BIST tekil hisseler için canlı fiyat/grafik terminaline erişimim yok**, bu yüzden Keskin Nişancı bölümünde tam setup üretmedim, sadece katalizörlü izleme listesi verdim. Astor Enerji'nin 29.09 KAP açıklamasının tam içeriği netleştirilemedi. Asya/Avrupa vadelileri için pencere içi güvenilir tek bir kaynak bulunamadı. Bülten açılış ÖNCESİ (07:44) hazırlandı, gerçek açılış verisi içermiyor.",
+  "sosyal": {
+    "hava": "#XU100/#BIST100/#Borsaİstanbul etiketlerinin ezici çoğunluğu öfke ve \"battık\" temalı (fonmağdurları hashtag'leri baskın); iyimser/al sinyali veren içerik neredeyse yok. Bu tek yönlülük başlı başına bir **kontrarian uyarı** ama karşı kanıt (net alım sinyali) yok, bu yüzden dip alım çağrısı yapmıyorum.",
+    "tarama": "41 X sorgusu (script ile 30.09 00:19'da, pencere içinde), 466 benzersiz tweet, 5 sorgu JSON hatası verdi. YouTube: 6 sorgu, son 30 saatte 0 video (elle tekrar denenmedi).",
+    "konular": [
+      {
+        "k": "Fon mağduriyeti / borsamağdurları",
+        "ton": "Öfke, çaresizlik",
+        "hacim": "Çok yüksek (en yüksek etkileşimli tweetler bu temada, ör. ♥648)",
+        "dogrulama": "Kısmen doğrulandı (SPK/DDK/gözaltı haberleri teyitli, rakamlar söylenti)",
+        "piyasa": "BIST -%2,40, yüksek hacim"
+      },
+      {
+        "k": "DDK/Tanrıkulu çıkar çatışması",
+        "ton": "Eleştirel, şaşkınlık",
+        "hacim": "Yüksek (bağımsız 3+ hesap aynı haberi taşıdı)",
+        "dogrulama": "Doğrulandı (istifa gerçek)",
+        "piyasa": "Kurumsal güven anlatısına girdi"
+      },
+      {
+        "k": "İran/Hürmüz",
+        "ton": "Endişe + kayıtsızlık karışımı, bazı hesaplar abartılı",
+        "hacim": "Çok yüksek tekil tweet ama konu geneli dağınık",
+        "dogrulama": "Kısmen — Avrupa tahliye çağrısı doğrulandı, füze iddiası söylenti",
+        "piyasa": "Petrol/altın kanalıyla dolaylı"
+      },
+      {
+        "k": "Dolar/altın/enflasyon şikayeti",
+        "ton": "Karamsar, \"her şey eriyor\"",
+        "hacim": "Orta-yüksek, tekrarlı hesap var (muhtemelen bot)",
+        "dogrulama": "Genel ton, spesifik veri değil",
+        "piyasa": "Duygu göstergesi, kanıt değil"
+      },
+      {
+        "k": "ABD/Fed/tahvil",
+        "ton": "Teknik, \"getiri piyasayı yönetiyor\"",
+        "hacim": "Orta",
+        "dogrulama": "Doğrulandı (10Y/30Y zirve)",
+        "piyasa": "S&P/Dow hafif negatif"
+      },
+      {
+        "k": "BIST Katılım endeks değişikliği",
+        "ton": "Bilgilendirici, nötr-hafif olumlu",
+        "hacim": "Orta, bağımsız hesaplar aynı resmi duyuruyu paylaştı",
+        "dogrulama": "Doğrulandı (Borsa İstanbul resmi duyurusu)",
+        "piyasa": "Endeksten çıkan/girenlerde pasif akış"
+      }
+    ],
+    "youtube": [],
+    "anormal": [
+      {
+        "kod": "HEDEF/MARTI",
+        "not": "Haberle eşleşiyor — manipülasyon soruşturması/temerrüt."
+      },
+      {
+        "kod": "ASTOR",
+        "not": "Haberle kısmen eşleşiyor — KAP açıklaması var ama içerik muğlak."
+      },
+      {
+        "kod": "THYAO",
+        "not": "Yüksek işlem hacmi haberi var ama özel bir katalizör bulamadım — dikkatli izle."
+      }
+    ]
+  }
+}
