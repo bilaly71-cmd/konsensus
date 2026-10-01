@@ -1,0 +1,400 @@
+{
+  "date": "2026-10-01",
+  "weekday": "Perşembe",
+  "asOf": "08:31",
+  "windowText": "30.09 18:00 → 01.10 08:31 (TSİ)",
+  "note": "Bu tur X/YouTube sosyal medya taraması çalıştırılmadı — zamanlanmış görevin kendi otomatik oturumu tam da bu saatlerde aynı kaynağı tarıyordu, hesap güvenliği için çakışma göze alınmadı. İçerik web haberleri kesişiminden derlendi.",
+  "sources": [
+    {
+      "n": "AA, Halk TV, cnbce.com (BIST kapanış)",
+      "k": "Birincil/Haber"
+    },
+    {
+      "n": "Medyascope, ahaber, Evrensel, halktv (fon skandalı)",
+      "k": "Haber"
+    },
+    {
+      "n": "ABC News (wire)",
+      "k": "Birincil"
+    },
+    {
+      "n": "CBS News canlı akış (ABD-İran)",
+      "k": "Haber"
+    },
+    {
+      "n": "SEC/Benzinga/Investing.com (Micron, çelişkili rakamlar)",
+      "k": "Haber"
+    }
+  ],
+  "top5": [
+    {
+      "h": "BIST 100 ikinci gün üst üste sert düştü: %2,79 ile 11.947,18",
+      "p": "Endeks 30 Eylül'ü **-%2,79** (-343,4 puan) kayıpla **11.947,18**'de kapattı, hacim **108,8 mlr TL** (AA/Halk TV, cnbce.com çapraz teyitli). Salı %2,40, çarşamba %2,79 — endeks **12.000 eşiğinin altına** sarktı.",
+      "chain": "Sebep: fon soruşturmasının derinleşmesi (yeni tutuklamalar, yeni mal varlığı tedbirleri) → güven erimesi → likit hisselerde satış sürüyor.",
+      "src": "AA/Halk TV · cnbce.com 30.09"
+    },
+    {
+      "h": "Fon skandalı: 830 milyar TL kayıp, 455.758 mağdur, 56 tutuklu — çember genişliyor",
+      "p": "7 portföy şirketine ait **131 fon** 17 Eylül'den beri TEFAS'ta kapalı. 29 Eylül'de 5 yeni tutuklama, 30 Eylül'de **6 şüpheli adliyeye sevk edildi** (Tera Portföy CEO'su Sarpyener ve YK Başkanı Özel dahil). El konulan mal varlığı: **5 villa (~1,2 mlr TL), 2 özel jet (~1,8 mlr TL), 1 yat, ~200-220 mn TL lüks araç**.",
+      "chain": "Soruşturma büyüdükçe → yeni isim çıkma riski → piyasada fiyatlanmamış belirsizlik sürüyor.",
+      "src": "Medyascope 30.09 · ahaber 30.09"
+    },
+    {
+      "h": "Mustafa Sandal'ın eşi Melis Sütşurup Sandal, 11 milyar TL'lik fon çıkışıyla gündemde",
+      "p": "Tasfiye edilen fonlardan son 3 ayda **11 milyar TL'yi aşan çıkış** yaptığı iddiasıyla 27 Eylül'de yurt dışı çıkış yasaklı **42 kişi** arasına girdi. Menajeri: \"muhatap Mustafa Sandal değil, eşi\" açıklaması yaptı.",
+      "chain": "Skandal magazin gündemine sıçradı → toplumsal/siyasi baskı artabilir → hükümetin hızlı hareket etme zorunluluğu büyüyor.",
+      "src": "Evrensel 27.09 · halktv 30.09"
+    },
+    {
+      "h": "ABD kapanışı karışık: S&P/Dow geriledi, Nasdaq Micron rüzgarıyla yükseldi",
+      "p": "**S&P 500 7.651,54 (-%0,3)**, **Dow 50.906,05 (-%0,9)**, **Nasdaq 26.861,06 (+%0,2)**, Russell 2000 **2.796,86 (-%0,4)** (ABC News wire, 30.09). Eylül ayı: S&P -%0,45, Nasdaq +%1,86, Dow -%4,29.",
+      "chain": "Güçlü ABD ekonomisi → Fed gevşeme beklentisi zayıflıyor → faiz baskısı hisselere yansıyor, ama Micron'un güçlü bilançosu Nasdaq'ı taşıdı.",
+      "src": "ABC News wire 30.09"
+    },
+    {
+      "h": "ABD-İran: Rubio heyeti erken gönderdi, Trump \"patlatırız ya da anlaşırız\" dedi",
+      "p": "Rubio, BM'deki teknik görüşmeler sonrası İran heyetini planlanandan **1 gün erken** ABD'yi terk etmeye zorladı (~04:36 TSİ, bu sabah). Trump (~00:57 TSİ): **\"Ya onları patlatırız ya anlaşma yaparız... çok yakında bitecek.\"**",
+      "chain": "Retorik sertleşiyor → ama dolaylı görüşmeler (Katar) sürüyor, somut askeri hareket yok → petrol/altın oynaklık riski yükseliyor.",
+      "src": "CBS News canlı akış, 30.09-01.10"
+    }
+  ],
+  "story": "**Endeksi ezen:** fon skandalı ikinci haftasına girdi, büyüyerek devam ediyor. BIST 100 iki gün üst üste sert düştü (-%2,40, -%2,79), **12.000 eşiğinin altına** sarktı. Skandalın boyutu: **830 milyar TL kayıp, 455.758 mağdur**, **56 tutuklu**, el konulan mal varlığında villa/özel jet/yat kalemleri var. Yeni isim: Mustafa Sandal'ın eşi Melis Sütşurup Sandal (11 mlr TL çıkış iddiası) — skandal artık magazin gündemine sıçradı. **Tek umut ışığı:** Bulls/Pardus/A1 Capital'in 66 fonu, ödeme taahhüdü verdikleri için tasfiye listesinden çıkarılma değerlendirmesinde — henüz resmi değil. Erdoğan İş Bankası'na Tera tasfiyesini **10 gün içinde** bitirme talimatı verdi — ilk kez somut bir süre konuldu. Dış tarafta ABD karışık kapandı (Micron rüzgarı Nasdaq'ı taşıdı), İran-ABD hattında retorik sertleşti (Rubio heyeti erken gönderdi, Trump sert çıktı) ama somut askeri eskalasyon yok. Tarihsel benzetme yapmıyorum — kur tarafında panik sinyali yok, bu kurumsal güven/denetim krizi, kur şoku değil.",
+  "strip": [
+    {
+      "l": "BIST 100",
+      "v": "11.947,18",
+      "c": "-%2,79",
+      "d": "d",
+      "n": "30.09 kapanış · AA/cnbce"
+    },
+    {
+      "l": "S&P 500",
+      "v": "7.651,54",
+      "c": "-%0,3",
+      "d": "d",
+      "n": "30.09 kapanış · ABC News"
+    },
+    {
+      "l": "Dow Jones",
+      "v": "50.906,05",
+      "c": "-%0,9",
+      "d": "d",
+      "n": "30.09 kapanış · ABC News"
+    },
+    {
+      "l": "Nasdaq",
+      "v": "26.861,06",
+      "c": "+%0,2",
+      "d": "u",
+      "n": "30.09 kapanış · ABC News"
+    },
+    {
+      "l": "Russell 2000",
+      "v": "2.796,86",
+      "c": "-%0,4",
+      "d": "d",
+      "n": "30.09 kapanış · ABC News"
+    },
+    {
+      "l": "USD/TRY",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı, bu tur güncel veri yok)"
+    },
+    {
+      "l": "CDS 5Y",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı)"
+    },
+    {
+      "l": "Ons altın",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı, kaynaklar tahmin piyasası verisi döndü)"
+    },
+    {
+      "l": "Brent",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı)"
+    },
+    {
+      "l": "ABD 10Y",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı, tahmin verisi var ama gerçek kapanış yok)"
+    },
+    {
+      "l": "DXY",
+      "v": "—",
+      "c": "",
+      "d": "n",
+      "n": "(doğrulanamadı)"
+    }
+  ],
+  "stripNote": "Bu tur DXY, ABD 10Y, altın, Brent/WTI ve CDS/USDTRY için doğrulanmış güncel kapanış rakamı bulamadım — aramalarım tahmin piyasası (Kalshi/Robinhood) verisi ya da eski tarihli sonuçlar döndürdü. K1 gereği tahmin yazmıyorum, \"—(doğrulanamadı)\" bıraktım.",
+  "dom": [
+    "BIST 100 30 Eylül'ü **-%2,79** (-343,4 puan) ile **11.947,18**'de kapattı, hacim **108,8 mlr TL** — iki gün üst üste sert düşüş.",
+    "En çok yükselenler: **SUWEN +%8,02, EKOS +%5,74, DGNMO +%5,58**. En çok düşenler: **ISVEA, ESCAR, TEHOL (~-%10)**.",
+    "Fon skandalında 30 Eylül'de **6 şüpheli adliyeye sevk edildi**, toplam tutuklu **56**. El konulan mal varlığında villa/özel jet/yat var.",
+    "**Bulls, Pardus, A1 Capital**'e ait toplam **66 fon**, ödeme taahhüdü verdikleri için tasfiye listesinden çıkarılma değerlendirmesinde (henüz resmi değil).",
+    "Erdoğan, İş Bankası'na Tera Portföy tasfiyesini **10 gün içinde** bitirme talimatı verdi.",
+    "USD/TRY ve CDS için bu tur güncel doğrulanmış veri yok [[ESKİ]]."
+  ],
+  "glob": [
+    "ABD karışık kapandı: **S&P 500 7.651,54 (-%0,3)**, **Dow 50.906,05 (-%0,9)**, **Nasdaq 26.861,06 (+%0,2)**, Russell 2000 **2.796,86 (-%0,4)**.",
+    "Eylül ayı toplamı: S&P **-%0,45**, Nasdaq **+%1,86**, Dow **-%4,29**.",
+    "**Micron (MU)**, 30 Eylül kapanış sonrası FY2026 4Ç/tam yıl sonuçlarını konsensüsün net üzerinde açıkladı — AI/HBM talebi güçlü, çip sektörü sert pozitif tepki verdi. Kesin rakamlar kaynaklar arası çelişkili, tam sayı vermiyorum.",
+    "ABD-İran: Rubio İran heyetini erken gönderdi, Trump \"patlatırız ya da anlaşırız, çok yakında bitecek\" dedi — retorik sertleşiyor ama Katar aracılığıyla dolaylı görüşmeler sürüyor.",
+    "Küresel petrol ihracatı alternatif güzergahlar ve korumalı konvoylarla savaş öncesi seviyelere yaklaşıyor (~21,8M/23,3M varil baz senaryo).",
+    "Bugün **17:00 TSİ**: ABD Eylül ISM İmalat PMI."
+  ],
+  "regime": [
+    [
+      "BIST ↔ fon skandalı",
+      "İki gün üst üste %2,4-2,8 arası düşüş, doğrudan soruşturma haberleriyle senkronize (AA/cnbce).",
+      "Ana sürücü hâlâ bu, başka hiçbir şey değil."
+    ],
+    [
+      "ABD endeksleri ↔ ekonomi gücü/Fed",
+      "S&P/Dow hafif-orta negatif, Nasdaq Micron coşkusuyla pozitif — \"ekonomi çok güçlü, Fed gevşemeyebilir\" endişesi fiyatlanıyor.",
+      "Küresel risk iştahı karışık, net yön yok."
+    ],
+    [
+      "Brent/altın ↔ İran-ABD",
+      "Retorik sertleşti (heyet erken gönderildi, Trump sert çıktı) ama somut askeri eskalasyon raporlanmadı.",
+      "Henüz BIST'e kanal yaratmadı, petrol/altında oynaklık riski var, izlemede."
+    ],
+    [
+      "BIST ↔ USDTRY/CDS",
+      "Güncel veri yok, ~5 gün önceki rakamlarda sakinlik gözlenmişti.",
+      "Kur tarafında panik sinyali YOK gibi görünüyor ama veri eski, temkinli ol."
+    ],
+    [
+      "Teknoloji (küresel) ↔ bilanço sezonu",
+      "Micron'un güçlü bilançosu sonrası çip hisseleri sert pozitif tepki verdi (rakamlar çelişkili, yön net).",
+      "AI/çip teması güçlü kalmaya devam ediyor."
+    ]
+  ],
+  "regimeNote": "Bugün gerçek zamanlı DXY, CDS, ABD 10Y, altın, Brent kapanış rakamlarını doğrulayamadım — rejim panosunu bu eksiklikle okuyun, otomasyonda gerçek fiyat serisinden çıkarılmalı.",
+  "usiran": {
+    "timeline": [
+      [
+        "30.09 ~10:27",
+        "İran Güvenlik Konseyi yetkilisi Gen. Mohsen Rezaei, Trump'ın İran'ın 7 günlük ateşkes teklifini reddetmesinin ardından \"ne müzakere edebilen ne savaşabilen bir çıkmazda\" olduğunu iddia etti."
+      ],
+      [
+        "30.09 ~11:41",
+        "İran hükümet sözcüsü, Katar aracılığıyla ABD'nin resmi karşı-teklifini aldıklarını doğruladı; Araghçi bunu Pezeşkiyan'a kabine toplantısında sundu."
+      ],
+      [
+        "01.10 ~00:57",
+        "Trump: \"Ya onları patlatırız ya anlaşma yaparız. Ama o an geliyor. Bir şekilde çok yakında bitecek.\""
+      ],
+      [
+        "01.10 ~04:36",
+        "ABD Dışişleri Bakanı Rubio, BM'deki teknik görüşmeler sonrası İran diplomatik heyetini planlanandan bir gün erken ABD'yi terk etmeye zorladı."
+      ]
+    ],
+    "verdict": "YOK",
+    "why": "Retorik önceki haftalara göre daha keskin (heyet erken gönderildi, \"patlatırız\" çıkışı) ama dolaylı görüşmeler (Katar) sürüyor, somut bir askeri hareket raporlanmadı — K2 gereği ekranı esas alıyorum: henüz tam tırmanma değil, ama günün en yakından izlenmesi gereken riski.",
+    "peace": [
+      "Katar aracılığıyla dolaylı görüşmelerin sürmesi",
+      "Petrol ihracatının savaş öncesi seviyelere yaklaşması"
+    ],
+    "esc": [
+      "Rubio'nun İran heyetini erken göndermesi",
+      "Trump'ın \"patlatırız ya da anlaşırız\" çıkışı",
+      "İran tarafının \"Trump çıkmazda\" söylemi"
+    ],
+    "impact": "Petrol arzının normale yaklaşması (arz güvencesi) ile retorik sertleşmesi (risk primi) aynı anda geliyor — net yön belirsiz, **altın ve Brent'te bugün yüksek oynaklık riski var**. BIST'e kanalı hâlâ dolaylı ve küçük; iç gündem (fon skandalı) baskın."
+  },
+  "news": [
+    {
+      "h": "BIST 100 ikinci gün sert düşüş, %2,79 ile 11.947,18",
+      "ts": "30.09",
+      "src": "AA/Halk TV · cnbce.com",
+      "chain": "Fon soruşturmasının derinleşmesi → güven erimesi → likit hisselerde satış sürüyor.",
+      "who": "Genel endeks, fon bağlantılı küçük hisseler (ISVEA/ESCAR/TEHOL taban kapattı).",
+      "priced": "Devam ediyor, dip henüz netleşmedi."
+    },
+    {
+      "h": "56 tutuklu, 6 kişi adliyeye sevk, yeni mal varlığı tedbirleri",
+      "ts": "30.09",
+      "src": "Medyascope · ahaber",
+      "chain": "Soruşturma kapsamı genişliyor → yeni isim çıkma riski sürüyor.",
+      "who": "Fonlarla bağlantısı çıkabilecek her şirket/isim.",
+      "priced": "Fiyatlanmamış risk, her yeni isim ayrı şok potansiyeli taşıyor."
+    },
+    {
+      "h": "66 fonun (Bulls/Pardus/A1 Capital) tasfiye listesinden çıkarılma olasılığı",
+      "ts": "30.09",
+      "src": "endeks24 · cnbce",
+      "chain": "Portföy şirketleri ödeme taahhüdü verdi → güven inşası potansiyeli → henüz resmi değil.",
+      "who": "Bulls, Pardus, A1 Capital fonları ve yatırımcıları.",
+      "priced": "Onaylanırsa pozitif sürpriz olabilir, henüz fiyatlanmadı."
+    },
+    {
+      "h": "Micron'un güçlü bilançosu sonrası çip sektörü sert tepki verdi",
+      "ts": "30.09 kapanış sonrası",
+      "src": "SEC/Benzinga/Investing.com (rakamlar çelişkili)",
+      "chain": "AI/HBM talebi teması güçleniyor → küresel çip sektörüne pozitif → BIST'e dolaylı kanal zayıf.",
+      "who": "Küresel teknoloji/çip sektörü, dolaylı olarak Türkiye'deki tedarik zinciri hisseleri.",
+      "priced": "ABD tarafında büyük ölçüde oldu (premarket sert tepki), BIST'te henüz görülmedi."
+    },
+    {
+      "h": "Rubio İran heyetini erken gönderdi, Trump sert çıktı",
+      "ts": "01.10 gece/sabah",
+      "src": "CBS News canlı akış",
+      "chain": "Retorik sertleşmesi → petrol/altın oynaklığı riski → BIST'e dolaylı.",
+      "who": "Petrol, altın, savunma sanayi hisseleri.",
+      "priced": "Çok taze (gece/sabah saatleri), henüz görülmedi."
+    }
+  ],
+  "kap": [
+    {
+      "t": "TERAM",
+      "c": "fon",
+      "w": "Çok yüksek",
+      "s": "SPK kararı, haber akışı 29-30.09",
+      "h": "Tera Yatırım Menkul Değerler A.Ş.'nin sermaye piyasası faaliyetleri SPK tarafından geçici olarak durduruldu",
+      "b": "Tera Yatırım CEO'su Emir Münir Sarpyener ve Tera Portföy YK Başkanı Erdin Özel gözaltına alındı, 30 Eylül'de adliyeye sevk edildi. SPK, şirketin faaliyetlerini geçici durdurdu.",
+      "y": "Fon skandalının merkezindeki şirketlerden biri, tasfiye süreci İş Bankası'na devredildi (10 gün süre verildi)."
+    }
+  ],
+  "buybacks": [],
+  "earnings": "**Micron (MU)**, 30 Eylül kapanış sonrası FY2026 4. çeyrek/tam yıl sonuçlarını açıkladı — konsensüsü net bir şekilde geçti (\"Beklentiyi dövdü\" hükmü), gerekçe: AI/veri merkezi kaynaklı yüksek bant genişlikli bellek (HBM) talebi. Taradığım kaynaklar kesin gelir/EPS rakamlarında birbiriyle çelişiyor (bir kaynak $54,2 mlr gelir/$33,42 EPS, başka bir kaynak $41,46 mlr/$25,11 diyor) — bu yüzden tam rakam vermiyorum, sadece yönü (net beat + güçlü talep + pozitif piyasa tepkisi) aktarıyorum. BIST'te pencere içinde öne çıkan bir bilanço tespit edilmedi.",
+  "rumors": [],
+  "sectors": [
+    [
+      "Holding/Fon bağlantılı küçük hisseler",
+      "Soruşturma derinleşiyor, yeni tutuklamalar.",
+      "Her yeni isim ayrı şok yaratabilir.",
+      "Negatif, volatil"
+    ],
+    [
+      "Teknoloji (küresel)",
+      "Micron'un güçlü bilançosu, AI/HBM teması.",
+      "ABD faiz ortamı hâlâ gergin.",
+      "Pozitif (küresel), BIST'e dolaylı"
+    ],
+    [
+      "Savunma/Havacılık",
+      "İran-ABD retoriği sertleşti ama askeri eskalasyon yok.",
+      "Ani bir askeri gelişme olursa hızlı tepki riski.",
+      "Nötr, izlemede"
+    ],
+    [
+      "Enerji/Petrol ilişkili",
+      "Petrol arzı normale yaklaşıyor (arz güvencesi).",
+      "Retorik sertleşirse ani fiyat sıçraması riski.",
+      "Nötr-belirsiz"
+    ]
+  ],
+  "hidden3": [
+    {
+      "h": "Skandal magazin gündemine sıçradı",
+      "b": "Melis Sütşurup Sandal (Mustafa Sandal'ın eşi) örneği, skandalın sadece finans çevresiyle sınırlı kalmadığını gösteriyor — geniş toplumsal/siyasi baskı potansiyeli artabilir, bu da hükümetin hızlı hareket etme zorunluluğunu büyütebilir."
+    },
+    {
+      "h": "66 fonun tasfiyeden çıkarılma ihtimali bir ayrım yaratıyor olabilir",
+      "b": "Eğer resmileşirse, piyasa \"hepsi dolandırıcılık değil, bir kısmı likidite sorunu\" ayrımını fiyatlamaya başlayabilir — sağlam portföy şirketleri ile asıl suç şebekesi birbirinden ayrışır, bu panik satışını bir noktada yavaşlatabilecek bir sinyal."
+    },
+    {
+      "h": "Erdoğan'ın İş Bankası'na verdiği \"10 gün\" süresi ilk somut takvim",
+      "b": "Önceki açıklamalarda hep \"takvim yok\" eleştirisi vardı, bu değişiklik hükümetin siyasi tahammülünün tükenmeye başladığının işareti olabilir — ~10 Ekim civarında somut bir ödeme haberi beklenmeli."
+    }
+  ],
+  "sniperNote": "**BIST setup: 0/5.** Doğrulanmış canlı fiyat/grafik erişimim yok ve bugünkü KAP taraması da eksik kaldığı için uydurmak yerine boş bırakıyorum. Dünün en çok düşenleri (ISVEA, ESCAR, TEHOL, ~-%10) ve yükselenleri (SUWEN, EKOS, DGNMO) listelendi ama katalizör bulamadım, izlemeye bile almıyorum.",
+  "watch": [],
+  "strat": {
+    "glob": "ABD tarafında karışık bir gün: güçlü ekonomi verileri Fed'in gevşeme hızını yavaşlatma riskini canlı tutarken, Micron'un konsensüsü net geçen bilançosu AI/HBM temasını güçlendirdi ve Nasdaq'ı taşıdı. İran-ABD hattında Rubio'nun heyeti erken göndermesi ve Trump'ın sert çıkışı retoriği sertleştirdi ama Katar aracılığıyla dolaylı görüşmeler sürüyor.",
+    "globExp": "Teknoloji/AI temasında güç sürebilir ama ABD faizinin yüksek kalması geniş piyasada baskı yaratmaya devam edebilir. Petrol/altında İran kaynaklı oynaklık riski yüksek.",
+    "dom": "Yerel hikâye ikinci haftasına giren fon skandalı — BIST 100 iki gün üst üste sert düştü, 12.000 eşiğinin altına indi. Tek umut: 66 fonun tasfiyeden çıkarılma ihtimali ve Erdoğan'ın İş Bankası'na verdiği 10 günlük somut süre.",
+    "domExp": "Soruşturma derinleştikçe (yeni tutuklama/mal varlığı tedbiri) baskı sürebilir; 66 fon kararı resmileşirse ya da İş Bankası'nın 10 günlük çalışması somut bir ödeme haberiyle sonuçlanırsa tepki yükselişi görülebilir.",
+    "scen": [
+      {
+        "k": "up-h",
+        "h": "Yukarı senaryo",
+        "d": "66 fon kararı resmileşir, yeni kötü haber gelmez, ödeme takvimi netleşir.",
+        "lv": "Dünkü kapanışın (11.947) belirgin üzerinde kapanış"
+      },
+      {
+        "k": "bz-h",
+        "h": "Baz senaryo",
+        "d": "Yeni büyük haber yok, soruşturma yavaş ilerliyor.",
+        "lv": "11.947 civarında yatay, geniş bantta oynak seyir"
+      },
+      {
+        "k": "dn-h",
+        "h": "Aşağı senaryo",
+        "d": "Yeni büyük isim/tutuklama çıkar, İran hattı sertleşir.",
+        "lv": "11.947 altında yeni dipler, 11.500-11.700 bandı test edilebilir"
+      }
+    ],
+    "levelNote": "Bu seviyeler resmi bir teknik analiz kaynağına dayanmıyor — sadece dünkü kapanışı referans alan kaba bir çerçeve, kesin seviye için Matriks/kurum notuna bakılmalı.",
+    "avoid": "**Dikkatli ol:** ISVEA, ESCAR, TEHOL (dün taban), Tera Portföy/Tera Yatırım bağlantılı tüm kalemler, fon soruşturmasıyla anılan her hissede yeni KAP açıklamasını tek tek oku."
+  },
+  "reads": [
+    {
+      "who": "Medyascope",
+      "date": "30.09",
+      "url": "https://medyascope.tv/2026/09/30/fon-krizi-nasil-basladi-nasil-oldu-ne-yapilabilirdi",
+      "txt": "Fon krizinin tam zaman çizelgesini çıkarıp SPK'nın erken müdahale etmediğini, denetimde gecikme olduğunu savunuyor."
+    },
+    {
+      "who": "ahaber",
+      "date": "30.09",
+      "url": "https://ahaber.com.tr/gundem/2026/09/30/fon-sorusturmasinda-sicak-gelisme-supheliler-icin-yakalama-ve-tutuklama-kararlari-pes-pese-geliyor",
+      "txt": "Yakalama/tutuklama kararlarının art arda geldiğini, el konulan mal varlığının detaylarını (villa, jet, yat) aktarıyor."
+    },
+    {
+      "who": "Evrensel",
+      "date": "27.09",
+      "url": "https://www.evrensel.net/haber/6002389/fon-sorusturmasinda-yeni-gelisme-42-kisinin-mal-varligina-tedbir-karari",
+      "txt": "Mal varlığı tedbirinin kapsamını ve Melis Sandal dahil isimleri aktarıyor."
+    },
+    {
+      "who": "ABC News (wire)",
+      "date": "30.09",
+      "url": "https://abcnews.com/Business/wireStory/major-us-stock-indexes-fared-wednesday-9302026-136901112",
+      "txt": "ABD ekonomisinin gücünün getirdiği faiz baskısı temasıyla günün düşüşünü özetliyor."
+    },
+    {
+      "who": "CBS News canlı akış",
+      "date": "30.09",
+      "url": "https://www.cbsnews.com/live-updates/iran-war-us-negotiations-strait-of-hormuz-oil/",
+      "txt": "Rubio'nun heyeti erken göndermesini, Trump'ın sert çıkışını ve Katar aracılığıyla süren karşı-teklif trafiğini saat saat aktarıyor."
+    }
+  ],
+  "opening": {
+    "band": 1,
+    "bandText": "Belirsiz-hafif negatif (beklenti, düşük güvenle)",
+    "basis": [
+      "İki gün üst üste sert düşüş sonrası teknik bir tepki ihtimali var ama soruşturmanın derinleşmeye devam etmesi baskıyı sürdürüyor.",
+      "VİOP gece seansı, TUR/ADR, güncel CDS/USDTRY gibi standart dayanakların hiçbiri bu tur doğrulanamadı — tahmin düşük güvenle veriliyor.",
+      "Küresel tarafta Micron kaynaklı pozitif bir teknoloji rüzgarı var ama BIST'e kanalı zayıf; İran retoriğinin sertleşmesi petrol/altın üzerinden belirsizlik yaratıyor."
+    ],
+    "pos": [
+      "Teknoloji/savunma sanayi tedarik zincirine dokunan hisseler (Micron rüzgarı, zayıf kanal)",
+      "66 fonun tasfiyeden çıkarılması resmileşirse fon bağlantılı hisselerde tepki alımı"
+    ],
+    "neg": [
+      "Soruşturmayla doğrudan anılan hisseler (ISVEA/ESCAR/TEHOL grubu)",
+      "Holding grubu geneli"
+    ]
+  },
+  "calendar": [
+    [
+      "17:00",
+      "ABD Eylül ISM İmalat PMI"
+    ]
+  ],
+  "blind": "Bu tur ciddi sayıda boşluk var: **(1) X/YouTube sosyal medya taraması hiç yapılmadı** — zamanlanmış görevin kendi otomatik oturumu aynı kaynakları tarıyordu, hesap güvenliği için çakışma göze alınmadı; Sosyal Medya Nabzı ve Karanlık Oda bölümleri bu yüzden boş. **(2) KAP'a doğrudan erişim yok**, web aramaları bugüne özel yeni bir şirket KAP bildirimi getirmedi. **(3) DXY, ABD 10Y, altın, Brent/WTI için bugüne ait doğrulanmış kapanış rakamı bulunamadı** — aramalar tahmin piyasası verisi ya da eski sonuçlar döndürdü. **(4) Türkiye CDS ve güncel USDTRY için gerçek zamanlı veri yok**, en güncel bilgi 5+ gün eski. **(5) Micron'un kesin gelir/EPS rakamları kaynaklar arası çelişkili**, tam sayı verilmedi. **(6) BIST tekil hisseler için canlı fiyat/grafik erişimi yok**, Keskin Nişancı'da 0 setup var. **(7) VİOP gece seansı, TUR/ADR verisi bulunamadı."
+}
