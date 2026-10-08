@@ -1,4 +1,5 @@
 ---
+import { u } from '../lib/yol';
 export const prerender = false;
 
 import AnaLayout from '../layouts/AnaLayout.astro';
@@ -37,7 +38,7 @@ const bekleyenSayisi = oneriler.filter((o) => !o.sonuc).length;
 		</p>
 		{bekleyenSayisi > 0 && (
 			<p class="bekleyen-not">
-				Şu an <strong>{bekleyenSayisi}</strong> öneri sonuç bekliyor — <a href="/panel">panelden</a> işaretlenebilir.
+				Şu an <strong>{bekleyenSayisi}</strong> öneri sonuç bekliyor — <a href={u("/panel")}>panelden</a> işaretlenebilir.
 			</p>
 		)}
 	</Kart>
@@ -100,7 +101,7 @@ const bekleyenSayisi = oneriler.filter((o) => !o.sonuc).length;
 		margin: 0;
 		font-size: 14px;
 		line-height: 1.6;
-		color: #3f434c;
+		color: #a99d86;
 	}
 	.bekleyen-not {
 		margin: 12px 0 0;
@@ -117,7 +118,7 @@ const bekleyenSayisi = oneriler.filter((o) => !o.sonuc).length;
 	.ozet-kart {
 		background: var(--kart);
 		border: 1px solid var(--kenarlik);
-		border-radius: 14px;
+		border-radius: 2px;
 		padding: 18px 20px;
 		display: flex;
 		flex-direction: column;
@@ -136,8 +137,8 @@ const bekleyenSayisi = oneriler.filter((o) => !o.sonuc).length;
 		color: var(--metin-ikincil);
 		padding: 24px;
 		text-align: center;
-		background: #faf9f5;
-		border-radius: 10px;
+		background: #17140f;
+		border-radius: 2px;
 	}
 	.tablo-sarici {
 		overflow-x: auto;
@@ -200,7 +201,7 @@ const bekleyenSayisi = oneriler.filter((o) => !o.sonuc).length;
 		}
 		tbody tr {
 			border: 1px solid var(--kenarlik);
-			border-radius: 14px;
+			border-radius: 2px;
 			padding: 12px 14px;
 			margin-bottom: 10px;
 		}

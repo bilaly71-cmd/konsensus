@@ -1,4 +1,5 @@
 ---
+import { u } from '../../lib/yol';
 export const prerender = false;
 
 import AnaLayout from '../../layouts/AnaLayout.astro';
@@ -34,7 +35,7 @@ function tl(n: number | null): string {
 
 <AnaLayout baslik={kod} aciklama={`${kod} için kurumların hedef fiyatları ve önerileri.`}>
 	<div class="ust">
-		<span class="onculler"><a href="/">Gösterge paneli</a> / <a href="/hedef-fiyatlar">Hedef fiyatlar</a> / {kod}</span>
+		<span class="onculler"><a href={u("/")}>Gösterge paneli</a> / <a href={u("/hedef-fiyatlar")}>Hedef fiyatlar</a> / {kod}</span>
 	</div>
 
 	<div class="baslik-satir">
@@ -50,7 +51,7 @@ function tl(n: number | null): string {
 		oneriler.length === 0 ? (
 			<Kart>
 				<p class="bos">
-					{kod} için henüz öneri girilmedi. <a href="/panel">Panel</a>'den ekleyebilirsin.
+					{kod} için henüz öneri girilmedi. <a href={u("/panel")}>Panel</a>'den ekleyebilirsin.
 				</p>
 			</Kart>
 		) : (
@@ -179,9 +180,9 @@ function tl(n: number | null): string {
 	.hisse-rozet {
 		width: 52px;
 		height: 52px;
-		border-radius: 12px;
+		border-radius: 2px;
 		background: var(--koyu);
-		color: #fff;
+		color:#ece4d2;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -230,9 +231,9 @@ function tl(n: number | null): string {
 		gap: 16px;
 	}
 	.hedef-kpi {
-		background: #faf9f5;
+		background: #17140f;
 		border: 1px solid var(--kenarlik);
-		border-radius: 12px;
+		border-radius: 2px;
 		padding: 16px;
 		display: flex;
 		flex-direction: column;
@@ -241,8 +242,8 @@ function tl(n: number | null): string {
 		color: var(--metin-ikincil);
 	}
 	.hedef-kpi.vurgu {
-		background: #eef0ff;
-		border-color: #d6d9ff;
+		background: #1f1805;
+		border-color: #8a6410;
 	}
 	.hedef-kpi strong {
 		font-family: var(--font-baslik);
@@ -306,22 +307,22 @@ function tl(n: number | null): string {
 		font-size: 12px;
 		font-weight: 600;
 		padding: 3px 8px;
-		border-radius: 20px;
+		border-radius: 2px;
 	}
 	.hareket-rozet.yeni {
-		background: #e3f2ea;
+		background: #10231a;
 		color: var(--yukselis);
 	}
 	.hareket-rozet.artirdi {
-		background: #eef0ff;
-		color: #2b2fa8;
+		background: #1f1805;
+		color: #ffcb4d;
 	}
 	.hareket-rozet.azaltti {
-		background: #fbf0dd;
+		background: #1f1805;
 		color: var(--etiket-metin);
 	}
 	.hareket-rozet.cikti {
-		background: #f8e4e2;
+		background: #2a1311;
 		color: var(--dusus);
 	}
 
@@ -345,7 +346,7 @@ function tl(n: number | null): string {
 		}
 		tbody tr {
 			border: 1px solid var(--kenarlik);
-			border-radius: 14px;
+			border-radius: 2px;
 			padding: 12px 14px;
 			margin-bottom: 10px;
 		}

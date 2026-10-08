@@ -1,4 +1,5 @@
 ---
+import { u } from '../lib/yol';
 export const prerender = false;
 
 import AnaLayout from '../layouts/AnaLayout.astro';
@@ -49,7 +50,7 @@ function tl(n: number | null): string {
 							{ozet.map((o) => (
 								<tr>
 									<td data-etiket="Hisse">
-										<a href={`/hisse/${o.hisse}`} class="hisse-link">
+										<a href={u(`/hisse/${o.hisse}`)} class="hisse-link">
 											{o.hisse}
 										</a>
 									</td>
@@ -76,8 +77,8 @@ function tl(n: number | null): string {
 		color: var(--metin-ikincil);
 		padding: 24px;
 		text-align: center;
-		background: #faf9f5;
-		border-radius: 10px;
+		background: #17140f;
+		border-radius: 2px;
 	}
 	.tablo-sarici {
 		overflow-x: auto;
@@ -137,7 +138,7 @@ function tl(n: number | null): string {
 		}
 		tbody tr {
 			border: 1px solid var(--kenarlik);
-			border-radius: 14px;
+			border-radius: 2px;
 			padding: 12px 14px;
 			margin-bottom: 10px;
 		}

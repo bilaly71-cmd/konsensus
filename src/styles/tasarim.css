@@ -1,23 +1,23 @@
-/* Konsensüs tasarım sistemi — "gazete + terminal" */
+/* Konsensüs tasarım sistemi — Kokpit teması (portal public/stil.css ile aynı palet: kehribar fosfor, koyu zemin) */
 :root {
-	--zemin: #f4f2ec;
-	--kart: #ffffff;
-	--kenarlik: #e2ded3;
-	--metin: #15171c;
-	--metin-ikincil: #5b5f68;
-	--koyu: #11151f;
-	--koyu-vurgu: #1f2636;
-	--marka: #3438c9;
-	--marka-koyu: #23268f;
-	--kehribar: #e9a23b;
-	--etiket-metin: #a15c07;
-	--yukselis: #0f7a4b;
-	--dusus: #b83227;
-	--cizgi: #eeebe3;
+	--zemin: #0b0a08;
+	--kart: #12100c;
+	--kenarlik: #2a251b;
+	--metin: #ece4d2;
+	--metin-ikincil: #a99d86;
+	--koyu: #0b0a08;
+	--koyu-vurgu: #17140f;
+	--marka: #ffb000;
+	--marka-koyu: #ffcb4d;
+	--kehribar: #ffb000;
+	--etiket-metin: #ffcb4d;
+	--yukselis: #5fd38d;
+	--dusus: #ff5a4e;
+	--cizgi: #2a251b;
 
-	--font-baslik: 'Fraunces', Georgia, serif;
+	--font-baslik: 'Big Shoulders Display', Impact, sans-serif;
 	--font-govde: 'IBM Plex Sans', system-ui, sans-serif;
-	--font-mono: 'IBM Plex Mono', monospace;
+	--font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
 }
 
 * {
@@ -51,10 +51,83 @@ h1,
 h2,
 h3 {
 	font-family: var(--font-baslik);
-	font-weight: 500;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 	margin: 0;
 }
 
 button {
 	font-family: inherit;
+}
+
+html {
+	color-scheme: dark;
+}
+body {
+	background:
+		radial-gradient(1200px 500px at 15% -10%, rgba(255, 176, 0, 0.06), transparent 60%),
+		repeating-linear-gradient(0deg, transparent 0 3px, rgba(255, 255, 255, 0.012) 3px 4px),
+		var(--zemin);
+}
+:focus-visible {
+	outline: 2px solid var(--marka);
+	outline-offset: 3px;
+}
+/* kare yüzeyler: terminal dili */
+button, input, select, textarea, table, [class*='kart'], [class*='rozet'], [class*='etiket'] {
+	border-radius: 2px;
+}
+
+/* Kokpit şeridi: portalın ortak gezintisi (portal iskele.js GEZINTI ile aynı bağlantılar) */
+.kokpit-serit {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	flex-wrap: wrap;
+	padding: 8px 16px;
+	border-bottom: 1px solid var(--kenarlik);
+	background: var(--kart);
+	font-family: var(--font-mono);
+}
+.kokpit-serit .marka {
+	font-family: var(--font-baslik);
+	font-weight: 800;
+	font-size: 22px;
+	letter-spacing: 0.14em;
+	color: var(--marka);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.kokpit-serit .marka svg {
+	width: 18px;
+	height: 18px;
+	stroke: currentColor;
+	fill: none;
+	stroke-width: 2;
+}
+.kokpit-serit nav {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin-left: auto;
+}
+.kokpit-serit nav a {
+	font-size: 11px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--metin-ikincil);
+	border: 1px solid var(--kenarlik);
+	padding: 5px 10px;
+	border-radius: 2px;
+}
+.kokpit-serit nav a:hover,
+.kokpit-serit nav a[aria-current] {
+	color: var(--marka);
+	border-color: var(--marka);
+}
+@media (max-width: 640px) {
+	.kokpit-serit { gap: 8px; }
+	.kokpit-serit nav { margin-left: 0; width: 100%; }
 }

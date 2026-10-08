@@ -102,10 +102,10 @@ import Rozet from '../components/Rozet.astro';
 		const enUzunSeriEl = document.getElementById('enUzunSeri')!;
 
 		const chart = createChart(grafikAlaniEl, {
-			layout: { background: { type: ColorType.Solid, color: 'transparent' }, textColor: '#5B5F68' },
-			grid: { vertLines: { color: '#EEEBE3' }, horzLines: { color: '#EEEBE3' } },
-			rightPriceScale: { borderColor: '#E2DED3' },
-			timeScale: { borderColor: '#E2DED3', timeVisible: false, secondsVisible: false },
+			layout: { background: { type: ColorType.Solid, color: 'transparent' }, textColor: '#a99d86' },
+			grid: { vertLines: { color: '#2a251b' }, horzLines: { color: '#2a251b' } },
+			rightPriceScale: { borderColor: '#2a251b' },
+			timeScale: { borderColor: '#2a251b', timeVisible: false, secondsVisible: false },
 			handleScroll: false,
 			handleScale: false,
 			height: 320,
@@ -113,10 +113,10 @@ import Rozet from '../components/Rozet.astro';
 		});
 		// Klasik TradingView mum renkleri: yükseliş yeşil, düşüş kırmızı (bkz. tasarım sistemi)
 		const mumSerisi = chart.addSeries(CandlestickSeries, {
-			upColor: '#0F7A4B',
-			downColor: '#B83227',
-			wickUpColor: '#0F7A4B',
-			wickDownColor: '#B83227',
+			upColor: '#5fd38d',
+			downColor: '#ff5a4e',
+			wickUpColor: '#5fd38d',
+			wickDownColor: '#ff5a4e',
 			borderVisible: false,
 		});
 
@@ -137,12 +137,12 @@ import Rozet from '../components/Rozet.astro';
 		// Destek/direnç/trend/harmonik çizgileri için ayrı ince çizgi serileri.
 		// Her yeni oyunda öncekiler temizlenip yeniden oluşturuluyor.
 		const CIZGI_RENKLERI: Record<CizgiSegmenti['tur'], { color: string; lineStyle?: 0 | 1 | 2 | 3 | 4 }> = {
-			destek: { color: '#0F7A4B', lineStyle: 2 },
-			direnc: { color: '#B83227', lineStyle: 2 },
-			boyun: { color: '#5B5F68', lineStyle: 0 },
-			'trend-ust': { color: '#3438C9', lineStyle: 0 },
-			'trend-alt': { color: '#3438C9', lineStyle: 0 },
-			harmonik: { color: '#E9A23B', lineStyle: 1 },
+			destek: { color: '#5fd38d', lineStyle: 2 },
+			direnc: { color: '#ff5a4e', lineStyle: 2 },
+			boyun: { color: '#a99d86', lineStyle: 0 },
+			'trend-ust': { color: '#ffb000', lineStyle: 0 },
+			'trend-alt': { color: '#ffb000', lineStyle: 0 },
+			harmonik: { color: '#ffb000', lineStyle: 1 },
 		};
 		let cizgiSerileri: any[] = [];
 
@@ -222,7 +222,7 @@ import Rozet from '../components/Rozet.astro';
 
 		async function sonucGonder(desen: string, tahmin: string, dogruMu: boolean) {
 			try {
-				await fetch('/api/oyun', {
+				await fetch(window.KB + '/api/oyun', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ desen, tahmin, dogruMu }),
@@ -279,7 +279,7 @@ import Rozet from '../components/Rozet.astro';
 
 		async function sicilYukle() {
 			try {
-				const yanit = await fetch('/api/oyun');
+				const yanit = await fetch(window.KB + '/api/oyun');
 				const veri = await yanit.json();
 				const genel = veri.genel || { toplam: 0, dogruSayisi: 0 };
 				if (!genel.toplam) return;
@@ -315,7 +315,7 @@ import Rozet from '../components/Rozet.astro';
 		.kategori-btn {
 			height: 36px;
 			padding: 0 14px;
-			border-radius: 18px;
+			border-radius: 2px;
 			border: 1px solid var(--kenarlik);
 			background: var(--kart);
 			color: var(--metin-ikincil);
@@ -325,16 +325,16 @@ import Rozet from '../components/Rozet.astro';
 			cursor: pointer;
 		}
 		.kategori-btn.aktif {
-			background: var(--metin);
-			border-color: var(--metin);
-			color: #fff;
+			background: var(--marka);
+			border-color: var(--marka);
+			color:#0b0a08;
 		}
 		.grafik-alani {
 			width: 100%;
 			border: 1px solid var(--kenarlik);
-			border-radius: 12px;
+			border-radius: 2px;
 			overflow: hidden;
-			background: #faf9f5;
+			background: #17140f;
 		}
 		.grafik-atif {
 			margin: 8px 0 0;
@@ -349,12 +349,12 @@ import Rozet from '../components/Rozet.astro';
 		.tahmin {
 			flex-grow: 1;
 			height: 52px;
-			border-radius: 10px;
+			border-radius: 2px;
 			border: 0;
 			font: inherit;
 			font-size: 16px;
 			font-weight: 600;
-			color: #fff;
+			color:#ece4d2;
 			cursor: pointer;
 		}
 		.tahmin:disabled {
@@ -381,14 +381,14 @@ import Rozet from '../components/Rozet.astro';
 			font-size: 13px;
 			font-weight: 700;
 			padding: 4px 12px;
-			border-radius: 20px;
+			border-radius: 2px;
 		}
 		.sonuc-rozet.dogru {
-			background: #e3f2ea;
+			background: #10231a;
 			color: var(--yukselis);
 		}
 		.sonuc-rozet.yanlis {
-			background: #f8e4e2;
+			background: #2a1311;
 			color: var(--dusus);
 		}
 		.sonuc-alani h3 {
@@ -405,10 +405,10 @@ import Rozet from '../components/Rozet.astro';
 			margin-top: 8px;
 			height: 44px;
 			padding: 0 20px;
-			border-radius: 10px;
+			border-radius: 2px;
 			border: 0;
 			background: var(--marka);
-			color: #fff;
+			color:#0b0a08;
 			font: inherit;
 			font-size: 14px;
 			font-weight: 600;
@@ -423,7 +423,7 @@ import Rozet from '../components/Rozet.astro';
 		.skor-kart {
 			background: var(--kart);
 			border: 1px solid var(--kenarlik);
-			border-radius: 14px;
+			border-radius: 2px;
 			padding: 18px 20px;
 			display: flex;
 			flex-direction: column;
@@ -434,7 +434,7 @@ import Rozet from '../components/Rozet.astro';
 		.skor-kart.vurgu {
 			background: var(--koyu);
 			border-color: var(--koyu);
-			color: #aeb3bf;
+			color: #a99d86;
 		}
 		.skor-kart strong {
 			font-family: var(--font-baslik);
@@ -450,8 +450,8 @@ import Rozet from '../components/Rozet.astro';
 			color: var(--metin-ikincil);
 			padding: 24px;
 			text-align: center;
-			background: #faf9f5;
-			border-radius: 10px;
+			background: #17140f;
+			border-radius: 2px;
 		}
 		.genel-sicil {
 			display: flex;

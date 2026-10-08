@@ -1,4 +1,5 @@
 ---
+import { u } from '../lib/yol';
 export const prerender = false;
 
 import AnaLayout from '../layouts/AnaLayout.astro';
@@ -72,13 +73,13 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 	</SayfaBasligi>
 
 	<div class="tarih-cubugu">
-		<a href={`/oneriler?tarih=${oncekiGun}`} class="tarih-ok" aria-label="Önceki gün">‹</a>
+		<a href={u(`/oneriler?tarih=${oncekiGun}`)} class="tarih-ok" aria-label="Önceki gün">‹</a>
 		<div class="tarih-orta">
 			<span class="tarih-metin">{tarihBaslik}</span>
-			{!bugunMu && <a href="/oneriler" class="bugune-don">bugüne dön</a>}
+			{!bugunMu && <a href={u("/oneriler")} class="bugune-don">bugüne dön</a>}
 		</div>
 		<a
-			href={`/oneriler?tarih=${sonrakiGun}`}
+			href={u(`/oneriler?tarih=${sonrakiGun}`)}
 			class:list={['tarih-ok', { pasif: sonrakiGun > bugun }]}
 			aria-label="Sonraki gün"
 		>
@@ -107,7 +108,7 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 			<Kart baslik="Günün konsensüsü" altBaslik="En çok kurumun aynı anda önerdiği hisseler">
 				<div class="konsensus-listesi">
 					{konsensusListesi.map((k) => (
-						<a href={`/hisse/${k.hisse}`} class="konsensus-satir">
+						<a href={u(`/hisse/${k.hisse}`)} class="konsensus-satir">
 							<span class="konsensus-hisse">{k.hisse}</span>
 							<span class="konsensus-cubuk">
 								<span class="konsensus-dolu" style={`width:${Math.round((k.n / enCokKurum) * 100)}%`} />
@@ -165,7 +166,7 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 		.tarih-ok {
 			width: 36px;
 			height: 36px;
-			border-radius: 8px;
+			border-radius: 2px;
 			border: 1px solid var(--kenarlik);
 			background: var(--kart);
 			display: flex;
@@ -203,7 +204,7 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 		.kpi {
 			background: var(--kart);
 			border: 1px solid var(--kenarlik);
-			border-radius: 14px;
+			border-radius: 2px;
 			padding: 18px 20px;
 			display: flex;
 			flex-direction: column;
@@ -245,8 +246,8 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 		}
 		.konsensus-cubuk {
 			height: 10px;
-			background: #efece4;
-			border-radius: 5px;
+			background: #17140f;
+			border-radius: 2px;
 			overflow: hidden;
 			display: block;
 		}
@@ -254,7 +255,7 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 			display: block;
 			height: 10px;
 			background: var(--marka);
-			border-radius: 5px;
+			border-radius: 2px;
 		}
 		.konsensus-kurumlar {
 			grid-column: 2;
@@ -280,7 +281,7 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 		.filtre-btn {
 			height: 32px;
 			padding: 0 12px;
-			border-radius: 16px;
+			border-radius: 2px;
 			border: 1px solid var(--kenarlik);
 			background: var(--kart);
 			color: var(--metin);
@@ -290,9 +291,9 @@ const tarihBaslik = new Intl.DateTimeFormat('tr-TR', {
 			cursor: pointer;
 		}
 		.filtre-btn.aktif {
-			background: var(--metin);
-			border-color: var(--metin);
-			color: #fff;
+			background: var(--marka);
+			border-color: var(--marka);
+			color:#0b0a08;
 		}
 
 		@media (max-width: 899px) {

@@ -1,4 +1,5 @@
 ---
+import { u } from '../lib/yol';
 export const prerender = false;
 
 import AnaLayout from '../layouts/AnaLayout.astro';
@@ -112,7 +113,7 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 			return '<div class="grid2"><div class="card prose"><div class="colh"><h3>Yurtdışı</h3></div><p>' + md(s.glob) + '</p><div class="expect"><b>Beklenti:</b> ' + md(s.globExp) + '</div></div><div class="card prose"><div class="colh"><h3>Yurtiçi</h3></div><p>' + md(s.dom) + '</p><div class="expect"><b>Beklenti:</b> ' + md(s.domExp) + '</div></div></div>'
 				+ '<div class="scen">' + list(s.scen).map(function (c) { return '<div class="' + esc(c.k) + '"><h4>' + esc(c.h) + '</h4><div class="small">' + esc(c.d) + '</div><div class="lv">' + md(c.lv) + '</div></div>'; }).join('') + '</div><p class="small" style="margin-top:6px">' + md(s.levelNote) + '</p>'
 				+ '<h3 style="font-size:17px;margin:22px 0 4px">Hisse fikirleri ve gerekçeleri</h3><p class="small" style="margin:0 0 10px">' + md(b.sniperNote) + '</p>'
-				+ '<div class="tw"><table><thead><tr><th>Hisse</th><th>Neden</th><th>Ne bozar</th><th>Güven</th><th></th></tr></thead><tbody>' + list(b.watch).map(function (f) { return '<tr><td class="tk"><a href="/hisse/' + encodeURIComponent(String(f.t).split(' ')[0]) + '">' + esc(f.t) + '</a></td><td>' + md(f.why) + '</td><td>' + md(f.bad) + '</td><td class="nw"><span class="tag">' + esc(f.conf) + '</span></td><td class="nw"><a href="/trade-defteri?tk=' + encodeURIComponent(String(f.t).split(' ')[0]) + '&why=' + encodeURIComponent(f.why || '') + '&conf=' + encodeURIComponent(f.conf || '') + '">Deftere ekle</a></td></tr>'; }).join('') + '</tbody></table></div>'
+				+ '<div class="tw"><table><thead><tr><th>Hisse</th><th>Neden</th><th>Ne bozar</th><th>Güven</th><th></th></tr></thead><tbody>' + list(b.watch).map(function (f) { return '<tr><td class="tk"><a href="' + window.KB + '/hisse/' + encodeURIComponent(String(f.t).split(' ')[0]) + '">' + esc(f.t) + '</a></td><td>' + md(f.why) + '</td><td>' + md(f.bad) + '</td><td class="nw"><span class="tag">' + esc(f.conf) + '</span></td><td class="nw"><a href="' + window.KB + '/trade-defteri?tk=' + encodeURIComponent(String(f.t).split(' ')[0]) + '&why=' + encodeURIComponent(f.why || '') + '&conf=' + encodeURIComponent(f.conf || '') + '">Deftere ekle</a></td></tr>'; }).join('') + '</tbody></table></div>'
 				+ '<p class="small" style="margin-top:8px">' + md(s.avoid) + '</p>';
 		}],
 		['s-okur', 'Mürekkep yalamışlar ne diyor?', 'yazar, tarih, link', function (b) {
@@ -164,12 +165,12 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 
 <style is:global>
 	.bulten {
-		--b-yaz: #5b5f68;
-		--b-yuz2: #faf8f3;
-		--b-up-soft: #dcf3ea;
-		--b-down-soft: #fbe4e2;
-		--b-warn-soft: #fbf0d9;
-		--b-acc-soft: #e8e9fa;
+		--b-yaz: #a99d86;
+		--b-yuz2: #17140f;
+		--b-up-soft: #10231a;
+		--b-down-soft: #2a1311;
+		--b-warn-soft: #1f1805;
+		--b-acc-soft: #1f1805;
 		margin-top: 20px;
 		font-size: 14px;
 		line-height: 1.55;
@@ -178,14 +179,14 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 	.bulten .ustbar { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; }
 	.bulten .when { font-family: var(--font-mono); font-size: 12px; color: var(--metin-ikincil); }
 	.bulten .arsiv { font-size: 13px; color: var(--metin-ikincil); display: flex; gap: 6px; align-items: center; }
-	.bulten .arsiv select { font: inherit; padding: 8px 10px; min-height: 44px; border: 1px solid var(--kenarlik); border-radius: 10px; background: var(--kart); color: var(--metin); }
+	.bulten .arsiv select { font: inherit; padding: 8px 10px; min-height: 44px; border: 1px solid var(--kenarlik); border-radius: 2px; background: var(--kart); color: var(--metin); }
 	.bulten .nav { display: flex; gap: 4px; overflow-x: auto; padding: 8px 0; margin-top: 8px; scrollbar-width: thin; position: sticky; top: 0; z-index: 5; background: var(--zemin); border-bottom: 1px solid var(--kenarlik); }
-	.bulten .nav a { white-space: nowrap; font-size: 12.5px; font-weight: 500; color: var(--metin-ikincil); padding: 8px 12px; border-radius: 8px; }
+	.bulten .nav a { white-space: nowrap; font-size: 12.5px; font-weight: 500; color: var(--metin-ikincil); padding: 8px 12px; border-radius: 2px; }
 	.bulten .nav a:hover { background: var(--b-acc-soft); color: var(--marka); }
-	.bulten .draft { margin-top: 14px; padding: 10px 14px; background: var(--b-warn-soft); border: 1px solid var(--kehribar); border-radius: 10px; font-size: 13px; }
+	.bulten .draft { margin-top: 14px; padding: 10px 14px; background: var(--b-warn-soft); border: 1px solid var(--kehribar); border-radius: 2px; font-size: 13px; }
 	.bulten .draft b { color: var(--etiket-metin); }
 	.bulten .srcbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-	.bulten .srcchip { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 8px; padding: 6px 10px; font-size: 12.5px; }
+	.bulten .srcchip { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 6px 10px; font-size: 12.5px; }
 	.bulten .srcchip small, .bulten .small, .bulten .srcnote { color: var(--metin-ikincil); }
 	.bulten .small { font-size: 12px; }
 	.bulten .srcchip small { font-size: 11.5px; }
@@ -194,7 +195,7 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 	.bulten .sh { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; border-bottom: 2px solid var(--metin); padding-bottom: 6px; margin-bottom: 14px; }
 	.bulten .sh h2 { font-size: 24px; letter-spacing: -0.3px; }
 	.bulten .idea { font-size: 11.5px; color: var(--metin-ikincil); font-family: var(--font-mono); }
-	.bulten .card { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 14px; padding: 16px 18px; }
+	.bulten .card { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 16px 18px; }
 	.bulten .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 	.bulten .grid2 > * { min-width: 0; }
 	@media (max-width: 760px) { .bulten .grid2 { grid-template-columns: 1fr; } }
@@ -204,18 +205,18 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 	.bulten b { font-weight: 600; }
 	.bulten .up { color: var(--yukselis); }
 	.bulten .down { color: var(--dusus); }
-	.bulten .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 6px; background: var(--b-acc-soft); color: var(--marka); }
+	.bulten .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 2px; background: var(--b-acc-soft); color: var(--marka); }
 	.bulten .tag.old { background: var(--b-warn-soft); color: var(--etiket-metin); }
 	.bulten .tag.hi { background: var(--b-down-soft); color: var(--dusus); }
 	.bulten .top5 { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-	.bulten .top5 li { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 14px; padding: 14px 16px; }
+	.bulten .top5 li { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 14px 16px; }
 	.bulten .top5 .rank { grid-row: span 2; font-family: var(--font-baslik); font-size: 34px; line-height: 1; color: var(--kehribar); width: 28px; text-align: center; }
 	.bulten .top5 h3 { font-size: 18px; line-height: 1.25; }
 	.bulten .top5 p { margin: 4px 0 0; font-size: 13.5px; }
 	.bulten .chain { color: var(--metin-ikincil); font-size: 12.5px; margin-top: 4px; }
 	.bulten .meta { margin-top: 6px; }
 	.bulten .strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-	.bulten .tile { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+	.bulten .tile { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 10px 12px; min-width: 0; }
 	.bulten .tile .l { font-size: 11px; color: var(--metin-ikincil); text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
 	.bulten .tile .v { font-family: var(--font-mono); font-size: 18px; font-weight: 600; margin-top: 2px; }
 	.bulten .tile .c { font-family: var(--font-mono); font-size: 12px; }
@@ -224,7 +225,7 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 	.bulten .bl li { padding-left: 14px; position: relative; font-size: 13.5px; }
 	.bulten .bl li::before { content: ''; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 1px; background: var(--kehribar); }
 	.bulten .mh { margin: 0 0 8px; font-family: var(--font-baslik); font-size: 15px; }
-	.bulten .tw { overflow-x: auto; border: 1px solid var(--kenarlik); border-radius: 14px; background: var(--kart); }
+	.bulten .tw { overflow-x: auto; border: 1px solid var(--kenarlik); border-radius: 2px; background: var(--kart); }
 	.bulten table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 560px; }
 	.bulten th, .bulten td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--cizgi); }
 	.bulten th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); font-weight: 600; background: var(--b-yuz2); white-space: nowrap; }
@@ -232,10 +233,10 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 	.bulten .nw { white-space: nowrap; }
 	.bulten .tk { font-family: var(--font-mono); font-weight: 600; }
 	.bulten .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-	.bulten .chip { font: inherit; font-size: 12.5px; font-weight: 500; padding: 10px 14px; min-height: 44px; border-radius: 999px; border: 1px solid var(--kenarlik); background: var(--kart); color: var(--metin); cursor: pointer; }
-	.bulten .chip[aria-pressed='true'] { background: var(--koyu); color: #fff; border-color: var(--koyu); }
+	.bulten .chip { font: inherit; font-size: 12.5px; font-weight: 500; padding: 10px 14px; min-height: 44px; border-radius: 2px; border: 1px solid var(--kenarlik); background: var(--kart); color: var(--metin); cursor: pointer; }
+	.bulten .chip[aria-pressed='true'] { background: var(--marka); color:#0b0a08; border-color: var(--marka); }
 	.bulten .kap { display: grid; gap: 8px; }
-	.bulten .kitem { display: grid; grid-template-columns: 90px 1fr; gap: 4px 14px; background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 14px; padding: 12px 16px; }
+	.bulten .kitem { display: grid; grid-template-columns: 90px 1fr; gap: 4px 14px; background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 12px 16px; }
 	.bulten .kitem .tkr { font-family: var(--font-mono); font-weight: 600; font-size: 15px; }
 	.bulten .kitem .tkr small { display: block; font-family: var(--font-govde); font-weight: 400; font-size: 11px; color: var(--metin-ikincil); }
 	.bulten .kitem h3 { font-size: 16px; line-height: 1.3; }
@@ -244,10 +245,10 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 	.bulten .kitem .why b { color: var(--metin); }
 	.bulten .kitem .row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-top: 6px; }
 	@media (max-width: 520px) { .bulten .kitem { grid-template-columns: 1fr; } }
-	.bulten .rumor { border: 1px dashed var(--kehribar); background: var(--kart); border-radius: 14px; padding: 12px 14px; }
+	.bulten .rumor { border: 1px dashed var(--kehribar); background: var(--kart); border-radius: 2px; padding: 12px 14px; }
 	.bulten .rumor .top { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 6px; }
-	.bulten .rtag { font-size: 11px; font-weight: 700; color: var(--etiket-metin); background: var(--b-warn-soft); padding: 2px 8px; border-radius: 6px; }
-	.bulten .status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+	.bulten .rtag { font-size: 11px; font-weight: 700; color: var(--etiket-metin); background: var(--b-warn-soft); padding: 2px 8px; border-radius: 2px; }
+	.bulten .status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 2px; }
 	.bulten .s-no { background: var(--b-down-soft); color: var(--dusus); }
 	.bulten .s-wait { background: var(--b-warn-soft); color: var(--etiket-metin); }
 	.bulten .s-idle { background: var(--b-yuz2); color: var(--metin-ikincil); border: 1px solid var(--kenarlik); }
@@ -257,20 +258,20 @@ const secili = istenen && gunler[istenen] ? istenen : tarihler[0];
 	.bulten .cal .tm { font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--marka); }
 	.bulten .prose p { margin: 0 0 10px; font-size: 14px; line-height: 1.65; }
 	.bulten .prose p:last-child { margin-bottom: 0; }
-	.bulten .expect { margin-top: 12px; padding: 9px 12px; background: var(--b-acc-soft); border-radius: 10px; font-size: 13px; }
+	.bulten .expect { margin-top: 12px; padding: 9px 12px; background: var(--b-acc-soft); border-radius: 2px; font-size: 13px; }
 	.bulten .scen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
 	@media (max-width: 760px) { .bulten .scen { grid-template-columns: 1fr; } }
-	.bulten .scen > div { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+	.bulten .scen > div { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 12px 14px; min-width: 0; }
 	.bulten .scen h4 { margin: 0 0 4px; font-family: var(--font-baslik); font-size: 15px; }
 	.bulten .scen .lv { font-family: var(--font-mono); font-size: 12.5px; color: var(--metin-ikincil); margin-top: 6px; }
 	.bulten .scen .up-h { border-top: 3px solid var(--yukselis); }
 	.bulten .scen .dn-h { border-top: 3px solid var(--dusus); }
 	.bulten .scen .bz-h { border-top: 3px solid var(--metin-ikincil); }
 	.bulten .gauge { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin: 14px 0 4px; }
-	.bulten .gauge div { min-height: 36px; display: grid; place-items: center; font-size: 11px; font-weight: 600; text-align: center; padding: 0 3px; border-radius: 6px; background: var(--b-yuz2); color: var(--metin-ikincil); border: 1px solid var(--kenarlik); }
-	.bulten .gauge div.on { background: var(--koyu); color: #fff; border-color: var(--koyu); }
+	.bulten .gauge div { min-height: 36px; display: grid; place-items: center; font-size: 11px; font-weight: 600; text-align: center; padding: 0 3px; border-radius: 2px; background: var(--b-yuz2); color: var(--metin-ikincil); border: 1px solid var(--kenarlik); }
+	.bulten .gauge div.on { background: var(--marka); color:#0b0a08; border-color: var(--marka); }
 	.bulten .gaugel { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; font-family: var(--font-mono); font-size: 10.5px; color: var(--metin-ikincil); text-align: center; }
 	.bulten .blind { border-left: 4px solid var(--kehribar); background: var(--kart); border-radius: 0 12px 12px 0; padding: 12px 16px; font-size: 13.5px; }
-	.bulten .empty, .bos { text-align: center; padding: 26px 16px; border: 1.5px dashed var(--kenarlik); border-radius: 14px; color: var(--metin-ikincil); }
+	.bulten .empty, .bos { text-align: center; padding: 26px 16px; border: 1.5px dashed var(--kenarlik); border-radius: 2px; color: var(--metin-ikincil); }
 	.bulten .yasal { margin-top: 32px; font-size: 11.5px; color: var(--metin-ikincil); border-top: 1px solid var(--kenarlik); padding-top: 12px; }
 </style>

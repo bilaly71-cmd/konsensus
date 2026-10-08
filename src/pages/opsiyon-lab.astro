@@ -90,17 +90,17 @@ import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 		let bacaklar: OpsiyonBacagi[] = HAZIR_STRATEJILER[0].bacaklarUret(100);
 
 		const chart = createChart(grafikAlaniEl, {
-			layout: { background: { type: ColorType.Solid, color: 'transparent' }, textColor: '#5B5F68' },
-			grid: { vertLines: { color: '#EEEBE3' }, horzLines: { color: '#EEEBE3' } },
-			rightPriceScale: { borderColor: '#E2DED3' },
-			timeScale: { borderColor: '#E2DED3', visible: false },
+			layout: { background: { type: ColorType.Solid, color: 'transparent' }, textColor: '#a99d86' },
+			grid: { vertLines: { color: '#2a251b' }, horzLines: { color: '#2a251b' } },
+			rightPriceScale: { borderColor: '#2a251b' },
+			timeScale: { borderColor: '#2a251b', visible: false },
 			handleScroll: false,
 			handleScale: false,
 			height: 320,
 			autoSize: true,
 		});
-		const karSerisi = chart.addSeries(LineSeries, { color: '#3438C9', lineWidth: 2 });
-		const sifirSerisi = chart.addSeries(LineSeries, { color: '#B0B4BE', lineWidth: 1, lineStyle: 2 });
+		const karSerisi = chart.addSeries(LineSeries, { color: '#ffb000', lineWidth: 2 });
+		const sifirSerisi = chart.addSeries(LineSeries, { color: '#3d3526', lineWidth: 1, lineStyle: 2 });
 
 		function bacaklariCiz() {
 			bacakGovdeEl.innerHTML = bacaklar
@@ -216,9 +216,9 @@ import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 		}
 		.strateji-btn {
 			text-align: left;
-			background: #faf9f5;
+			background: #17140f;
 			border: 1px solid var(--kenarlik);
-			border-radius: 12px;
+			border-radius: 2px;
 			padding: 14px;
 			cursor: pointer;
 			display: flex;
@@ -227,7 +227,7 @@ import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 		}
 		.strateji-btn:hover {
 			border-color: var(--marka);
-			background: #eef0ff;
+			background: #1f1805;
 		}
 		.strateji-ad {
 			font-weight: 600;
@@ -252,12 +252,12 @@ import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 		.baz-fiyat input {
 			height: 44px;
 			border: 1px solid var(--kenarlik);
-			border-radius: 10px;
+			border-radius: 2px;
 			padding: 0 14px;
 			font: inherit;
 			font-size: 15px;
 			font-weight: 600;
-			background: #faf9f5;
+			background: #17140f;
 		}
 
 		.tablo-sarici {
@@ -292,11 +292,11 @@ import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 		.sayi-kutu {
 			height: 36px;
 			border: 1px solid var(--kenarlik);
-			border-radius: 6px;
+			border-radius: 2px;
 			padding: 0 8px;
 			font: inherit;
 			font-size: 13px;
-			background: #faf9f5;
+			background: #17140f;
 			width: 100%;
 			box-sizing: border-box;
 		}
@@ -319,7 +319,7 @@ import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 		.ikincil-btn {
 			height: 44px;
 			padding: 0 18px;
-			border-radius: 10px;
+			border-radius: 2px;
 			border: 1px solid var(--kenarlik);
 			background: var(--kart);
 			font: inherit;
@@ -335,9 +335,9 @@ import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 		.grafik-alani {
 			width: 100%;
 			border: 1px solid var(--kenarlik);
-			border-radius: 12px;
+			border-radius: 2px;
 			overflow: hidden;
-			background: #faf9f5;
+			background: #17140f;
 		}
 		.grafik-atif {
 			margin: 8px 0 0;
@@ -351,9 +351,9 @@ import { HAZIR_STRATEJILER } from '../lib/opsiyon';
 			margin-top: 16px;
 		}
 		.ozet-kart {
-			background: #faf9f5;
+			background: #17140f;
 			border: 1px solid var(--kenarlik);
-			border-radius: 12px;
+			border-radius: 2px;
 			padding: 14px 16px;
 			display: flex;
 			flex-direction: column;

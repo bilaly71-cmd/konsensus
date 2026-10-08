@@ -25,7 +25,7 @@ const { baslik, altBaslik, etiket, koyu = false, class: ekSinif } = Astro.props;
 	.kart {
 		background: var(--kart);
 		border: 1px solid var(--kenarlik);
-		border-radius: 16px;
+		border-radius: 2px;
 		padding: 24px;
 		display: flex;
 		flex-direction: column;
@@ -35,7 +35,7 @@ const { baslik, altBaslik, etiket, koyu = false, class: ekSinif } = Astro.props;
 	.kart.koyu {
 		background: var(--koyu);
 		border-color: var(--koyu);
-		color: #e7e9ee;
+		color: #ece4d2;
 	}
 	.etiket {
 		font-size: 11px;
@@ -56,14 +56,14 @@ const { baslik, altBaslik, etiket, koyu = false, class: ekSinif } = Astro.props;
 		font-size: 24px;
 	}
 	.koyu h2 {
-		color: #fff;
+		color:#ece4d2;
 	}
 	.alt {
 		font-size: 13px;
 		color: var(--metin-ikincil);
 	}
 	.koyu .alt {
-		color: #aeb3bf;
+		color: #a99d86;
 	}
 	.sag {
 		margin-left: auto;
@@ -73,7 +73,7 @@ const { baslik, altBaslik, etiket, koyu = false, class: ekSinif } = Astro.props;
 	@media (max-width: 899px) {
 		.kart {
 			padding: 18px;
-			border-radius: 14px;
+			border-radius: 2px;
 		}
 		h2 {
 			font-size: 20px;

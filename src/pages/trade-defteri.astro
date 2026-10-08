@@ -165,10 +165,10 @@ import Rozet from '../components/Rozet.astro';
 			+ (t.why ? '<p class="tx"><b>Gerekçe:</b> ' + esc(t.why) + '</p>' : '') + (t.cond ? '<p class="tx"><b>Koşul / iptal:</b> ' + esc(t.cond) + '</p>' : '')
 			+ '<div class="small">' + esc((t.src || []).join(' · ')) + (t.conf ? ' · güven: ' + esc(t.conf) : '') + '</div>'
 			+ '<div class="tctl"><select data-act="status" aria-label="Durum">' + opts(STAT, t.status) + '</select><input data-act="exit" class="n" inputmode="decimal" placeholder="Çıkış fiyatı" value="' + esc(t.exit || '') + '" aria-label="Çıkış fiyatı"><button class="btn ghost" data-act="more">' + (o ? 'Gizle' : 'Not / zaman çizelgesi (' + (t.updates || []).length + ')') + '</button><button class="btn ghost warn" data-act="del">Sil</button></div></div>'
-			+ '<div>' + (imgs.length ? '<img class="thumb" alt="" data-lb="' + imgs[0].id + '" src="/api/trade?gorsel=' + encodeURIComponent(imgs[0].id) + '">' + (imgs.length > 1 ? '<div class="small">+' + (imgs.length - 1) + ' görsel</div>' : '') : '') + '</div>';
+			+ '<div>' + (imgs.length ? '<img class="thumb" alt="" data-lb="' + imgs[0].id + '" src="' + window.KB + '/api/trade?gorsel=' + encodeURIComponent(imgs[0].id) + '">' + (imgs.length > 1 ? '<div class="small">+' + (imgs.length - 1) + ' görsel</div>' : '') : '') + '</div>';
 		if (o) {
 			h += '<div class="more"><h4>Zaman çizelgesi</h4><ol class="tl">' + (t.updates || []).map(function (u) {
-				return '<li class="te"><div class="th"><b>' + esc(u.stage) + '</b><span>' + fdt(u.ts) + '</span>' + (u.price != null ? '<span class="tk">' + fmt(u.price) + '</span>' : '') + '</div><div class="tx">' + esc(u.text) + '</div>' + ((u.images || []).length ? '<div class="figs">' + u.images.map(function (im) { return '<figure class="fig"><img class="thumb" alt="" data-lb="' + im.id + '" src="/api/trade?gorsel=' + encodeURIComponent(im.id) + '"><figcaption>' + esc(im.cap) + '</figcaption></figure>'; }).join('') + '</div>' : '') + '</li>';
+				return '<li class="te"><div class="th"><b>' + esc(u.stage) + '</b><span>' + fdt(u.ts) + '</span>' + (u.price != null ? '<span class="tk">' + fmt(u.price) + '</span>' : '') + '</div><div class="tx">' + esc(u.text) + '</div>' + ((u.images || []).length ? '<div class="figs">' + u.images.map(function (im) { return '<figure class="fig"><img class="thumb" alt="" data-lb="' + im.id + '" src="' + window.KB + '/api/trade?gorsel=' + encodeURIComponent(im.id) + '"><figcaption>' + esc(im.cap) + '</figcaption></figure>'; }).join('') + '</div>' : '') + '</li>';
 			}).join('') + '</ol><div class="addbox"><div class="lvform"><select class="ctl" data-nstage>' + opts(STAGES, 'Not') + '</select><input class="ctl n" data-nprice inputmode="decimal" placeholder="Fiyat (isteğe bağlı)"></div><textarea class="ctl" data-ntext rows="2" placeholder="Not: ne oldu, ne düşündün, ne öğrendin"></textarea><div class="dz" data-act="npick">Grafik ekle</div><div class="pend" data-pend="' + t.id + '">' + pendHTML(listFor(t.id), t.id) + '</div><div><button class="btn" data-act="nadd">Nota ekle</button></div></div></div>';
 		}
 		return h + '</div>';
@@ -266,7 +266,7 @@ import Rozet from '../components/Rozet.astro';
 
 	/* Tam yedek: görseller dahil (başka projeye/cihaza taşımak için) ve geri yükleme */
 	function blobToDataUrl(b) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = rej; fr.readAsDataURL(b); }); }
-	async function gorselVeri(id) { var r = await fetch('/api/trade?gorsel=' + encodeURIComponent(id)); if (!r.ok) return null; return blobToDataUrl(await r.blob()); }
+	async function gorselVeri(id) { var r = await fetch(window.KB + '/api/trade?gorsel=' + encodeURIComponent(id)); if (!r.ok) return null; return blobToDataUrl(await r.blob()); }
 	async function gorselleriDoldur(list) { for (var i = 0; i < (list || []).length; i++) { list[i].veri = await gorselVeri(list[i].id); } }
 	$('#x-tam').addEventListener('click', async function () {
 		try {
@@ -299,9 +299,9 @@ import Rozet from '../components/Rozet.astro';
 <style is:global>
 	.td { margin-top: 20px; display: grid; gap: 16px; font-size: 14px; }
 	.td h2 { font-size: 22px; }
-	.td .kart { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 16px; padding: 18px; }
+	.td .kart { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 18px; }
 	.td .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
-	.td .tile { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 12px; padding: 10px 12px; }
+	.td .tile { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 10px 12px; }
 	.td .tile .l { font-size: 11px; color: var(--metin-ikincil); text-transform: uppercase; letter-spacing: .06em; }
 	.td .tile .v { font-family: var(--font-mono); font-size: 20px; font-weight: 600; margin-top: 2px; }
 	.td .form { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
@@ -309,7 +309,7 @@ import Rozet from '../components/Rozet.astro';
 	.td .form > * { min-width: 0; }
 	.td .f { display: flex; flex-direction: column; gap: 4px; }
 	.td .f > label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--metin-ikincil); font-weight: 600; }
-	.td input, .td select, .td textarea, .td .ctl { font: inherit; font-size: 14px; color: var(--metin); background: #faf8f3; border: 1px solid var(--kenarlik); border-radius: 10px; padding: 10px; min-height: 44px; width: 100%; }
+	.td input, .td select, .td textarea, .td .ctl { font: inherit; font-size: 14px; color: var(--metin); background: #17140f; border: 1px solid var(--kenarlik); border-radius: 2px; padding: 10px; min-height: 44px; width: 100%; }
 	.td input[type='checkbox'] { width: auto; min-height: 0; }
 	.td textarea { min-height: 72px; resize: vertical; }
 	.td input.n, .td .n { font-family: var(--font-mono); }
@@ -317,50 +317,50 @@ import Rozet from '../components/Rozet.astro';
 	@media (max-width: 760px) { .td .form { grid-template-columns: repeat(2, 1fr); } .td .s2, .td .s3 { grid-column: span 1; } .td .s6 { grid-column: span 2; } }
 	.td .srcpick { display: flex; gap: 14px; flex-wrap: wrap; min-height: 44px; align-items: center; }
 	.td .srcpick label { display: flex; gap: 6px; align-items: center; font-size: 13px; text-transform: none; letter-spacing: 0; color: var(--metin); }
-	.td .rr { font-family: var(--font-mono); padding: 11px 10px; border-radius: 10px; background: #faf8f3; border: 1px solid var(--kenarlik); min-height: 44px; }
-	.td .rr.bad { border-color: var(--kehribar); background: #fbf0d9; }
-	.td .btn { font: inherit; font-size: 13px; font-weight: 600; padding: 10px 16px; min-height: 44px; border-radius: 12px; border: 1px solid var(--marka); background: var(--marka); color: #fff; cursor: pointer; }
+	.td .rr { font-family: var(--font-mono); padding: 11px 10px; border-radius: 2px; background: #17140f; border: 1px solid var(--kenarlik); min-height: 44px; }
+	.td .rr.bad { border-color: var(--kehribar); background: #1f1805; }
+	.td .btn { font: inherit; font-size: 13px; font-weight: 600; padding: 10px 16px; min-height: 44px; border-radius: 2px; border: 1px solid var(--marka); background: var(--marka); color:#0b0a08; cursor: pointer; }
 	.td .btn.ghost { background: transparent; color: var(--marka); }
 	.td .btn.warn { color: var(--dusus); border-color: var(--dusus); }
 	.td .btn[disabled] { opacity: .5; }
 	.td .aksiyon { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 	.td .baslik-satir { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
 	.td .small { font-size: 12px; color: var(--metin-ikincil); }
-	.td .dz { border: 1.5px dashed var(--kenarlik); border-radius: 12px; padding: 12px; text-align: center; font-size: 12.5px; color: var(--metin-ikincil); background: #faf8f3; cursor: pointer; min-height: 44px; }
+	.td .dz { border: 1.5px dashed var(--kenarlik); border-radius: 2px; padding: 12px; text-align: center; font-size: 12.5px; color: var(--metin-ikincil); background: #17140f; cursor: pointer; min-height: 44px; }
 	.td .dz:hover { border-color: var(--marka); color: var(--marka); }
 	.td .pend { display: grid; gap: 8px; margin-top: 8px; } .td .pend:empty { display: none; }
 	.td .pi { display: grid; grid-template-columns: 72px 1fr auto; gap: 8px; align-items: center; }
-	.td .pi img { width: 72px; height: 52px; object-fit: cover; border-radius: 6px; border: 1px solid var(--kenarlik); }
+	.td .pi img { width: 72px; height: 52px; object-fit: cover; border-radius: 2px; border: 1px solid var(--kenarlik); }
 	.td .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-	.td .chip { font: inherit; font-size: 12.5px; font-weight: 500; padding: 10px 14px; min-height: 44px; border-radius: 999px; border: 1px solid var(--kenarlik); background: var(--kart); color: var(--metin); cursor: pointer; }
-	.td .chip[aria-pressed='true'] { background: var(--koyu); color: #fff; border-color: var(--koyu); }
+	.td .chip { font: inherit; font-size: 12.5px; font-weight: 500; padding: 10px 14px; min-height: 44px; border-radius: 2px; border: 1px solid var(--kenarlik); background: var(--kart); color: var(--metin); cursor: pointer; }
+	.td .chip[aria-pressed='true'] { background: var(--marka); color:#0b0a08; border-color: var(--marka); }
 	.td .tlist { display: grid; gap: 10px; }
-	.td .trade { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 14px; padding: 14px 16px; display: grid; grid-template-columns: 1fr 150px; gap: 10px 16px; }
+	.td .trade { background: var(--kart); border: 1px solid var(--kenarlik); border-radius: 2px; padding: 14px 16px; display: grid; grid-template-columns: 1fr 150px; gap: 10px 16px; }
 	.td .trade > * { min-width: 0; }
 	@media (max-width: 640px) { .td .trade { grid-template-columns: 1fr; } }
 	.td .hd { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
 	.td .tkr, .td .tk { font-family: var(--font-mono); font-weight: 600; }
 	.td .hd .tkr { font-size: 18px; }
-	.td .side { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 6px; }
-	.td .side.l { background: #dcf3ea; color: var(--yukselis); } .td .side.s { background: #fbe4e2; color: var(--dusus); }
-	.td .st { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #faf8f3; color: var(--metin-ikincil); border: 1px solid var(--kenarlik); }
-	.td .st.win { background: #dcf3ea; color: var(--yukselis); border-color: transparent; } .td .st.loss { background: #fbe4e2; color: var(--dusus); border-color: transparent; } .td .st.open { background: #e8e9fa; color: var(--marka); border-color: transparent; }
+	.td .side { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 2px; }
+	.td .side.l { background: #10231a; color: var(--yukselis); } .td .side.s { background: #2a1311; color: var(--dusus); }
+	.td .st { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 2px; background: #17140f; color: var(--metin-ikincil); border: 1px solid var(--kenarlik); }
+	.td .st.win { background: #10231a; color: var(--yukselis); border-color: transparent; } .td .st.loss { background: #2a1311; color: var(--dusus); border-color: transparent; } .td .st.open { background: #1f1805; color: var(--marka); border-color: transparent; }
 	.td .tlv { display: flex; flex-wrap: wrap; gap: 4px 16px; font-family: var(--font-mono); font-size: 13px; margin-top: 6px; }
 	.td .tlv small { font-family: var(--font-govde); font-size: 10.5px; color: var(--metin-ikincil); text-transform: uppercase; letter-spacing: .05em; margin-right: 4px; }
 	.td .tx { margin: 6px 0 0; font-size: 13.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
 	.td .tctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
 	.td .tctl select { width: auto; } .td .tctl input { width: 130px; }
-	.td .thumb { width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--kenarlik); cursor: zoom-in; display: block; }
+	.td .thumb { width: 100%; max-height: 120px; object-fit: cover; border-radius: 2px; border: 1px solid var(--kenarlik); cursor: zoom-in; display: block; }
 	.td .more { grid-column: 1 / -1; border-top: 1px solid var(--kenarlik); padding-top: 12px; display: grid; gap: 14px; }
 	.td .more h4 { margin: 0; font-family: var(--font-baslik); font-size: 16px; }
 	.td .tl { list-style: none; margin: 0 0 0 6px; padding: 0 0 0 16px; border-left: 2px solid var(--kenarlik); display: grid; gap: 14px; }
 	.td .te { position: relative; } .td .te::before { content: ''; position: absolute; left: -23px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--kehribar); border: 2px solid var(--kart); }
 	.td .te .th { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 12px; color: var(--metin-ikincil); }
 	.td .figs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; } .td .fig { margin: 0; } .td .fig figcaption { font-size: 12px; color: var(--metin-ikincil); }
-	.td .addbox { background: #faf8f3; border: 1px solid var(--kenarlik); border-radius: 12px; padding: 12px; display: grid; gap: 8px; }
+	.td .addbox { background: #17140f; border: 1px solid var(--kenarlik); border-radius: 2px; padding: 12px; display: grid; gap: 8px; }
 	.td .lvform { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-	.td .empty { text-align: center; padding: 26px 16px; border: 1.5px dashed var(--kenarlik); border-radius: 14px; color: var(--metin-ikincil); }
+	.td .empty { text-align: center; padding: 26px 16px; border: 1.5px dashed var(--kenarlik); border-radius: 2px; color: var(--metin-ikincil); }
 	.lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(5, 10, 16, .86); display: grid; place-items: center; padding: 16px; }
 	.lightbox[hidden] { display: none; }
-	.lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+	.lightbox img { max-width: 100%; max-height: 100%; border-radius: 2px; }
 </style>

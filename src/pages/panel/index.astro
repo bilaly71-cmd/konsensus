@@ -385,7 +385,7 @@ const bugun = bugunIstanbul();
 			durumMesajiEl.textContent = 'Kaydediliyor...';
 			durumMesajiEl.className = 'durum-mesaji';
 			try {
-				const yanit = await fetch('/api/oneriler', {
+				const yanit = await fetch(window.KB + '/api/oneriler', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ tarih: tarihEl.value, satirlar: gecerli }),
@@ -417,14 +417,14 @@ const bugun = bugunIstanbul();
 
 		// --- Bugün kaydedilenler ---
 		async function kayitliSil(id: number) {
-			await fetch(`/api/oneriler?id=${id}`, { method: 'DELETE' });
+			await fetch(window.KB + `/api/oneriler?id=${id}`, { method: 'DELETE' });
 			kayitliListeYukle();
 		}
 		(window as any).kayitliSil = kayitliSil;
 
 		async function kayitliListeYukle() {
 			const tarih = tarihEl.value;
-			const yanit = await fetch(`/api/oneriler?tarih=${tarih}`);
+			const yanit = await fetch(window.KB + `/api/oneriler?tarih=${tarih}`);
 			const veri = await yanit.json();
 			const kayitlar = veri.satirlar || [];
 			if (kayitlar.length === 0) {
@@ -459,7 +459,7 @@ const bugun = bugunIstanbul();
 			if (sonucIsleniyor) return;
 			sonucIsleniyor = true;
 			try {
-				await fetch('/api/oneriler', {
+				await fetch(window.KB + '/api/oneriler', {
 					method: 'PATCH',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ id, sonuc }),
@@ -483,7 +483,7 @@ const bugun = bugunIstanbul();
 		});
 
 		async function bekleyenListeYukle() {
-			const yanit = await fetch('/api/oneriler?durum=bekleyen');
+			const yanit = await fetch(window.KB + '/api/oneriler?durum=bekleyen');
 			const veri = await yanit.json();
 			const satirlar = veri.satirlar || [];
 			if (satirlar.length === 0) {
@@ -538,7 +538,7 @@ const bugun = bugunIstanbul();
 			fonHataEl.textContent = '';
 			(fonEkleDugmeEl as HTMLButtonElement).disabled = true;
 			try {
-				const yanit = await fetch('/api/fon', {
+				const yanit = await fetch(window.KB + '/api/fon', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
@@ -576,7 +576,7 @@ const bugun = bugunIstanbul();
 		});
 
 		async function fonSil(id: number) {
-			await fetch(`/api/fon?id=${id}`, { method: 'DELETE' });
+			await fetch(window.KB + `/api/fon?id=${id}`, { method: 'DELETE' });
 			fonListesiYukle();
 		}
 
@@ -587,7 +587,7 @@ const bugun = bugunIstanbul();
 		});
 
 		async function fonListesiYukle() {
-			const yanit = await fetch('/api/fon');
+			const yanit = await fetch(window.KB + '/api/fon');
 			const veri = await yanit.json();
 			const satirlar = (veri.satirlar || []).slice(0, 10);
 			if (satirlar.length === 0) {
@@ -624,7 +624,7 @@ const bugun = bugunIstanbul();
 			takvimHataEl.textContent = '';
 			(takvimEkleDugmeEl as HTMLButtonElement).disabled = true;
 			try {
-				const yanit = await fetch('/api/takvim', {
+				const yanit = await fetch(window.KB + '/api/takvim', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
@@ -653,7 +653,7 @@ const bugun = bugunIstanbul();
 		});
 
 		async function takvimSil(id: number) {
-			await fetch(`/api/takvim?id=${id}`, { method: 'DELETE' });
+			await fetch(window.KB + `/api/takvim?id=${id}`, { method: 'DELETE' });
 			takvimListesiYukle();
 		}
 		takvimListesiEl.addEventListener('click', (e) => {
@@ -663,7 +663,7 @@ const bugun = bugunIstanbul();
 		});
 
 		async function takvimListesiYukle() {
-			const yanit = await fetch('/api/takvim');
+			const yanit = await fetch(window.KB + '/api/takvim');
 			const veri = await yanit.json();
 			const satirlar = (veri.satirlar || []).slice(0, 10);
 			if (satirlar.length === 0) {
@@ -697,7 +697,7 @@ const bugun = bugunIstanbul();
 			haberHataEl.textContent = '';
 			(haberEkleDugmeEl as HTMLButtonElement).disabled = true;
 			try {
-				const yanit = await fetch('/api/haberler', {
+				const yanit = await fetch(window.KB + '/api/haberler', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
@@ -734,7 +734,7 @@ const bugun = bugunIstanbul();
 		});
 
 		async function haberSil(id: number) {
-			await fetch(`/api/haberler?id=${id}`, { method: 'DELETE' });
+			await fetch(window.KB + `/api/haberler?id=${id}`, { method: 'DELETE' });
 			haberListesiYukle();
 		}
 		haberListesiEl.addEventListener('click', (e) => {
@@ -744,7 +744,7 @@ const bugun = bugunIstanbul();
 		});
 
 		async function haberListesiYukle() {
-			const yanit = await fetch('/api/haberler');
+			const yanit = await fetch(window.KB + '/api/haberler');
 			const veri = await yanit.json();
 			const satirlar = (veri.satirlar || []).slice(0, 10);
 			if (satirlar.length === 0) {
@@ -790,13 +790,13 @@ const bugun = bugunIstanbul();
 		select {
 			height: 44px;
 			border: 1px solid var(--kenarlik);
-			border-radius: 10px;
+			border-radius: 2px;
 			padding: 0 14px;
 			font: inherit;
 			font-size: 14px;
 			font-weight: 600;
 			color: var(--metin);
-			background: #faf9f5;
+			background: #17140f;
 		}
 		input:focus,
 		select:focus,
@@ -807,7 +807,7 @@ const bugun = bugunIstanbul();
 		.toplu {
 			background: var(--kart);
 			border: 1px solid var(--kenarlik);
-			border-radius: 16px;
+			border-radius: 2px;
 			padding: 4px 24px;
 		}
 		.toplu summary {
@@ -828,11 +828,11 @@ const bugun = bugunIstanbul();
 		textarea {
 			width: 100%;
 			border: 1px solid var(--kenarlik);
-			border-radius: 10px;
+			border-radius: 2px;
 			padding: 12px 14px;
 			font-family: var(--font-mono);
 			font-size: 13px;
-			background: #faf9f5;
+			background: #17140f;
 			resize: vertical;
 		}
 		.dugmeler {
@@ -844,8 +844,8 @@ const bugun = bugunIstanbul();
 			color: var(--metin-ikincil);
 			padding: 24px;
 			text-align: center;
-			background: #faf9f5;
-			border-radius: 10px;
+			background: #17140f;
+			border-radius: 2px;
 		}
 		.tablo-sarici {
 			overflow-x: auto;
@@ -875,7 +875,7 @@ const bugun = bugunIstanbul();
 			height: 36px;
 			min-width: 90px;
 			border: 1px solid transparent;
-			border-radius: 6px;
+			border-radius: 2px;
 			padding: 0 8px;
 			font: inherit;
 			font-size: 13px;
@@ -887,16 +887,16 @@ const bugun = bugunIstanbul();
 		}
 		.hucre:hover {
 			border-color: var(--kenarlik);
-			background: #faf9f5;
+			background: #17140f;
 		}
 		.hucre:focus {
 			border-color: var(--marka);
-			background: #fff;
+			background: #12100c;
 			outline: none;
 		}
 		.hucre.eksik {
-			background: #f8e4e2;
-			border-color: #edc7c2;
+			background: #2a1311;
+			border-color: #5a2420;
 		}
 		.guven-hucre {
 			text-align: center;
@@ -914,15 +914,15 @@ const bugun = bugunIstanbul();
 			cursor: help;
 		}
 		.guven.yuksek {
-			background: #e3f2ea;
+			background: #10231a;
 			color: var(--yukselis);
 		}
 		.guven.orta {
-			background: #fbf0dd;
+			background: #1f1805;
 			color: var(--etiket-metin);
 		}
 		.guven.dusuk {
-			background: #f8e4e2;
+			background: #2a1311;
 			color: var(--dusus);
 		}
 		.sil {
@@ -959,7 +959,7 @@ const bugun = bugunIstanbul();
 		.sonuc-btn {
 			height: 32px;
 			padding: 0 10px;
-			border-radius: 8px;
+			border-radius: 2px;
 			border: 1px solid var(--kenarlik);
 			background: var(--kart);
 			font: inherit;
@@ -969,17 +969,17 @@ const bugun = bugunIstanbul();
 			white-space: nowrap;
 		}
 		.sonuc-btn.hedef:hover {
-			background: #e3f2ea;
-			border-color: #c5e3d2;
+			background: #10231a;
+			border-color: #1f4b33;
 			color: var(--yukselis);
 		}
 		.sonuc-btn.stop:hover {
-			background: #f8e4e2;
-			border-color: #edc7c2;
+			background: #2a1311;
+			border-color: #5a2420;
 			color: var(--dusus);
 		}
 		.sonuc-btn.sure:hover {
-			background: #f1eee6;
+			background: #17140f;
 			color: var(--metin-ikincil);
 		}
 		.yenile {

@@ -1,4 +1,5 @@
 ---
+import { u } from '../lib/yol';
 import AnaLayout from '../layouts/AnaLayout.astro';
 import Buton from '../components/Buton.astro';
 ---
@@ -9,8 +10,8 @@ import Buton from '../components/Buton.astro';
 		<h1>Bu sayfayı bulamadık</h1>
 		<p>Aradığın sayfa taşınmış ya da hiç var olmamış olabilir.</p>
 		<div class="dugmeler">
-			<Buton href="/">Gösterge paneline dön</Buton>
-			<Buton href="/oneriler" tur="ikincil">Önerilere git</Buton>
+			<Buton href={u("/")}>Gösterge paneline dön</Buton>
+			<Buton href={u("/oneriler")} tur="ikincil">Önerilere git</Buton>
 		</div>
 	</div>
 </AnaLayout>

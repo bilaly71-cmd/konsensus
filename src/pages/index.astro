@@ -1,4 +1,5 @@
 ---
+import { u } from '../lib/yol';
 export const prerender = false;
 
 import AnaLayout from '../layouts/AnaLayout.astro';
@@ -68,7 +69,7 @@ const oneriKolonlari = [
 
 	<section class="haber-izgara" aria-label="Haberler">
 		<Kart baslik="Şirket haberleri" altBaslik="KAP özetleri · kaynak linkli" class="haber-kart">
-			<Fragment slot="sag"><a href="/oneriler">Tümü</a></Fragment>
+			<Fragment slot="sag"><a href={u("/oneriler")}>Tümü</a></Fragment>
 			{
 				sirketHaberleriKayitlari.length === 0 ? (
 					<p class="haber-bos">Henüz haber girilmedi.</p>
@@ -78,7 +79,7 @@ const oneriKolonlari = [
 							<li>
 								<span class="nokta" />
 								{h.hisse && (
-									<a href={`/hisse/${h.hisse}`} class="haber-hisse">
+									<a href={u(`/hisse/${h.hisse}`)} class="haber-hisse">
 										{h.hisse}
 									</a>
 								)}
@@ -96,7 +97,7 @@ const oneriKolonlari = [
 			}
 		</Kart>
 		<Kart baslik="Piyasa haberleri" altBaslik="Genel gündem" class="haber-kart">
-			<Fragment slot="sag"><a href="/takvim">Tümü</a></Fragment>
+			<Fragment slot="sag"><a href={u("/takvim")}>Tümü</a></Fragment>
 			{
 				piyasaHaberleriKayitlari.length === 0 ? (
 					<p class="haber-bos">Henüz haber girilmedi.</p>
@@ -140,7 +141,7 @@ const oneriKolonlari = [
 				) : (
 					<div class="konsensus-listesi">
 						{konsensusListesi.map((k) => (
-							<a href={`/hisse/${k.hisse}`} class="konsensus-satir">
+							<a href={u(`/hisse/${k.hisse}`)} class="konsensus-satir">
 								<span class="konsensus-hisse">{k.hisse}</span>
 								<span class="konsensus-cubuk">
 									<span class="konsensus-dolu" style={`width:${Math.round((k.n / enCokKurum) * 100)}%`} />
@@ -154,7 +155,7 @@ const oneriKolonlari = [
 			}
 		</Kart>
 		<Kart baslik="Öneri karnesi" koyu class="dar">
-			<Fragment slot="sag"><a href="/oneri-karnesi" class="karne-link">Yöntem</a></Fragment>
+			<Fragment slot="sag"><a href={u("/oneri-karnesi")} class="karne-link">Yöntem</a></Fragment>
 			{
 				karneler.length === 0 ? (
 					<p class="koyu-metin">
@@ -176,12 +177,12 @@ const oneriKolonlari = [
 					</div>
 				)
 			}
-			<a href="/oneri-karnesi" class="karne-tum-link">Tüm kurumların karnesi</a>
+			<a href={u("/oneri-karnesi")} class="karne-tum-link">Tüm kurumların karnesi</a>
 		</Kart>
 	</section>
 
 	<Kart baslik="Bugünkü öneriler" altBaslik="Kaynak her satırda">
-		<Fragment slot="sag"><a href="/oneriler">Tümü</a></Fragment>
+		<Fragment slot="sag"><a href={u("/oneriler")}>Tümü</a></Fragment>
 		<Tablo kolonlar={oneriKolonlari} satirlar={oneriSatirlari} bosMesaj="Bugün için henüz öneri girilmedi." />
 	</Kart>
 
@@ -190,7 +191,7 @@ const oneriKolonlari = [
 			<Kart baslik="Hedef revizyonları" altBaslik="Bugün, aynı kurumun önceki girişine göre">
 				<div class="revizyon-listesi">
 					{revizyonlar.map((r) => (
-						<a href={`/hisse/${r.hisse}`} class="revizyon-satir">
+						<a href={u(`/hisse/${r.hisse}`)} class="revizyon-satir">
 							<span class:list={['revizyon-ok', r.yon]}>{r.yon === 'yukselir' ? '▲' : '▼'}</span>
 							<span class="revizyon-orta">
 								<span class="revizyon-hisse">{r.hisse}</span>
@@ -212,11 +213,11 @@ const oneriKolonlari = [
 			<p class="metin">
 				Hisse fiyatı düşerse özkaynak oranın ne olur, çağrı gelir mi? Birkaç saniyede gör.
 			</p>
-			<div><Buton href="/teminat-simulatoru">Simülatöre git</Buton></div>
+			<div><Buton href={u("/teminat-simulatoru")}>Simülatöre git</Buton></div>
 		</Kart>
 		<Kart etiket="ARENA" baslik="Grafik oyunu" class="dar">
 			<p class="metin">Grafik burada kesildi. Sence devamı?</p>
-			<div><Buton href="/grafik-oyunu" tur="ikincil">Oyuna göz at</Buton></div>
+			<div><Buton href={u("/grafik-oyunu")} tur="ikincil">Oyuna göz at</Buton></div>
 		</Kart>
 	</section>
 </AnaLayout>
@@ -242,7 +243,7 @@ const oneriKolonlari = [
 	.revizyon-ok {
 		width: 28px;
 		height: 28px;
-		border-radius: 8px;
+		border-radius: 2px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -250,11 +251,11 @@ const oneriKolonlari = [
 		font-weight: 700;
 	}
 	.revizyon-ok.yukselir {
-		background: #e3f2ea;
+		background: #10231a;
 		color: var(--yukselis);
 	}
 	.revizyon-ok.duser {
-		background: #f8e4e2;
+		background: #2a1311;
 		color: var(--dusus);
 	}
 	.revizyon-orta {
@@ -311,8 +312,8 @@ const oneriKolonlari = [
 	}
 	.konsensus-cubuk {
 		height: 10px;
-		background: #efece4;
-		border-radius: 5px;
+		background: #17140f;
+		border-radius: 2px;
 		overflow: hidden;
 		display: block;
 	}
@@ -320,7 +321,7 @@ const oneriKolonlari = [
 		display: block;
 		height: 10px;
 		background: var(--marka);
-		border-radius: 5px;
+		border-radius: 2px;
 	}
 	.konsensus-kurumlar {
 		grid-column: 2;
@@ -403,7 +404,7 @@ const oneriKolonlari = [
 	.kpi {
 		background: var(--kart);
 		border: 1px solid var(--kenarlik);
-		border-radius: 14px;
+		border-radius: 2px;
 		padding: 20px;
 		display: flex;
 		flex-direction: column;
@@ -441,14 +442,14 @@ const oneriKolonlari = [
 		color: var(--metin-ikincil);
 		padding: 24px;
 		text-align: center;
-		background: #faf9f5;
-		border-radius: 10px;
+		background: #17140f;
+		border-radius: 2px;
 	}
 	.koyu-metin {
 		margin: 0;
 		font-size: 14px;
 		line-height: 1.5;
-		color: #aeb3bf;
+		color: #a99d86;
 	}
 	.karne-link {
 		color: var(--kehribar);
@@ -469,20 +470,20 @@ const oneriKolonlari = [
 	.karne-sira {
 		font-family: var(--font-baslik);
 		font-size: 15px;
-		color: #7d8391;
+		color: #6e6553;
 	}
 	.karne-kurum {
 		font-size: 13px;
 		font-weight: 500;
-		color: #fff;
+		color:#ece4d2;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 	.karne-cubuk {
 		height: 8px;
-		background: #252c3b;
-		border-radius: 4px;
+		background: #2a251b;
+		border-radius: 2px;
 		overflow: hidden;
 		display: block;
 	}
@@ -490,12 +491,12 @@ const oneriKolonlari = [
 		display: block;
 		height: 8px;
 		background: var(--kehribar);
-		border-radius: 4px;
+		border-radius: 2px;
 	}
 	.karne-yuzde {
 		font-size: 14px;
 		font-weight: 600;
-		color: #fff;
+		color:#ece4d2;
 		text-align: right;
 	}
 	.karne-tum-link {
@@ -509,7 +510,7 @@ const oneriKolonlari = [
 		margin: 0;
 		font-size: 14px;
 		line-height: 1.55;
-		color: #3f434c;
+		color: #a99d86;
 	}
 
 	@media (max-width: 1100px) {

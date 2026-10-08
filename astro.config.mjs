@@ -8,6 +8,8 @@ export default defineConfig({
 	// (export const prerender = false ile işaretlenenler) sunucuda çalışıp
 	// D1 veritabanına erişiyor.
 	output: 'static',
+	// Portal (Kokpit) içinde /konsensus altında sunulur.
+	base: '/konsensus',
 	adapter: cloudflare({
 		platformProxy: { enabled: true },
 	}),
