@@ -12,18 +12,16 @@ Bilal'in 27.09.2026 talimatıyla yürürlükte. Bu bölüm, üstündeki/altında
 - Kural netleşmediğinde makul bir varsayım kullanılır, `DURUM.md`'ye "Bilal'le teyit edilecek" diye not düşülür, iş DURDURULMAZ.
 - Kota/oturum limiti dolarsa `DURUM.md` güncellenip durulur; Bilal "devam et" dediğinde kaldığı yerden sürülür.
 - İş bitince veya durunca Bilal'e şu dörtlü rapor verilir: (1) ne yapıldığı madde madde, (2) hangi varsayımların teyit edilmesi gerektiği, (3) hata çıkma ihtimali olan yerler, (4) telefonda/bilgisayarda tek tek denenecek gerçek test listesi.
-- Karar günlüğü ve varsayımlar `DURUM.md`'de tutulur; `CLAUDE.md`'deki "Durum" bölümü yol haritası özeti olarak ayrıca güncellenmeye devam eder.
+- Karar günlüğü ve varsayımlar `DURUM.md`'de tutulur. Bu dosyadaki "Durum" yalnız kısa özet + teknik tuzaklardır; ayrıntı buraya YAZILMAZ (her oturumda yüklenir, token yer).
 
 ## Nasıl çalışıyoruz
 - Sahibi: Bilal. Kodlama bilmiyor ama teknik kavramları hızlı kavrıyor. Türkçe, kısa ve net anlat.
-- Her adımda: ne yaptığını 2-3 cümleyle özetle, sonra Bilal'in yapması gereken şeyi (tıklama, hesap açma vb.) numaralı adımlarla yaz.
-- **Parça parça ilerle.** Bir adım canlıda çalışmadan (site açıldı, telefonda denendi) sonrakine geçme.
-- Büyük değişiklikten önce planı göster, onay al.
+- Bilal'in elle yapması gereken şeyi (tıklama, hesap açma vb.) numaralı adımlarla yaz.
+- Her adım canlıda doğrulanır (build + sayfa açılıyor) ve commit/push edilir; onay beklenmez (bkz. otonom mod).
 - Gizli bilgileri (token, şifre) asla koda yazma; Cloudflare/GitHub secret olarak girilecek.
-- Her adımın sonunda bu dosyadaki "Durum" bölümünü güncelle.
 
 ## Teknik altyapı
-- **Astro** (statik site üretici) + **Cloudflare Pages** (barındırma, ücretsiz).
+- **Astro** (statik site üretici) + **Cloudflare Workers** (statik varlık + sunucu rotaları, ücretsiz). Portal (Kokpit) içinde `/konsensus` alt yolunda sunulur (`astro.config.mjs` → `base: '/konsensus'`); kök Worker `portal` service binding ile buraya yönlendirir.
 - Veritabanı: **Cloudflare D1**. Zamanlanmış işler: Cloudflare Workers cron veya GitHub Actions.
 - Grafikler: TradingView **Lightweight Charts** (açık kaynak; sitede TradingView atfı ve linki zorunlu).
 - Fiyatlar 15 dk gecikmeli.
@@ -58,34 +56,16 @@ Sonra: Öneri karnesi, Fon akıllı para, bülten + e-posta, halka arz, Arena, k
 - Her sayfanın altında: "Burada yer alan bilgiler yatırım danışmanlığı kapsamında değildir. Fiyatlar 15 dakika gecikmelidir."
 - Rakip sitelerden veri çekilmez.
 
-## Durum
-- [x] Adım 0 tamamlandı (27.09.2026): GitHub repo (bilaly71-cmd/konsensus), Astro iskeleti, "yakında" sayfası. Cloudflare'e bağlı, canlı: https://konsensus.bilaly71.workers.dev — masaüstü ve telefonda doğrulandı. Domain şimdilik ertelendi (Bilal isteği), workers.dev adresiyle devam.
-- [x] Adım 1 tamamlandı (27.09.2026), telefonda doğrulandı: `src/layouts/AnaLayout.astro` (sol menü, üst bar, alt bilgi, mobil üst bar + 5 sekmeli alt menü + tam menü çekmecesi), `src/lib/menu.ts` (menü ve sekmeler tek yerde), `src/styles/tasarim.css` (renk/yazı değişkenleri), bileşenler `src/components/`: Kart, Rozet, Buton, Tablo (telefonda karta döner), GrafikKutusu (yer tutucu + TradingView atfı), SayfaBasligi, BosSayfa, Ikon. Menüdeki 13 sayfa boş iskelet olarak var. Bileşen vitrini: /bilesenler (menüde yok). Ana sayfaya ayrıca Bilal isteğiyle "Şirket haberleri" ve "Piyasa haberleri" kompakt kartları eklendi (gösterge panelinden önce, ekranı kaplamadan).
-- [x] Adım 2 tamamlandı (27.09.2026): `/teminat-simulatoru` — Bilal "genel/tipik BIST kuralı" seçti. Tipik SPK oranları kullanıldı: başlangıç %50, sürdürme/çağrı %35 (sabitler dosyanın başında, kolayca değiştirilebilir). Portföy + kredi girilir, kaydırıcıyla fiyat senaryosu denenir, özkaynak oranı ve "kaç % düşerse çağrı gelir" canlı hesaplanır. Veritabanı yok, tamamen istemci tarafı JS.
-- Not: Bu oturumda PATH'te node yok; komutlarda `$env:Path = "C:\Program Files\nodejs;" + $env:Path` kullanılıyor.
-- [x] Adım 3 tamamlandı (27.09.2026): D1 veritabanı (`konsensus-db`, binding `DB`) + `/panel` yönetim paneli. `migrations/0001_oneriler.sql` hem uzak hem yerel D1'e uygulandı. `/panel`: tarih seç → yapıştır (sekme/`|` ile ayrılmış satırlar) → "Tabloya çevir" ile önizleme → "Onayla ve kaydet" → `src/pages/api/oneriler.ts` (GET/POST/DELETE) ile D1'e yazar. Ana sayfa artık D1'den okuyor: "Bugünkü öneri" ve "Konsensüs hissesi" KPI'ları, "Günün konsensüsü" listesi ve "Bugünkü öneriler" tablosu gerçek veriyle doluyor. Canlıda uçtan uca test edildi (ekle + sil çalışıyor, veritabanı şu an temiz/boş).
-  - Teknik notlar: `@astrojs/cloudflare` adaptörü + `wrangler.jsonc` (main alanı YOK — Astro build kendi `dist/server/wrangler.json`'ını üretiyor, deploy ondan yapılıyor: `npm run deploy` → `astro build && wrangler deploy -c dist/server/wrangler.json`). `compatibility_date` ileri tarihli olamıyor, workerd sürümüne göre ayarlandı. Astro v7'de binding erişimi `Astro.locals.runtime.env` DEĞİL, `import { env } from 'cloudflare:workers'` (bkz. `src/lib/db.ts`). `wrangler login` ile bu makinede Cloudflare'e kimlik doğrulandı (offline_access token, `~/.wrangler`'da durur).
-  - Bulunan/düzeltilen hata: `Buton.astro` bileşeni `id` gibi ekstra HTML özelliklerini elemente aktarmıyordu (props'ları spread etmiyordu) — düzeltildi, artık `{...rest}` ile geçiyor.
-- **Kritik, kasıtlı olarak ertelendi:** `/panel` şu an herkese açık (linki bilen girebilir). Cloudflare Zero Trust artık Access'i açmak için kart bilgisi istiyor (ücretsiz sınırda ücretsiz, ama kart isteniyor); Bilal kart ekranında durdu, henüz karar vermedi. İki seçenek konuşuldu: (a) basit paylaşılan şifre (kod içinde, Cloudflare secret — kart gerekmez), (b) Cloudflare Access (e-posta girişi, kart gerekir). Bilal "şimdilik hiçbiri" dedi. **Panel linkini kimseyle paylaşma** uyarısı verildi. Bir sonraki oturumda bu karara geri dönülmeli.
-- Doğrulandı: Cloudflare'in git-push'ta otomatik derleme/dağıtım sistemi (Workers Builds) yeni yapıyla (adaptör + D1 + wrangler.jsonc main'siz) sorunsuz çalışıyor — ekstra dashboard ayarı gerekmedi.
-- Panel UX düzeltmesi (27.09.2026): İlk tasarımda tek bir metin kutusuna ayraçla (tab/`|`/virgül) ayrılmış satır yapıştırma isteniyordu; Bilal tek boşlukla yazınca (ayraç kullanmadan) satır doğru bölünmüyordu ve bu "çalışmıyor" izlenimi verdi. Çözüm: `/panel` artık önce yedi ayrı kutulu bir form gösteriyor (Kurum, Hisse, Tür, Giriş, Hedef, Stop, Potansiyel + "Satır ekle"); toplu Excel/Sheets yapıştırma katlanır "isteğe bağlı" bölümde ikinci seçenek olarak duruyor. Bilal test etti, "çalışıyor, mükemmel" dedi ve kendi başına gerçek bir öneri ekledi (THYAO/garan).
-- Bilal talimatı (27.09.2026): "Bundan sonrakiler için benden teyit isteme, sürekli yapmaya devam et limit bitene kadar." — kalan yol haritası adımları onay beklemeden art arda yapılıyor; her adım yine de canlıda test edilip commit/push ediliyor, sadece "devam edeyim mi" sorusu atlanıyor.
-- [x] Adım 4 tamamlandı (27.09.2026): `/oneriler` artık gerçek Öneri Merkezi. `src/lib/oneriler.ts` ortak D1 sorgularını (tariheGoreOneriler, konsensusHesapla) barındırıyor, hem `/` hem `/oneriler` bunu kullanıyor. Özellikler: önceki/sonraki gün gezinme (`?tarih=YYYY-MM-DD`), özet KPI'lar (toplam öneri, kapsayan kurum, konsensüs hissesi), günün konsensüsü listesi, tür filtreleri (Tümü/Günlük/Haftalık/Model portföy/Takip listesi — istemci tarafı JS ile satır gizleme). Canlıda test edildi.
-- [x] Adım 5 tamamlandı (27.09.2026): Hisse sayfaları + hedef fiyatlar.
-  - `src/lib/oneriler.ts`'e eklendi: `tumOneriler`, `hisseyeGoreOneriler`, `sayiyaCevir` (Türkçe/İngilizce ondalık ayraçlarını sayıya çevirir, "[hedef]" gibi placeholder'larda null döner), `hisseleriOzetle` (hisse bazında kurum sayısı + en düşük/ortalama/en yüksek hedef).
-  - `/hedef-fiyatlar`: tüm hisselerin listesi, her satır `/hisse/[kod]`'a bağlı.
-  - `/hisse/[kod]` (dinamik rota, `getStaticPaths` yok — `prerender = false` ile istek anında D1'den okunuyor): grafik yer tutucu (GrafikKutusu — gerçek grafik/fiyat verisi yok, "yakında"), konsensüs KPI'ları, öneri türü dağılımı, kurum bazlı tam tablo. Hisse hiç önerilmemişse nazik boş durum gösteriyor (hataya düşmüyor, test edildi: `/hisse/ABCDE`).
-  - Ana sayfa ve `/oneriler`'daki konsensüs satırları ve tüm öneri tablolarındaki hisse kodları (`Tablo.astro`, `tur: 'hisse'` kolonu) artık `/hisse/[kod]`'a linkli (sonradan düzeltildi, bkz. aşağıdaki "Düzeltme" notu).
-  - **Henüz yok (kapsam dışı bırakıldı):** Gerçek zamanlı/15dk gecikmeli fiyat verisi ve grafik — bunun için bir piyasa verisi kaynağı seçilmesi lazım, Bilal'e sorulmadı, roadmap'te ayrıca ele alınmalı.
-- Düzeltme (27.09.2026): `Tablo.astro`'da hisse hücreleri link değildi, düzeltildi. Ayrıca `GrafikKutusu` ve `AnaLayout` alt bilgisinde "TradingViewLightweight" bitişik yazım hatası vardı (satır sonu boşluğu Astro derleyicisinde kayboluyor), `{' '}` ile düzeltildi. İkisi de canlıda doğrulandı.
-- Tüm site (13 menü sayfası + ana sayfa + /oneriler + /hedef-fiyatlar + /hisse/[kod] + /panel + /bilesenler) tek tek HTTP durumu ve konsol hatası için tarandı (27.09.2026) — hepsi temiz.
-- Roadmap'te sırada olan "Sonra" maddeleri (Öneri karnesi, Fon akıllı para, bülten + e-posta, halka arz, Arena, kripto, takvim) gerçek dış veri kaynağı ve/veya Bilal'in iş kuralı tanımını gerektiriyor (fiyat geçmişi, fon portföy raporları, e-posta altyapısı, halka arz takvimi kaynağı vb.) — bunlar netleşmeden anlamlı/kalıcı bir uygulama yapılamaz, bir sonraki oturumda Bilal'e sorulmalı.
-- Bilal talimatı (27.09.2026): "Sormadan devam et, kendini geliştir, zekice detaylara önem ver, proaktif/sezgisel/kurgusal ol." Veri/kural gerektiren roadmap maddeleri yerine, mevcut sistemi gerçek ve kalıcı iyileştirmelerle güçlendirdim (uydurma veri eklemedim):
-  - Marka favicon'u (koyu kare + kehribar nokta + "K" monogramı), Astro'nun varsayılan logosunun yerine.
-  - Üst bardaki arama kutusu artık gerçekten çalışıyor: hisse kodu yazıp Enter'a basınca `/hisse/[KOD]`'a gider. `/` tuşu kutuya odaklanır (masaüstü) ya da arama diyaloğunu açar (mobil, ayrı koyu temalı `<dialog>`).
-  - OG/Twitter meta etiketleri + canonical link: linkler artık sosyal medyada/mesajlaşmada düzgün önizleniyor.
-  - `public/robots.txt` ve `src/pages/sitemap.xml.ts` (dinamik — D1'deki tüm hisse sayfalarını da otomatik listeler, `/panel` ve `/api` dışlanmış).
-  - Markalı `404.astro` sayfası.
-  - `/panel`: Kurum kutusu sayfa açılışında otomatik odaklı; formdaki herhangi bir kutudayken Enter'a basmak "Satır ekle" ile aynı işi yapıyor (klavyeden hızlı veri girişi).
-  - Erişilebilirlik: "İçeriğe atla" linki (klavye kullanıcıları için, Tab'a basınca görünür).
-  - Tüm site yeniden tek tek tarandı (17 yol, `/olmayan-sayfa` ile 404 dahil) — hepsi temiz, `robots.txt`/`sitemap.xml`/`favicon.svg` de dahil.
+## Durum (özet — ayrıntı ve tarihçe `DURUM.md`)
+- Canlı: https://konsensus.bilaly71.workers.dev ve portal altında `/konsensus/*`. Git push → Workers Builds otomatik deploy.
+- Yol haritası 0–5 tamam; ek modüller (teminat simülatörü, grafik oyunu, öneri karnesi, fon radar, takvim/halka arz/SPK, opsiyon lab, özkaynak planlayıcı, bülten) canlıda. Trade defteri ayrı repoya (`trade-journal`) paketlendi, sayfa burada da duruyor.
+- Açık güvenlik notu: `/panel` ve yazma API'leri kimliksiz (Bilal onayladı; linki paylaşma).
+
+### Teknik tuzaklar (bunları bilmeden kod yazma)
+- Deploy: `npm run deploy` = `astro build && wrangler deploy -c dist/server/wrangler.json`; `wrangler.jsonc`'de `main` alanı YOK (Astro kendi wrangler.json'unu üretir).
+- Astro v7: binding erişimi `import { env } from 'cloudflare:workers'` (bkz. `src/lib/db.ts`), `Astro.locals.runtime.env` DEĞİL.
+- `compatibility_date` ileri tarihli olamaz (workerd sürümüne göre).
+- Dinamik sayfalar `export const prerender = false`; geri kalan statik.
+- Astro bileşenlerinde satır sonu boşluğu kaybolur: kelime aralarında `{' '}` kullan.
+- Bileşenler ekstra HTML özelliklerini `{...rest}` ile geçirir (Buton.astro örneği).
+- Windows'ta node PATH'te değilse: `$env:Path = "C:\Program Files\nodejs;" + $env:Path`.
