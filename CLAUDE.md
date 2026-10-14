@@ -25,7 +25,7 @@ Bilal'in 27.09.2026 talimatıyla yürürlükte. Bu bölüm, üstündeki/altında
 - Veritabanı: **Cloudflare D1**. Zamanlanmış işler: Cloudflare Workers cron veya GitHub Actions.
 - Grafikler: TradingView **Lightweight Charts** (açık kaynak; sitede TradingView atfı ve linki zorunlu).
 - Fiyatlar 15 dk gecikmeli.
-- Yönetim paneli (/panel) Cloudflare Access arkasında, sadece Bilal'in e-postası.
+- Yönetim paneli (/panel) şu an korumasız (Access kart istediği için ertelendi); linki paylaşma.
 - Kod GitHub'da; Cloudflare her push'ta otomatik yayınlar (proje Cloudflare'in yeni birleşik "Workers & Pages" sisteminde bir Workers projesi olarak kuruldu, işlev Pages ile aynı: git bağlantısı, otomatik build/deploy).
 
 ## Tasarım sistemi ("gazete + terminal")
