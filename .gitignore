@@ -4,3 +4,6 @@ dist/
 .env
 .DS_Store
 .wrangler/
+
+# Bülten taslak çıktıları (üretim artığı)
+bulten/taslak-*.json
